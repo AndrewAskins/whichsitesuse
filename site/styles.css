@@ -317,3 +317,10 @@ pre.config {
 .plan-table td, .plan-table th { white-space: nowrap; }
 .plan-table tbody th { width: 22%; }
 @media (max-width: 900px) { #pricing .split .section-head { grid-template-columns: 1fr; } }
+
+/* Free credits call to action */
+.free-grant { padding: var(--s5); border: 1px solid var(--rule); background: color-mix(in srgb, var(--moon) 14%, var(--surface)); box-shadow: inset 4px 0 0 var(--moon); }
+.free-grant h3 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: var(--s2); }
+.free-grant p { max-width: 52ch; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .free-grant { background: color-mix(in srgb, var(--moon) 7%, var(--surface)); } }
+:root[data-theme="dark"] .free-grant { background: color-mix(in srgb, var(--moon) 7%, var(--surface)); }

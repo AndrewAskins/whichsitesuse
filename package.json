@@ -20,7 +20,8 @@
     "test:watch": "vitest",
     "site:sync": "node scripts/sync-site.mjs",
     "site:check": "node scripts/sync-site.mjs --check",
-    "seo:export": "tsx src/seo/export.ts"
+    "seo:export": "tsx src/seo/export.ts",
+    "og:static": "tsx src/og/static.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1172.0",
@@ -29,6 +30,7 @@
     "@google-cloud/bigquery": "^9.6.1",
     "@google-cloud/storage": "^9.0.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
+    "@resvg/resvg-js": "^2.6.2",
     "express": "^5.3.0",
     "pg": "^8.23.1",
     "pino": "^10.4.0",

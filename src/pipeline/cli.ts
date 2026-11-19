@@ -14,6 +14,7 @@ import {
 } from "./bigquery.js";
 import { runSeoOnly } from "../seo/publish.js";
 import { runMonthly } from "./monthly.js";
+import { runReport } from "./report.js";
 import { EXTRACT_SQL, MEASURE_SQL, SAMPLE_COUNTS_SQL, SAMPLE_CWV_SQL, SAMPLE_STACK_SQL } from "./sql.js";
 
 const GIB = 1024 ** 3;
@@ -26,11 +27,13 @@ const round = (n: number, digits = 2) => Math.round(n * 10 ** digits) / 10 ** di
  *   sample   one real domain's stack and CWV plus a few technology counts (each dry-run first)
  *   monthly  export to GCS, build the Parquet snapshot, publish it to R2, then the SEO dataset
  *   seo      rebuild the SEO dataset from the snapshot already on R2 (no BigQuery)
+ *   report   profile REPORT_TECHNOLOGIES from the published snapshot (no BigQuery)
  */
 async function main() {
   const config = loadConfig();
   const mode = (process.argv[2] as typeof config.PIPELINE_MODE | undefined) ?? config.PIPELINE_MODE;
   if (mode === "seo") return runSeoOnly(config);
+  if (mode === "report") return runReport(config);
   const bq = bigqueryClient(config);
   const cap = config.BIGQUERY_MAX_BYTES_BILLED;
 

@@ -6,7 +6,6 @@
   <title>Terms of Service | WhichSitesUse</title>
   <meta name="description" content="The terms for using WhichSitesUse: accounts, free credits, plans and top-ups, API keys and agents, acceptable use, the data's limits, and liability.">
   <link rel="canonical" href="https://whichsitesuse.com/terms/">
-  <meta name="robots" content="noindex">
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://whichsitesuse.com/terms/">
@@ -58,12 +57,11 @@
   <main>
     <section class="page-hero">
       <div class="wrap">
-        <p class="draft-banner">Draft for review, not yet in effect.</p>
         <p class="crumbs"><a href="/">Home</a> / Terms</p>
         <p class="label">Legal</p>
         <h1>Terms of service</h1>
         <p class="lede">The agreement between you and us when you use WhichSitesUse, through the website, the MCP server or the REST API, yourself or through an agent.</p>
-        <p class="lede">Effective [effective date].</p>
+        <p class="lede">Effective November 19, 2026.</p>
       </div>
     </section>
 
@@ -122,9 +120,9 @@
           </div>
           <div class="prose">
             <p>Monthly plans are billed in advance and renew each month until you cancel. Each paid month adds that plan's credits, and unused plan credits expire when the next month's arrive. If you cancel, the plan stops renewing and the credits you already have last until the end of that billing month. Top-ups are one-off purchases whose credits last 12 months from purchase. We spend plan credits first, then top-up credits, then free credits.</p>
-            <p>Prices are shown on our <a href="/#pricing">pricing</a> and at checkout, in US dollars. [Tax handling: whether prices include sales tax or VAT, and whether Stripe Tax is used.] We can change prices with [notice period] notice by email, and a new price applies from your next renewal after that notice.</p>
+            <p>Prices are shown on our <a href="/#pricing">pricing</a> and at checkout, in US dollars. Prices don't include taxes, and any sales tax or VAT that applies is shown at checkout. We can change prices with 30 days' notice by email, and a new price applies from your next renewal after that notice.</p>
             <p>Payments are processed by Stripe under its own terms. Credits aren't money, have no cash value, and can't be transferred to another account or exchanged for cash.</p>
-            <p>[Refund rule: for example, whether unused plan or top-up credits are refundable, within what period, and what happens to credits when we suspend or close an account.]</p>
+            <p>We handle refunds case by case, and we generally refund only when the service didn't work as described because of a defect on our side. To ask for one, email <a href="mailto:andrew@discoshrimp.lol">andrew@discoshrimp.lol</a> with the account and the charge. Unused credits are otherwise not refundable, and cancelling a plan stops future renewals without refunding the current period.</p>
           </div>
         </div>
       </div>
@@ -140,7 +138,7 @@
           <div class="prose">
             <p>Your API keys are your responsibility, so keep them secret and don't share them outside your organization. Every call made with your key counts as yours and spends your credits, whoever or whatever made it. If a key leaks, revoke it on your account page straight away. You can set a monthly credit cap on each key to limit what it can spend.</p>
             <p>You can also connect an app, such as Claude or ChatGPT, by approving it on our consent page. A connected app acts for your account the same way a key does. Whoever approves the connection is responsible for what the app spends, up to the monthly cap they set on the consent page, or without limit if they leave the cap empty. You can disconnect an app from your account page at any time, which stops it straight away.</p>
-            <p>You can give a key or a connected app to an AI agent or another program to use for you. You're responsible for what it does with that access, including what it searches for and how many credits it spends, and for checking its results before you rely on them. An agent can't pay. It can create a checkout link, and the person who opens that link and pays is the one charged, with the credits going to your account. [Lawyer review: liability for spend by an agent, a connected app or a leaked key.]</p>
+            <p>You can give a key or a connected app to an AI agent or another program to use for you. You're responsible for what it does with that access, including what it searches for and how many credits it spends, and for checking its results before you rely on them. An agent can't pay. It can create a checkout link, and the person who opens that link and pays is the one charged, with the credits going to your account. If you think a key has leaked, revoke it from your account page straight away; credits spent before you revoke it are yours.</p>
           </div>
         </div>
       </div>
@@ -163,7 +161,6 @@
               <li>attack, overload, probe or interfere with the service or other users</li>
               <li>use the service for anything unlawful, or to send spam or other messages that break the law where they're received</li>
             </ul>
-            <p>[Lawyer review: whether "a large part" needs a number, and how this interacts with HTTP Archive's and the Chrome UX Report's own data terms.]</p>
           </div>
         </div>
       </div>
@@ -178,7 +175,7 @@
           </div>
           <div class="prose">
             <p>The technology data comes from <a href="https://httparchive.org">HTTP Archive</a>'s public monthly crawl, detected with its fork of the open-source Wappalyzer rules, and the Core Web Vitals come from the <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a>. We don't crawl sites ourselves. The crawl runs monthly, so results can be up to about six weeks old, sites with little Chrome traffic are often missing, and tools that don't load on public pages can't be detected. Detection rules can also be wrong.</p>
-            <p>The data is provided as is. We don't promise it's accurate, complete or current, and you shouldn't rely on it alone for decisions where a mistake would be costly. Every response includes an attribution line for HTTP Archive and the Chrome UX Report, and you should keep it when you publish results. [Lawyer review: confirm the license terms of HTTP Archive's and the Chrome UX Report's data.]</p>
+            <p>The data is provided as is. We don't promise it's accurate, complete or current, and you shouldn't rely on it alone for decisions where a mistake would be costly. Every response includes an attribution line for HTTP Archive and the Chrome UX Report, and you should keep it when you publish results.</p>
           </div>
         </div>
       </div>
@@ -206,8 +203,8 @@
             <h2>Suspension and termination</h2>
           </div>
           <div class="prose">
-            <p>You can stop using WhichSitesUse at any time, cancel your plan from the billing link on your account page, and ask us to close your account by emailing [contact email].</p>
-            <p>We can suspend or close your account, revoke its keys, or remove free credits if you break these terms, if we reasonably suspect fraud or abuse, or if the law requires it. A suspended account can't make API calls, create keys or take payments. Where we reasonably can, we'll tell you why and give you a chance to fix the problem first. [Refund rule on suspension or closure, as above.]</p>
+            <p>You can stop using WhichSitesUse at any time, cancel your plan from the billing link on your account page, and ask us to close your account by emailing <a href="mailto:andrew@discoshrimp.lol">andrew@discoshrimp.lol</a>.</p>
+            <p>We can suspend or close your account, revoke its keys, or remove free credits if you break these terms, if we reasonably suspect fraud or abuse, or if the law requires it. A suspended account can't make API calls, create keys or take payments. Where we reasonably can, we'll tell you why and give you a chance to fix the problem first. If we close an account because its owner broke these terms, unused credits aren't refunded.</p>
             <p>The sections on acceptable use, the data and its limits, liability, and governing law continue after the agreement ends.</p>
           </div>
         </div>
@@ -237,8 +234,8 @@
           </div>
           <div class="prose">
             <p>To the extent the law allows, WhichSitesUse is provided "as is" and "as available", without warranties of any kind, including fitness for a particular purpose, accuracy and non-infringement.</p>
-            <p>To the extent the law allows, we aren't liable for indirect, incidental, special, consequential or punitive damages, or for lost profits, revenue, data or business, and our total liability for any claim about the service is limited to [liability cap, for example the amount you paid us in the 12 months before the claim]. Some jurisdictions don't allow these limits, so they may not all apply to you.</p>
-            <p>[Lawyer review: indemnity clause, and the exact wording of the disclaimer and cap.]</p>
+            <p>To the extent the law allows, we aren't liable for indirect, incidental, special, consequential or punitive damages, or for lost profits, revenue, data or business, and our total liability for any claim about the service is limited to the greater of the amount you paid us in the 12 months before the claim and US$100. Some jurisdictions don't allow these limits, so they may not all apply to you.</p>
+            <p>You agree to cover our reasonable costs, including legal fees, from claims by others that arise from your breach of these terms or your unlawful use of the service.</p>
           </div>
         </div>
       </div>
@@ -252,9 +249,9 @@
             <h2>Governing law, changes and contact</h2>
           </div>
           <div class="prose">
-            <p>These terms are governed by the laws of the State of Delaware, without regard to its conflict of laws rules. Disputes go to [courts or arbitration, and venue]. [Lawyer review: consumer protections for users outside the US.]</p>
-            <p>We may update these terms. We'll change the date at the top of this page, and for material changes we'll email account holders at least [notice period for changes to terms] before they take effect. Using the service after that means you accept the new terms.</p>
-            <p>Questions go to [contact email], or by post to Disco Shrimp Company, LLC, [mailing address].</p>
+            <p>These terms are governed by the laws of the State of Delaware, without regard to its conflict of laws rules. Disputes go to the state or federal courts located in Delaware, and you and we agree to their jurisdiction. Nothing in these terms takes away rights you have under consumer protection laws that can't be waived.</p>
+            <p>We may update these terms. We'll change the date at the top of this page, and for material changes we'll email account holders at least 30 days before they take effect. Using the service after that means you accept the new terms.</p>
+            <p>Questions go to <a href="mailto:andrew@discoshrimp.lol">andrew@discoshrimp.lol</a>, or by post to Disco Shrimp Company, LLC, 245 N Highland Ave NE, Suite 230, Atlanta, GA 30307, USA.</p>
           </div>
         </div>
       </div>

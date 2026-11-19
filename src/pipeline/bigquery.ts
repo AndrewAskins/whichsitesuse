@@ -112,16 +112,21 @@ export async function latestCrawlDate(bq: BigQuery, maxBytesBilled: number): Pro
 export async function latestCruxDate(bq: BigQuery, crawlDate: string, maxBytesBilled: number): Promise<string | null> {
   const { rows } = await run<{ crux_date: unknown }>(
     bq,
-    { query: LATEST_CRUX_SQL, params: { crawl_date: crawlDate }, types: { crawl_date: "DATE" } },
+    { query: LATEST_CRUX_SQL, params: { crawl_date: BigQuery.date(crawlDate) } },
     maxBytesBilled,
   );
   return dateString(rows[0]?.crux_date);
 }
 
+/**
+ * DATE parameters must be BigQueryDate objects: the client silently sends a
+ * plain string typed as DATE with no value, so every date filter matches
+ * nothing (the first dry runs reported 0 bytes this way).
+ */
 export function extractParams(crawlDate: string, cruxDate: string | null): Pick<Query, "params" | "types"> {
   return {
-    params: { crawl_date: crawlDate, crux_date: cruxDate },
-    types: { crawl_date: "DATE", crux_date: "DATE" },
+    params: { crawl_date: BigQuery.date(crawlDate), crux_date: cruxDate ? BigQuery.date(cruxDate) : null },
+    types: cruxDate ? undefined : { crux_date: "DATE" },
   };
 }
 

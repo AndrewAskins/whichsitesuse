@@ -217,7 +217,7 @@ section.block { padding: 0 0 var(--section); }
 .filters li { position: relative; padding: 6px 0 6px 28px; max-width: var(--measure); }
 .filters li::before { content: "+"; position: absolute; left: 4px; top: 6px; font: 500 15px/1.7 var(--mono); color: var(--muted); }
 .example-list { margin-top: var(--s2); }
-.example-list li { display: grid; grid-template-columns: 150px 1fr; gap: var(--s4); align-items: baseline; padding: 12px 0; border-top: 1px dashed var(--line); }
+.example-list li { display: grid; grid-template-columns: 190px 1fr; gap: var(--s4); align-items: baseline; padding: 12px 0; border-top: 1px dashed var(--line); }
 .example-list li:first-child { border-top: 0; }
 @media (max-width: 560px) { .example-list li { grid-template-columns: 1fr; gap: var(--s1); } }
 

@@ -10,29 +10,6 @@
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 
-  // Theme switch: light and dark buttons in the header; the choice is remembered.
-  var root = document.documentElement;
-  var switches = document.querySelectorAll("[data-set-theme]");
-  function effectiveTheme() {
-    return root.getAttribute("data-theme") ||
-      (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  }
-  function syncSwitch() {
-    var t = effectiveTheme();
-    for (var k = 0; k < switches.length; k++) {
-      switches[k].setAttribute("aria-pressed", String(switches[k].getAttribute("data-set-theme") === t));
-    }
-  }
-  for (var k = 0; k < switches.length; k++) {
-    switches[k].addEventListener("click", function () {
-      var t = this.getAttribute("data-set-theme");
-      root.setAttribute("data-theme", t);
-      try { localStorage.setItem("wsu-theme", t); } catch (e) {}
-      syncSwitch();
-    });
-  }
-  syncSwitch();
-
   // H1 "Which sites use [technology]?": cycles through the rows of the adoption table (real HTTP Archive counts).
   // The static Shopify text is what crawlers, no-JS readers and reduced-motion readers see.
   var word = document.getElementById("tech-word");

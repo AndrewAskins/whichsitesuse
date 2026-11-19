@@ -226,7 +226,9 @@ export async function buildSnapshot(opts: BuildOptions): Promise<SnapshotManifes
     const out = (f: string) => lit(join(opts.outDir, f));
     const parquet = "(FORMAT parquet, COMPRESSION zstd, ROW_GROUP_SIZE 122880)";
     await db.run(`COPY (SELECT * FROM technologies ORDER BY tech_id) TO ${out(SNAPSHOT_FILES.technologies)} ${parquet}`);
-    await db.run(`COPY (SELECT * FROM sites ORDER BY site_id) TO ${out(SNAPSHOT_FILES.sites)} ${parquet}`);
+    // Sorted by domain so a domain lookup reads one row group (Parquet min/max
+    // stats) instead of scanning 15M rows. Every other read joins or sorts anyway.
+    await db.run(`COPY (SELECT * FROM sites ORDER BY domain) TO ${out(SNAPSHOT_FILES.sites)} ${parquet}`);
     // Already in (tech_id, site_id) order, and preserve_insertion_order keeps it that way.
     await db.run(`COPY site_tech TO ${out(SNAPSHOT_FILES.siteTech)} ${parquet}`);
     log.info({ step: "parquet written" }, "snapshot build progress");

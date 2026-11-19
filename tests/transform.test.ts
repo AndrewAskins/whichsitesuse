@@ -131,3 +131,15 @@ describe("buildSnapshot in slices", () => {
     expect(many.rows).toEqual(sorted);
   });
 });
+
+describe("sites.parquet", () => {
+  it("is sorted by domain, so a domain lookup reads one row group", async () => {
+    const outDir = await mkdtemp(join(tmpdir(), "wsu-out-"));
+    await buildSnapshot({ rawGlob, outDir, crawlDate: "2026-11-01", cruxDate: "2026-10-01", overrides: OVERRIDES, memoryLimit: "256MB" });
+    const snap = await Snapshot.open(outDir, { serveHttpArchive: true });
+    const rows = await snap.query<{ domain: string }>("SELECT domain FROM read_parquet($1)", [join(outDir, "sites.parquet")]);
+    snap.close();
+    const domains = rows.map((r) => r.domain);
+    expect(domains).toEqual([...domains].sort());
+  });
+});

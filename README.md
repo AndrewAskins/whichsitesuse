@@ -46,7 +46,9 @@ Without a snapshot on disk the data tools answer `snapshot_unavailable` (HTTP 50
 
 - `dry-run` reports the bytes the extract would scan and whether it fits the free tier. Free.
 - `measure` runs an aggregate-only version of the extract: rows, sites, average detections per site, and a size estimate. Scans the same bytes as the extract.
-- `monthly` writes the snapshot (next build step).
+- `monthly` runs `EXPORT DATA` to `gs://$GCS_BUCKET/extract/<month>/`, downloads the files, builds the snapshot with DuckDB (`src/pipeline/transform.ts`: technology overrides from Postgres applied, `first_seen` carried from last month), uploads it to R2 under `snapshots/<month>/`, then rewrites `snapshots/current.json`. It skips a month that is already current unless `CRAWL_DATE` pins one.
+
+The query service (`src/data/sync.ts`) downloads the month `current.json` points at into its own directory and swaps to it without dropping in-flight queries.
 
 Every BigQuery job carries `maximumBytesBilled` (`BIGQUERY_MAX_BYTES_BILLED`,
 default 200 GiB), and the client refuses a service account from any project

@@ -22,7 +22,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <script>
     // Theme: ?theme=light|dark forces one and is remembered; otherwise a saved choice, otherwise the system setting.
@@ -149,15 +149,24 @@
                 <li>passing or failing LCP, INP or CLS</li>
               </ul>
             </div>
-            <div class="row">
-              <h3>A few lists you could pull in one search</h3>
-              <ul class="example-list">
-                <li><span class="who">SEO agency</span><span>WordPress sites in the top 1M that fail INP, to pitch a speed fix.</span></li>
-                <li><span class="who">Shopify agency</span><span>Shopify stores in the top 100k, split by TLD for the markets you work in.</span></li>
-                <li><span class="who">SaaS founder</span><span>Sites that run a competitor's script and not yours.</span></li>
-                <li><span class="who">Performance consultant</span><span>Next.js sites in the top 100k that fail LCP.</span></li>
-              </ul>
-            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="examples">
+      <div class="wrap">
+        <p class="rule-label">// 02 &nbsp;Example searches</p>
+        <div class="split">
+          <div class="section-head">
+            <h2>Lists you could pull in one search</h2>
+            <p class="intro">Each of these is a single reverse search, and the count comes back free first, so you know the size and the cost before you pull anything.</p>
+          </div>
+          <div class="example-grid">
+            <div class="example"><p class="who">SEO agency</p><p class="what">WordPress sites in the top 1M that fail INP, to pitch a speed fix.</p><p class="filters-used">WordPress + top 1M + INP fail</p></div>
+            <div class="example"><p class="who">Shopify agency</p><p class="what">Shopify stores in the top 100k, split by TLD for the markets you work in.</p><p class="filters-used">Shopify + top 100k + TLD</p></div>
+            <div class="example"><p class="who">SaaS founder</p><p class="what">Sites that run a competitor's script and not yours.</p><p class="filters-used">uses theirs + excludes yours</p></div>
+            <div class="example"><p class="who">Performance consultant</p><p class="what">Next.js sites in the top 100k that fail LCP.</p><p class="filters-used">Next.js + top 100k + LCP fail</p></div>
           </div>
         </div>
       </div>
@@ -165,7 +174,7 @@
 
     <section class="block" id="agents">
       <div class="wrap">
-        <p class="rule-label">// 02 &nbsp;For agents</p>
+        <p class="rule-label">// 03 &nbsp;For agents</p>
         <div class="split">
           <div class="section-head">
             <h2>An MCP server and a REST API</h2>
@@ -197,7 +206,7 @@
 
     <section class="block" id="data">
       <div class="wrap">
-        <p class="rule-label">// 03 &nbsp;Data</p>
+        <p class="rule-label">// 04 &nbsp;Data</p>
         <div class="split">
           <div class="section-head">
             <h2>Where the data comes from</h2>
@@ -212,20 +221,31 @@
 
     <section class="block" id="pricing">
       <div class="wrap">
-        <p class="rule-label">// 04 &nbsp;Pricing</p>
+        <p class="rule-label">// 05 &nbsp;Pricing</p>
         <div class="split">
           <div class="section-head">
             <h2>Priced per site in the list</h2>
             <p class="intro">A site in a list costs one credit and a domain lookup costs two. Counts, technology search, balance checks and "not covered" lookups are free.</p>
           </div>
           <div>
-            <div class="plans">
-              <div class="plan"><p class="name">Starter</p><p class="price">$19<small> / month</small></p><p class="credits">5,000 credits a month, with CSV export</p></div>
-              <div class="plan plan-featured"><p class="name">Growth</p><p class="price">$49<small> / month</small></p><p class="credits">20,000 credits a month</p></div>
-              <div class="plan"><p class="name">Pro</p><p class="price">$149<small> / month</small></p><p class="credits">100,000 credits a month</p></div>
-              <div class="plan"><p class="name">Top-up</p><p class="price">$10</p><p class="credits">1,000 credits that last 12 months</p></div>
+            <!-- Plan numbers live here, in the JSON-LD offers in <head>, and in the FAQ answer on the free plan. -->
+            <div class="table-wrap">
+              <table class="plan-table">
+                <thead>
+                  <tr><th scope="col"><span class="visually-hidden">Plan detail</span></th><th scope="col">Starter</th><th scope="col" class="is-rec">Growth <span class="rec-tag">Recommended</span></th><th scope="col">Pro</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="price-row"><th scope="row">Price</th><td><strong>$19</strong> / month</td><td class="is-rec"><strong>$49</strong> / month</td><td><strong>$149</strong> / month</td></tr>
+                  <tr><th scope="row">Credits each month</th><td>5,000</td><td class="is-rec">20,000</td><td>100,000</td></tr>
+                  <tr><th scope="row">Sites in a list</th><td>5,000</td><td class="is-rec">20,000</td><td>100,000</td></tr>
+                  <tr><th scope="row">Or domain lookups</th><td>2,500</td><td class="is-rec">10,000</td><td>50,000</td></tr>
+                  <tr><th scope="row">Per 1,000 sites</th><td>$3.80</td><td class="is-rec">$2.45</td><td>$1.49</td></tr>
+                  <tr><th scope="row">CSV export</th><td>Yes</td><td class="is-rec">Yes</td><td>Yes</td></tr>
+                </tbody>
+              </table>
             </div>
-            <p class="pricing-note">Monthly credits reset each month and get used before top-up credits. On Starter, 5,000 credits buys a list of 5,000 WordPress sites failing INP or 2,500 domain lookups. A list of 500 Shopify stores costs 500 credits, about $1.25 on Growth. For comparison, <a href="https://builtwith.com/plans">BuiltWith's plans</a> start at $295 a month and <a href="https://www.wappalyzer.com/pricing/">Wappalyzer Pro</a> is $250 a month (both checked November 2026).</p>
+            <p class="topup"><strong>Top-ups:</strong> $10 for 1,000 credits that last 12 months, on any plan or none.</p>
+            <p class="pricing-note">Monthly credits reset each month and get used before top-up credits. For comparison, <a href="https://builtwith.com/plans">BuiltWith's plans</a> start at $295 a month and <a href="https://www.wappalyzer.com/pricing/">Wappalyzer Pro</a> is $250 a month (both checked November 2026).</p>
             <div class="free-grant">
               <p>There isn't a free plan, but a new account with a verified work email gets 250 credits once, enough to run a real search on your own market before you pay.</p>
               <a class="btn btn-primary" href="/signup">get 250 free credits</a>
@@ -237,7 +257,7 @@
 
     <section class="block" id="faq">
       <div class="wrap">
-        <p class="rule-label">// 05 &nbsp;Questions</p>
+        <p class="rule-label">// 06 &nbsp;Questions</p>
         <div class="split">
           <div class="section-head">
             <h2>Common questions</h2>
@@ -272,7 +292,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>Technology detections come from <a href="https://httparchive.org">HTTP Archive</a>, using its open-source Wappalyzer fork. Core Web Vitals come from the <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a>.</p>
-      <p>&copy; <span id="year">2026</span> WhichSitesUse</p>
+      <p>&copy; <span id="year">2026</span> Disco Shrimp Company, LLC</p>
     </div>
   </footer>
 

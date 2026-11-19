@@ -150,7 +150,7 @@
         <p class="crumbs"><a href="/">Home</a> / <a href="/companies-using/">Companies using</a> / Salesforce</p>
         <p class="label">Salesforce, November 2026 crawl</p>
         <h1>Companies using Salesforce</h1>
-        <p class="lede">To find companies using Salesforce, look for the Salesforce products that load on their websites, such as Commerce Cloud stores, Service Cloud chat and Pardot tracking. The core CRM runs behind a login and leaves no trace, so this page lists the products <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl can see and the search that finds every site running any of them, at one credit per site after a free count.</p>
+        <p class="lede">If you sell Salesforce services or an AppExchange product, the websites that load a Salesforce product are as close as a public crawl gets to a list of Salesforce customers, and this page shows how to pull them. One search covers eight Salesforce entries, among them Commerce Cloud stores, Service Cloud chat and Pardot tracking, across the 15,269,451 sites in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, and you can narrow it by popularity, TLD or Core Web Vitals, count any slice for free and pull the domains at one credit per site. The core CRM runs behind a login and leaves no trace on a website, so the list only holds companies that put a Salesforce product on their public pages.</p>
       </div>
     </section>
 
@@ -202,7 +202,7 @@
         <div class="split">
           <div class="section-head">
             <h2>Which Salesforce products can a crawl see?</h2>
-            <p class="intro">Eight entries in <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's Wappalyzer rules</a> carry the Salesforce name (checked November 2026).</p>
+            <p class="intro">Eight entries in <a href="https://github.com/HTTPArchive/wappalyzer/blob/main/src/technologies/s.json">HTTP Archive's Wappalyzer rules</a> carry the Salesforce name (checked November 2026).</p>
           </div>
           <div>
             <div class="table-wrap">
@@ -221,7 +221,7 @@
               </table>
             </div>
             <div class="prose">
-              <p>Two more entries imply Salesforce without carrying its name: an ApexPages response header, and a WordPress web-to-lead plugin that sends form entries to Salesforce. Because only some entries imply the parent, a search for <code>salesforce</code> alone misses sites whose only trace is Pardot, Marketing Cloud or one of the personalization products. Search for any of the eight slugs when you want them all, and check the slugs with <code>find_technologies</code>, which is free.</p>
+              <p>Two more entries imply Salesforce without carrying its name: <a href="https://github.com/HTTPArchive/wappalyzer/blob/main/src/technologies/a.json">ApexPages</a>, which matches an <code>X-Powered-By: Salesforce.com ApexPages</code> response header, and <a href="https://github.com/HTTPArchive/wappalyzer/blob/main/src/technologies/b.json">Brilliant Web-to-Lead</a>, a WordPress plugin that sends form entries to Salesforce (both in HTTP Archive's Wappalyzer rules, checked November 2026). Because only some entries imply the parent, a search for <code>salesforce</code> alone misses sites whose only trace is Pardot, Marketing Cloud or one of the personalization products. Search for any of the eight slugs when you want them all, and check the slugs with <code>find_technologies</code>, which is free.</p>
               <p>Sales Cloud itself runs behind a login, so a company that uses Salesforce as its CRM and nothing on its website looks like any other site to the crawler. The <a href="https://almanac.httparchive.org/en/2025/methodology">crawl also only loads the mobile homepage and one inner page</a>, so a chat widget or tracking tag that appears only on a support or pricing page can be missed, and sites with little Chrome traffic are often not in the crawl at all.</p>
             </div>
           </div>
@@ -371,9 +371,9 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
           </div>
           <div class="card-grid">
             <a href="/companies-using/"><h3>All technologies</h3><p>How to find the sites that use any technology in the crawl.</p></a>
-            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin.</p></a>
-            <a href="/companies-using/shopify/"><h3>Shopify</h3><p>756,868 stores, filtered by popularity, TLD and apps.</p></a>
-            <a href="/companies-using/stripe/"><h3>Stripe</h3><p>208,351 sites that load Stripe on a crawled page.</p></a>
+            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin in HTTP Archive's November 2026 crawl, counted by WhichSitesUse.</p></a>
+            <a href="/companies-using/shopify/"><h3>Shopify</h3><p>756,868 stores in HTTP Archive's November 2026 crawl, counted by WhichSitesUse, to filter by popularity, TLD and apps.</p></a>
+            <a href="/companies-using/stripe/"><h3>Stripe</h3><p>208,351 sites in HTTP Archive's November 2026 crawl, counted by WhichSitesUse, that load Stripe on a crawled page.</p></a>
           </div>
         </div>
 

@@ -160,7 +160,7 @@
         <div class="split">
           <div class="section-head">
             <h2>How many Shopify stores are there?</h2>
-            <p class="intro">Sites with real Chrome traffic where the detection rules found Shopify on the mobile homepage.</p>
+            <p class="intro">The Shopify count covers sites with real Chrome traffic where the detection rules found Shopify on the mobile homepage.</p>
           </div>
           <div>
             <div class="prose">
@@ -213,12 +213,12 @@
         <div class="split">
           <div class="section-head">
             <h2>How Shopify is detected, and what slips through</h2>
-            <p class="intro">From the Shopify entry in <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's Wappalyzer rules</a> (checked November 2026).</p>
+            <p class="intro">Shopify detection follows the Shopify entry in <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's Wappalyzer rules</a> (checked November 2026).</p>
           </div>
           <div class="prose">
             <p>A store is counted when the crawler sees one of Shopify's own signals: the <code>_shopify_s</code> or <code>_shopify_y</code> cookies, a <code>powered-by: Shopify</code> or <code>x-shopify-stage</code> response header, Shopify's checkout and digital-wallet meta tags, JavaScript objects such as <code>ShopifyAPI</code> or <code>SHOPIFY_API_BASE_URL</code>, or requests to a <code>myshopify.com</code> address. Links to <code>cdn.shopify.com</code> also count, at lower confidence. On top of that, 104 Shopify app and framework entries imply Shopify, so a store whose app scripts are visible is counted even if the core signals are hidden.</p>
             <p>Stores built on Shopify's Hydrogen framework are counted when they send Hydrogen's <code>powered-by</code> header. A custom headless front end that loads none of these signals on the crawled pages can be missed. There's no separate Shopify Plus entry, so Plus and standard stores can't be told apart, and Shop Pay is its own entry (<code>shop-pay</code>) if you want stores that show it.</p>
-            <p>Here's what one result looks like. In the November 2026 crawl, allbirds.com had 29 technologies detected on its mobile homepage, Shopify and Shop Pay among them, sat in the top 500k bucket and passed all three Core Web Vitals in October 2026 field data (LCP 1.9 s, INP 175 ms, CLS 0).</p>
+            <p>Here's what one result looks like. In <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, counted by WhichSitesUse, allbirds.com had 29 technologies detected on its mobile homepage, Shopify and Shop Pay among them, sat in the top 500k bucket and passed all three Core Web Vitals in October 2026 field data (LCP 1.9 s, INP 175 ms, CLS 0).</p>
           </div>
         </div>
       </div>
@@ -273,13 +273,18 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Who pulls a Shopify list</h2>
-            <p class="intro">Each of these is one search, and the count comes back free first.</p>
+            <p class="intro">Each of these Shopify lists is one search, and its count comes back free first.</p>
           </div>
+          <div>
           <div class="example-grid">
             <div class="example"><p class="who">Shopify agency</p><p class="what">Stores in the top 100k, split by TLD for the markets you work in.</p><p class="filters-used">shopify + max_rank 100000 + tld</p></div>
             <div class="example"><p class="who">Shopify app developer</p><p class="what">Stores that don't run a competing app, in the popularity range you sell to.</p><p class="filters-used">shopify + excludes theirs + rank buckets</p></div>
             <div class="example"><p class="who">Performance consultant</p><p class="what">Shopify stores that fail INP on mobile, to pitch theme and script cleanup.</p><p class="filters-used">shopify + cwv inp:fail + device mobile</p></div>
             <div class="example"><p class="who">Marketing automation vendor</p><p class="what">Shopify stores already running a marketing automation tool, to pitch a switch.</p><p class="filters-used">shopify + category "Marketing automation"</p></div>
+          </div>
+          <div class="prose">
+            <p>An SMS marketing tool would search for <code>shopify</code> plus <code>attentive</code> to list stores already using a rival. allbirds.com is one store that search returns, since <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, counted by WhichSitesUse, found both on its mobile homepage.</p>
+          </div>
           </div>
         </div>
       </div>
@@ -291,7 +296,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Shopify stores in more detail</h2>
-            <p class="intro">From the same November 2026 snapshot as the count.</p>
+            <p class="intro">These Shopify tables come from the same November 2026 snapshot as the 756,868 count.</p>
           </div>
           <div>
             <figure class="sample">
@@ -359,13 +364,13 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Other lists</h2>
-            <p class="intro">Counts are mobile homepages in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl.</p>
+            <p class="intro">These lists for other technologies count mobile homepages in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, the same data as the Shopify count.</p>
           </div>
           <div class="card-grid">
             <a href="/companies-using/"><h3>All technologies</h3><p>How to find the sites that use any technology in the crawl.</p></a>
-            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin.</p></a>
+            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin in HTTP Archive's November 2026 crawl, counted by WhichSitesUse.</p></a>
             <a href="/companies-using/salesforce/"><h3>Salesforce</h3><p>Which Salesforce products show up on a public site.</p></a>
-            <a href="/companies-using/stripe/"><h3>Stripe</h3><p>208,351 sites that load Stripe on a crawled page.</p></a>
+            <a href="/companies-using/stripe/"><h3>Stripe</h3><p>208,351 sites in HTTP Archive's November 2026 crawl, counted by WhichSitesUse, that load Stripe on a crawled page.</p></a>
           </div>
         </div>
 

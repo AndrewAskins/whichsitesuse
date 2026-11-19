@@ -102,7 +102,7 @@
         },
         {
           "@type": "Question",
-          "name": "Why isn't a business I know uses Stripe in the list?",
+          "name": "Why is a business I know uses Stripe missing from the list?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Usually because Stripe only loads on its checkout or billing pages, or it sends customers to a payment page on Stripe's own domain. The crawl loads the homepage and one inner page, so it never sees those."
@@ -150,7 +150,7 @@
         <p class="crumbs"><a href="/">Home</a> / <a href="/companies-using/">Companies using</a> / Stripe</p>
         <p class="label">Stripe, November 2026 crawl</p>
         <h1>Who uses Stripe</h1>
-        <p class="lede">208,351 websites load Stripe on their mobile homepage in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, which is 1.4% of the 15,269,451 sites it covers. That counts sites where Stripe loads on a crawled page, which is fewer than the businesses that take payments through Stripe. Count any slice of them for free and pull the domains at one credit each.</p>
+        <p class="lede">208,351 websites load Stripe on their mobile homepage in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, 1.4% of the 15,269,451 sites it covers, and you can narrow them by popularity, TLD, other technologies or Core Web Vitals, count any slice for free and pull the domains at one credit each. The count covers sites where Stripe loads on a crawled page, which is fewer than the businesses that take payments through Stripe.</p>
       </div>
     </section>
 
@@ -160,7 +160,7 @@
         <div class="split">
           <div class="section-head">
             <h2>How many websites use Stripe?</h2>
-            <p class="intro">Websites where Stripe loads on a page the crawler visits, which is a smaller group than the businesses that use Stripe.</p>
+            <p class="intro">The Stripe count covers websites where Stripe loads on a page the crawler visits, which is a smaller group than the businesses that use Stripe.</p>
           </div>
           <div>
             <div class="prose">
@@ -202,7 +202,7 @@
         <div class="split">
           <div class="section-head">
             <h2>How Stripe is detected and what the crawl misses</h2>
-            <p class="intro">From the Stripe entry in <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's Wappalyzer rules</a> (checked November 2026).</p>
+            <p class="intro">Stripe detection follows the Stripe entry in <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's Wappalyzer rules</a> (checked November 2026).</p>
           </div>
           <div>
             <div class="table-wrap">
@@ -276,13 +276,18 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Who pulls a Stripe list</h2>
-            <p class="intro">Each of these is one search, and the count comes back free first.</p>
+            <p class="intro">Each of these Stripe lists is one search, and its count comes back free first.</p>
           </div>
+          <div>
           <div class="example-grid">
             <div class="example"><p class="who">Payments provider</p><p class="what">Stripe sites in the top 100k that don't also offer PayPal.</p><p class="filters-used">stripe + excludes paypal + max_rank 100000</p></div>
             <div class="example"><p class="who">Billing or tax SaaS</p><p class="what">Stripe sites on the country TLDs your product supports.</p><p class="filters-used">stripe + tld</p></div>
             <div class="example"><p class="who">WooCommerce agency</p><p class="what">WordPress stores taking cards through a Stripe plugin.</p><p class="filters-used">stripe + woocommerce</p></div>
             <div class="example"><p class="who">Checkout performance consultant</p><p class="what">Stripe sites that fail INP on mobile, to pitch checkout speed work.</p><p class="filters-used">stripe + cwv inp:fail + device mobile</p></div>
+          </div>
+          <div class="prose">
+            <p>A fundraising platform is a good fit for the homepage signal, because a donate form on the homepage is one of the ways Stripe shows up in the crawl. It can count Stripe sites on the .org TLD in the top 1M for free (<code>stripe + tld org + max_rank 1000000</code>), then pull only that slice.</p>
+          </div>
           </div>
         </div>
       </div>
@@ -294,7 +299,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Stripe sites in more detail</h2>
-            <p class="intro">From the same November 2026 snapshot as the count.</p>
+            <p class="intro">These Stripe tables come from the same November 2026 snapshot as the 208,351 count.</p>
           </div>
           <div>
             <figure class="sample">
@@ -333,6 +338,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Common questions</h2>
+            <p class="intro">These answers cover what the Stripe count includes and what it leaves out.</p>
           </div>
           <div class="faq-list">
             <details>
@@ -340,7 +346,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
               <p>No. The 208,351 counts sites where Stripe loads on the pages the crawl visits. That is fewer than the businesses that use Stripe, and the count says nothing about how much any of them process.</p>
             </details>
             <details>
-              <summary>Why isn't a business I know uses Stripe in the list?</summary>
+              <summary>Why is a business I know uses Stripe missing from the list?</summary>
               <p>Usually because Stripe only loads on its checkout or billing pages, or it sends customers to a payment page on Stripe's own domain. The crawl loads the homepage and one inner page, so it never sees those.</p>
             </details>
             <details>
@@ -362,13 +368,13 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
         <div class="split">
           <div class="section-head">
             <h2>Other lists</h2>
-            <p class="intro">Counts are mobile homepages in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl.</p>
+            <p class="intro">These lists for other technologies count mobile homepages in <a href="https://httparchive.org/">HTTP Archive</a>'s November 2026 crawl, the same data as the Stripe count.</p>
           </div>
           <div class="card-grid">
             <a href="/companies-using/"><h3>All technologies</h3><p>How to find the sites that use any technology in the crawl.</p></a>
-            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin.</p></a>
+            <a href="/companies-using/hubspot/"><h3>HubSpot</h3><p>334,592 sites with HubSpot's tracking code, CMS or plugin in HTTP Archive's November 2026 crawl, counted by WhichSitesUse.</p></a>
             <a href="/companies-using/salesforce/"><h3>Salesforce</h3><p>Which Salesforce products show up on a public site.</p></a>
-            <a href="/companies-using/shopify/"><h3>Shopify</h3><p>756,868 stores, filtered by popularity, TLD and apps.</p></a>
+            <a href="/companies-using/shopify/"><h3>Shopify</h3><p>756,868 stores in HTTP Archive's November 2026 crawl, counted by WhichSitesUse, to filter by popularity, TLD and apps.</p></a>
           </div>
         </div>
 

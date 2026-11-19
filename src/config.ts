@@ -51,10 +51,11 @@ const schema = z.object({
   // How often the query service checks R2 for a newer snapshot (and SEO dataset).
   SNAPSHOT_POLL_MINUTES: z.coerce.number().int().positive().default(360),
 
-  CRAWL_DATE: z
-    .string()
-    .regex(/^\d{4}-\d{2}-01$/)
-    .optional(),
+  // Pins the monthly run to one crawl month. Empty means unpinned (the newest crawl).
+  CRAWL_DATE: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().regex(/^\d{4}-\d{2}-01$/).optional(),
+  ),
 
   // Signs magic links, sessions, CSRF tokens, checkout links and hashes device fingerprints.
   // Required in production; a fixed dev value is used elsewhere.

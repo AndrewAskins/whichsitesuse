@@ -17,7 +17,7 @@ export class Snapshot {
     readonly manifest: SnapshotManifest,
   ) {}
 
-  static async open(dir: string, opts: { serveHttpArchive: boolean }): Promise<Snapshot> {
+  static async open(dir: string, opts: { serveHttpArchive: boolean; memoryLimit?: string }): Promise<Snapshot> {
     const manifest = JSON.parse(
       await readFile(join(dir, SNAPSHOT_FILES.manifest), "utf8"),
     ) as SnapshotManifest;
@@ -27,7 +27,10 @@ export class Snapshot {
       );
     }
 
-    const instance = await DuckDBInstance.create(":memory:", { threads: "4" });
+    const instance = await DuckDBInstance.create(":memory:", {
+      threads: "4",
+      ...(opts.memoryLimit ? { memory_limit: opts.memoryLimit } : {}),
+    });
     const conn = await instance.connect();
     const file = (name: string) => `'${join(dir, name).replaceAll("'", "''")}'`;
     const sourceFilter = opts.serveHttpArchive ? "" : "WHERE source <> 'httparchive'";

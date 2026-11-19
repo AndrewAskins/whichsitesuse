@@ -40,6 +40,10 @@ export async function runMonthly(
   const storage = gcsClient(config);
   const prefix = exportPrefix(dates.crawlDate);
   const uri = `gs://${config.GCS_BUCKET}/${prefix}*.parquet`;
+  // A failed run leaves its export behind, and EXPORT DATA's overwrite only replaces
+  // files with the same names. Clear the prefix first so the download can't mix two
+  // exports (November's first build counted about half its rows twice).
+  await deletePrefix(storage, config.GCS_BUCKET, prefix);
   const exported = await run(bq, { query: EXPORT_SQL(uri), ...dates.params }, config.BIGQUERY_MAX_BYTES_BILLED);
   log.info({ uri, bytes_billed: exported.bytesBilled }, "extract exported");
 

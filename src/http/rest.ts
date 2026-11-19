@@ -44,7 +44,7 @@ export function toOperationError(err: unknown, opName: string): OperationError {
   return new OperationError("internal", "Something went wrong on our side.");
 }
 
-function sendError(res: Response, err: unknown, opName: string, deps?: GateDeps) {
+export function sendError(res: Response, err: unknown, opName: string, deps?: GateDeps) {
   const opErr = toOperationError(err, opName);
   // Points clients at OAuth discovery (RFC 9728), as MCP does.
   if (opErr.code === "unauthorized" && deps?.services) res.set("WWW-Authenticate", wwwAuthenticate(deps.services));

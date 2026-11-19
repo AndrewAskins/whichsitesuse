@@ -78,6 +78,11 @@ describe("MCP over Streamable HTTP", () => {
 
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name)).toEqual(operations.map((o) => o.name));
+    // Directories read these: nothing is destructive, and only buy_credits isn't read-only.
+    for (const tool of tools) {
+      expect(tool.annotations?.destructiveHint).toBe(false);
+      expect(tool.annotations?.readOnlyHint).toBe(tool.name !== "buy_credits");
+    }
 
     const result = await client.callTool({ name: "find_technologies", arguments: { q: "wordpress" } });
     expect(result.isError).toBeFalsy();

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.whichsitesuse/whichsitesuse",
+  "title": "WhichSitesUse",
+  "description": "Which sites use a technology, and what a domain runs. Technographics from HTTP Archive's crawl.",
+  "websiteUrl": "https://whichsitesuse.com",
+  "repository": {
+    "url": "https://github.com/AndrewAskins/whichsitesuse",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.whichsitesuse.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer followed by your WhichSitesUse API key. find_technologies and count_sites also work without one.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

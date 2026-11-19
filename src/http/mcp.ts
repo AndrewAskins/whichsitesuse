@@ -32,7 +32,14 @@ export function buildMcpServer(
         title: op.title,
         description: op.description,
         inputSchema: op.input.shape,
-        annotations: { readOnlyHint: op.rest.method === "get", openWorldHint: false },
+        // Directories check these. No tool deletes or overwrites anything: buy_credits only
+        // makes a checkout link that a human opens and pays.
+        annotations: {
+          readOnlyHint: op.rest.method === "get",
+          destructiveHint: false,
+          idempotentHint: op.rest.method === "get",
+          openWorldHint: false,
+        },
       },
       async (args: unknown) => {
         try {

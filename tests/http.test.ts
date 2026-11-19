@@ -48,6 +48,31 @@ describe("REST", () => {
     expect(body.error.issues[0].field).toBe("q");
   });
 
+  it("serves the site tools with comma lists, repeated params and the shared envelope", async () => {
+    const count: any = await (await fetch(`${base}/v1/counts?technologies=shopify,klaviyo`)).json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(count.data).toMatchObject({ total: 1, full_list_credits: 1 });
+    expect(count.meta.credits_used).toBe(0);
+
+    const res = await fetch(`${base}/v1/sites?technologies=shopify&technologies=klaviyo&match=any&limit=1&cwv=lcp:pass`);
+    expect(res.status).toBe(200);
+    const sites: any = await res.json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(sites.data.sites.map((s: { domain: string }) => s.domain)).toEqual(["shop-a.com"]);
+    expect(sites.data.next_cursor).toBeNull();
+    expect(sites.meta).toMatchObject({ crawl_date: "2026-10-01", credits_used: 1 });
+
+    const domain: any = await (await fetch(`${base}/v1/domains/${encodeURIComponent("https://www.shop-a.com/")}`)).json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(domain.data).toMatchObject({ covered: true, domain: "shop-a.com" });
+    expect(domain.meta.credits_used).toBe(2);
+
+    const missing = await fetch(`${base}/v1/domains/nowhere.example`);
+    expect(missing.status).toBe(200);
+    expect(((await missing.json()) as any).meta.credits_used).toBe(0); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const unknown = await fetch(`${base}/v1/counts?technologies=nope`);
+    expect(unknown.status).toBe(400);
+    expect(((await unknown.json()) as any).error.unknown_technologies).toEqual(["nope"]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  });
+
   it("returns 503 while no snapshot is loaded", async () => {
     const saved = snapshot;
     snapshot = null;
@@ -69,6 +94,23 @@ describe("MCP over Streamable HTTP", () => {
     expect(result.isError).toBeFalsy();
     const body = result.structuredContent as { data: { matches: { slug: string }[] } };
     expect(body.data.matches[0]?.slug).toBe("wordpress");
+    await client.close();
+  });
+
+  it("calls search_sites with real arrays and objects", async () => {
+    const client = new Client({ name: "test", version: "0.0.0" });
+    await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
+    const result = await client.callTool({
+      name: "search_sites",
+      arguments: { technologies: ["shopify"], cwv: { lcp: "pass" }, device: "mobile", max_credits: 5 },
+    });
+    expect(result.isError).toBeFalsy();
+    const body = result.structuredContent as { data: { sites: { domain: string }[] }; meta: { credits_used: number } };
+    expect(body.data.sites.map((s) => s.domain)).toEqual(["shop-a.com"]);
+    expect(body.meta.credits_used).toBe(1);
+
+    const lookup = await client.callTool({ name: "lookup_domain", arguments: { domain: "live-c.io" } });
+    expect((lookup.structuredContent as { data: { covered: boolean } }).data.covered).toBe(true);
     await client.close();
   });
 

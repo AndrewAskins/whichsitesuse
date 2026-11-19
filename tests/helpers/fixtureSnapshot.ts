@@ -40,6 +40,45 @@ export const FIXTURE_ROWS: Rows = {
   ],
 };
 
+const site = (row: Record<string, unknown>) => ({
+  on_mobile: true, on_desktop: true,
+  lcp_p75_mobile: null, inp_p75_mobile: null, cls_p75_mobile: null,
+  lcp_p75_desktop: null, inp_p75_desktop: null, cls_p75_desktop: null,
+  last_crawl_date: "2026-10-01", source: "httparchive", ...row,
+});
+const detection = (site_id: number, tech_id: number, row: Record<string, unknown> = {}) => ({
+  site_id, tech_id, version: null, confidence: 1, on_mobile: true, on_desktop: true,
+  first_seen: "2026-10-01", last_seen: "2026-10-01", source: "httparchive", ...row,
+});
+
+/**
+ * FIXTURE_ROWS plus enough sites to exercise the site filters. Shopify, best rank first:
+ * store-d.co.uk (1k), shop-a.com (10k), shop-h.com (10k), store-e.com (100k, desktop only), live-c.io (unknown).
+ */
+export const QUERY_FIXTURE_ROWS: Rows = {
+  technologies: FIXTURE_ROWS.technologies,
+  sites: [
+    ...FIXTURE_ROWS.sites,
+    site({ site_id: 4, domain: "store-d.co.uk", root_url: "https://store-d.co.uk/", rank_bucket: 1000, tld: "co.uk", lcp_p75_mobile: 3000, inp_p75_mobile: 100, cls_p75_mobile: 0.05, lcp_p75_desktop: 2000, inp_p75_desktop: 80, cls_p75_desktop: 0.01 }),
+    site({ site_id: 5, domain: "store-e.com", root_url: "https://store-e.com/", rank_bucket: 100000, tld: "com", lcp_p75_desktop: 2400, inp_p75_desktop: 150, cls_p75_desktop: 0.05 }),
+    site({ site_id: 6, domain: "wp-f.com", root_url: "https://wp-f.com/", rank_bucket: 10000, tld: "com", lcp_p75_mobile: 2000, inp_p75_mobile: 100, cls_p75_mobile: 0.02 }),
+    site({ site_id: 7, domain: "wp-g.net", root_url: "https://wp-g.net/", rank_bucket: null, tld: "net" }),
+    site({ site_id: 8, domain: "shop-h.com", root_url: "https://shop-h.com/", rank_bucket: 10000, tld: "com", lcp_p75_mobile: 2600, inp_p75_mobile: 180, cls_p75_mobile: 0.08, lcp_p75_desktop: 2600, inp_p75_desktop: 120, cls_p75_desktop: 0.05 }),
+  ],
+  site_tech: [
+    ...FIXTURE_ROWS.site_tech,
+    detection(4, 1),
+    detection(4, 3),
+    detection(5, 1, { on_mobile: false }),
+    detection(5, 4),
+    detection(6, 2, { version: "6.4.2" }),
+    detection(6, 4),
+    detection(7, 2, { version: "5.9" }),
+    detection(8, 1, { confidence: 0.8 }),
+    detection(8, 5),
+  ],
+};
+
 /** Writes a tiny snapshot (the real schema, a handful of rows) to a temp dir. */
 export async function buildFixtureSnapshot(rows: Rows = FIXTURE_ROWS): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "wsu-snapshot-"));

@@ -62,6 +62,13 @@ REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV a
 - **Stripe** (`src/billing/stripe.ts`, `webhooks.ts`, `src/web/buy.ts`): Checkout for plans and top-ups,
   webhooks at `POST /stripe/webhook` into the ledger. Prices are found or created by lookup key, so there
   is no price id to configure. `buy_credits` returns a signed `/buy/<token>` link a human opens; it lasts 7 days.
+- **OAuth for MCP clients** (`src/auth/oauth.ts`, `src/web/oauth.ts`): what Claude, ChatGPT and other
+  directories expect. Protected-resource and authorization-server metadata under `/.well-known/`, dynamic
+  client registration (`/oauth/register`), authorization code with PKCE S256 (`/oauth/authorize`, a consent
+  page with an optional monthly credit cap), `/oauth/token` with rotating refresh tokens, and `/oauth/revoke`.
+  An approved app is stored as an `api_keys` row, so caps, usage and revocation work as for keys. With
+  accounts on, `/mcp` answers 401 with `WWW-Authenticate` until it gets an OAuth token or API key; REST free
+  tools stay anonymous.
 - **Pages**: `/signup`, `/login`, `/account` (balance, API keys and caps, buy), `/request-credits`, `/admin`
   (abuse dashboard, request review, revoke and suspend). Accounts in `ADMIN_EMAILS` become admins when they verify.
 - Background jobs run in the web service (`src/jobs.ts`): hourly credit expiry, weekly email-list refresh.

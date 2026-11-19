@@ -272,3 +272,7 @@ pre.config {
 .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s4); }
 .site-footer .wrap::before { content: ""; flex-basis: 100%; border-top: 1px solid var(--rule); margin-bottom: var(--s2); }
 .site-footer p { margin: 0; max-width: 64ch; }
+
+/* Sample lookup (Fig. 2) inside the first row */
+.sample { margin: var(--s5) 0 0; }
+.sample figcaption { margin-top: var(--s3); font: 400 12px/1.6 var(--mono); color: var(--muted); }

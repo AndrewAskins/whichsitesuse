@@ -72,7 +72,7 @@
     return /^([a-z0-9-]+\.)+[a-z]{2,}$/.test(s) ? s : null;
   }
 
-  var PRELAUNCH = "Free lookups open when WhichSitesUse launches. Until then, the table below shows real counts from HTTP Archive's latest crawl.";
+  var PRELAUNCH = "Free lookups open when WhichSitesUse launches. Until then, the table on this page shows real counts from HTTP Archive's November 2026 crawl.";
 
   function showNotice(message) {
     result.hidden = false;

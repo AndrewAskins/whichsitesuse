@@ -106,3 +106,58 @@ export function graph(nodes: Node[]): Node {
 
 /** JSON for a <script type="application/ld+json"> block, safe against "</script>". */
 export const ldJson = (value: unknown): string => JSON.stringify(value).replace(/</g, "\\u003c");
+
+/** The product with its plans and top-ups as offers, for the page that shows prices. */
+export function softwareApplication(p: {
+  path: string;
+  description: string;
+  offers: { name: string; price: string; description: string; recurring?: boolean }[];
+}): Node {
+  return {
+    "@type": "SoftwareApplication",
+    "@id": `${SITE_ORIGIN}/#software`,
+    name: "WhichSitesUse",
+    url: absolute(p.path),
+    description: p.description,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    publisher: { "@id": ORGANIZATION["@id"] },
+    offers: p.offers.map((o) => ({
+      "@type": "Offer",
+      name: o.name,
+      price: o.price,
+      priceCurrency: "USD",
+      description: o.description,
+      url: absolute(p.path),
+      ...(o.recurring
+        ? { priceSpecification: { "@type": "UnitPriceSpecification", price: o.price, priceCurrency: "USD", billingDuration: "P1M", unitText: "MONTH" } }
+        : {}),
+    })),
+  };
+}
+
+/** An article on a page: TechArticle for the docs, Article for guides. */
+export function article(p: {
+  path: string;
+  headline: string;
+  description: string;
+  dateModified: string;
+  image?: string;
+  type?: "Article" | "TechArticle";
+  about?: string[];
+}): Node {
+  return {
+    "@type": p.type ?? "Article",
+    "@id": `${absolute(p.path)}#article`,
+    headline: p.headline,
+    description: p.description,
+    url: absolute(p.path),
+    mainEntityOfPage: { "@id": `${absolute(p.path)}#webpage` },
+    inLanguage: "en",
+    dateModified: p.dateModified,
+    ...(p.image ? { image: p.image } : {}),
+    ...(p.about ? { about: p.about } : {}),
+    author: { "@id": ORGANIZATION["@id"] },
+    publisher: { "@id": ORGANIZATION["@id"] },
+  };
+}

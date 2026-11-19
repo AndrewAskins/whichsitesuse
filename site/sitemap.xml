@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://whichsitesuse.com/</loc></url>
   <url><loc>https://whichsitesuse.com/docs/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/connect/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/filters/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/find-technologies/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/count-sites/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/search-sites/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/lookup-domain/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/get-balance/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/api/buy-credits/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/credits/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/errors/</loc></url>
+  <url><loc>https://whichsitesuse.com/docs/data/</loc></url>
   <url><loc>https://whichsitesuse.com/builtwith-alternative/</loc></url>
   <url><loc>https://whichsitesuse.com/wappalyzer-alternative/</loc></url>
   <url><loc>https://whichsitesuse.com/technographics/</loc></url>

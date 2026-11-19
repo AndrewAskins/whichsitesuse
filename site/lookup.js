@@ -9,6 +9,47 @@
   var result = document.getElementById("result");
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
+
+  // Theme switch: light and dark buttons in the header; the choice is remembered.
+  var root = document.documentElement;
+  var switches = document.querySelectorAll("[data-set-theme]");
+  function effectiveTheme() {
+    return root.getAttribute("data-theme") ||
+      (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }
+  function syncSwitch() {
+    var t = effectiveTheme();
+    for (var k = 0; k < switches.length; k++) {
+      switches[k].setAttribute("aria-pressed", String(switches[k].getAttribute("data-set-theme") === t));
+    }
+  }
+  for (var k = 0; k < switches.length; k++) {
+    switches[k].addEventListener("click", function () {
+      var t = this.getAttribute("data-set-theme");
+      root.setAttribute("data-theme", t);
+      try { localStorage.setItem("wsu-theme", t); } catch (e) {}
+      syncSwitch();
+    });
+  }
+  syncSwitch();
+
+  // H1 "Which sites use [technology]?": the static word (Shopify) is what crawlers and no-JS readers see.
+  var word = document.getElementById("tech-word");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (word && !reduce) {
+    var words = (word.getAttribute("data-words") || "").split(",").filter(Boolean);
+    var i = 0;
+    if (words.length > 1) {
+      setInterval(function () {
+        word.classList.add("is-swapping");
+        setTimeout(function () {
+          i = (i + 1) % words.length;
+          word.textContent = words[i];
+          word.classList.remove("is-swapping");
+        }, 180);
+      }, 2200);
+    }
+  }
   if (!form || !input || !result) return;
 
   function el(tag, attrs, text) {

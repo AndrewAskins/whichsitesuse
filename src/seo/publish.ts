@@ -5,6 +5,7 @@ import type { Config } from "../config.js";
 import { Snapshot } from "../data/snapshot.js";
 import { log } from "../log.js";
 import { downloadSnapshot, r2Client, readCurrent } from "../storage/r2.js";
+import { fetchTechCatalog } from "./catalog.js";
 import { buildSeoDataset } from "./dataset.js";
 import { downloadSeoDataset, readSeoPointer, uploadSeoDataset } from "./storage.js";
 
@@ -16,7 +17,8 @@ export async function publishSeoDataset(config: Config, s3: S3Client, snapshotDi
     const previous =
       pointer && pointer.crawl_date < snapshot.manifest.crawl_date ? await downloadSeoDataset(s3, config.R2_BUCKET, pointer.key) : null;
     const started = Date.now();
-    const data = await buildSeoDataset(snapshot, { previous });
+    const catalog = await fetchTechCatalog();
+    const data = await buildSeoDataset(snapshot, { previous, catalog });
     const published = await uploadSeoDataset(s3, config.R2_BUCKET, data);
     log.info(
       {

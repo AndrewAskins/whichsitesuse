@@ -51,10 +51,4 @@ export const SEO_RULES: Readonly<SeoRules> = {
   maxTlds: 6,
 };
 
-/**
- * Technologies with hand-written pages in site/companies-using/<slug>/. Render serves those static
- * files before its rewrite to the API, so the API leaves these slugs out of its sitemap.
- */
-export const HANDWRITTEN_TECH_SLUGS = ["hubspot", "salesforce", "shopify", "stripe"] as const;
-
 export const SITE_ORIGIN = "https://whichsitesuse.com";

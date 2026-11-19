@@ -2,13 +2,13 @@ import { cp, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PagePlan, renderCategoryIndex, renderCategoryPage, renderSitemap, renderTechPage, type RenderedPage } from "./pages.js";
+import { PagePlan, renderCategoryIndex, renderCategoryPage, renderHub, renderSitemap, renderTechPage, type RenderedPage } from "./pages.js";
 import { readSeoDatasetFile } from "./storage.js";
 
 /**
  * Writes the marketing site plus every programmatic page as static files: what
  * whichsitesuse.com would serve once the rewrites are on. Used for PR previews.
- * Static files already in site/ (the hand-written pages) win, as they do on Render.
+ * A static file already in site/ at the same path wins, as it would on Render.
  */
 export async function exportSite(plan: PagePlan, siteDir: string, outDir: string): Promise<number> {
   await cp(siteDir, outDir, { recursive: true });
@@ -23,6 +23,7 @@ export async function exportSite(plan: PagePlan, siteDir: string, outDir: string
   for (const slug of plan.tech.keys()) await write(`/companies-using/${slug}/`, renderTechPage(plan, slug));
   for (const slug of plan.category.keys()) await write(`/categories/${slug}/`, renderCategoryPage(plan, slug));
   await write("/categories/", renderCategoryIndex(plan));
+  await write("/companies-using/", renderHub(plan));
   await mkdir(join(outDir, "sitemaps"), { recursive: true });
   await writeFile(join(outDir, "sitemaps", "technologies.xml"), renderSitemap(plan));
   return written;

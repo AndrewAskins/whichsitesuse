@@ -15,6 +15,7 @@ import {
   rankLabels,
   renderCategoryIndex,
   renderCategoryPage,
+  renderHub,
   renderSitemap,
   renderTechPage,
 } from "../src/seo/pages.js";
@@ -70,9 +71,10 @@ describe("PagePlan", () => {
     expect(renderTechPage(strict, "doppler")).toBeNull();
   });
 
-  it("leaves hand-written pages out of the sitemap", () => {
+  it("lists the hub, the categories and every indexable technology in the sitemap", () => {
     const xml = renderSitemap(plan);
-    expect(xml).not.toContain("/companies-using/shopify/");
+    expect(xml).toContain("https://whichsitesuse.com/companies-using/</loc>");
+    expect(xml).toContain("https://whichsitesuse.com/companies-using/shopify/");
     expect(xml).toContain("https://whichsitesuse.com/categories/");
     expect(xml).not.toContain("/companies-using/doppler/");
   });
@@ -88,13 +90,36 @@ describe("PagePlan", () => {
 describe("technology page", () => {
   it("answers the question with real counts and the shared header", () => {
     const html = renderTechPage(plan, "shopify")!.html;
-    expect(html).toContain("<h1>Which sites use Shopify?</h1>");
+    expect(html).toContain("<h1>Shopify stores list</h1>");
     expect(html).toContain("5 of the 8 websites in HTTP Archive's October 2026 crawl run Shopify.");
     expect(html).toContain('<link rel="canonical" href="https://whichsitesuse.com/companies-using/shopify/">');
     expect(html).toContain('content="index,follow"');
     expect(html).toContain('class="site-header"');
     expect(html).toContain("store-d.co.uk");
     expect(html).toContain("/v1/sites?technologies=shopify");
+  });
+
+  it("puts the list of sites above the explanation", () => {
+    const html = renderTechPage(plan, "shopify")!.html;
+    expect(html.indexOf('id="sites"')).toBeGreaterThan(0);
+    expect(html.indexOf('id="sites"')).toBeLessThan(html.indexOf('id="notes"'));
+    expect(html.indexOf('id="sites"')).toBeLessThan(html.indexOf('id="faq"'));
+  });
+
+  it("uses the generated heading when there is no override", () => {
+    expect(renderTechPage(plan, "klaviyo")!.html).toContain("<h1>Which sites use Klaviyo?</h1>");
+  });
+
+  it("has unique metadata, an OG image and JSON-LD", () => {
+    const html = renderTechPage(plan, "shopify")!.html;
+    expect(html).toMatch(/<title>Shopify stores list: 5 websites \(October 2026\) \| WhichSitesUse<\/title>/);
+    expect(html).toContain('<meta property="og:image" content="https://api.whichsitesuse.com/og/companies-using/shopify.png">');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image">');
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)![1]!);
+    const types = ld["@graph"].map((n: { "@type": string }) => n["@type"]);
+    expect(types).toEqual(expect.arrayContaining(["Organization", "WebSite", "WebPage", "BreadcrumbList", "ItemList", "Dataset", "FAQPage"]));
+    const titles = new Set([...plan.tech.keys()].map((slug) => renderTechPage(plan, slug)!.html.match(/<title>(.*?)<\/title>/)![1]));
+    expect(titles.size).toBe(plan.tech.size);
   });
 
   it("marks small technologies noindex", () => {
@@ -107,8 +132,8 @@ describe("technology page", () => {
 
   it("hides sections without enough data", () => {
     const html = renderTechPage(new PagePlan(data, { ...rules, cwvMinTested: 1000 }), "shopify")!.html;
-    expect(html).not.toContain("Core Web Vitals on Shopify sites");
-    expect(renderTechPage(plan, "shopify")!.html).toContain("Core Web Vitals on Shopify sites");
+    expect(html).not.toContain("<h3>Core Web Vitals</h3>");
+    expect(renderTechPage(plan, "shopify")!.html).toContain("<h3>Core Web Vitals</h3>");
   });
 
   it("escapes names from the data", () => {
@@ -137,6 +162,15 @@ describe("category pages", () => {
   it("lists every category on the index", () => {
     const html = renderCategoryIndex(plan).html;
     expect(html).toContain('href="/categories/email-marketing/"');
+    expect(html).toContain('"@type":"CollectionPage"');
+  });
+
+  it("has a hub that searches every technology with a page", () => {
+    const html = renderHub(plan).html;
+    expect(html).toContain("<h1>Find companies by technology</h1>");
+    expect(html).toContain('id="tech-index"');
+    expect(html).toContain('href="/companies-using/klaviyo/"');
+    expect(html).toContain('<link rel="canonical" href="https://whichsitesuse.com/companies-using/">');
   });
 
   it("has no page for a category with one technology", () => {
@@ -157,6 +191,21 @@ describe("routes", () => {
     const res = await fetch(`${base}/companies-using/klaviyo`, { redirect: "manual" });
     expect(res.status).toBe(301);
     expect(res.headers.get("location")).toBe("/companies-using/klaviyo/");
+  });
+
+  it("serves the hub and redirects to its trailing slash", async () => {
+    expect((await fetch(`${base}/companies-using/`)).status).toBe(200);
+    const res = await fetch(`${base}/companies-using`, { redirect: "manual" });
+    expect(res.status).toBe(301);
+  });
+
+  it("serves OG images as PNG", async () => {
+    for (const path of ["/og/companies-using/doppler.png", "/og/categories/email-marketing.png", "/og/companies-using.png", "/og/categories.png"]) {
+      const res = await fetch(`${base}${path}`);
+      expect(res.status, path).toBe(200);
+      expect(res.headers.get("content-type")).toBe("image/png");
+    }
+    expect((await fetch(`${base}/og/companies-using/nope.png`)).status).toBe(404);
   });
 
   it("404s an unknown technology", async () => {
@@ -185,7 +234,7 @@ describe("static export", () => {
     await mkdir(join(site, "companies-using", "shopify"), { recursive: true });
     await writeFile(join(site, "companies-using", "shopify", "index.html"), "hand-written");
     const written = await exportSite(plan, site, out);
-    expect(written).toBe(plan.tech.size - 1 + plan.category.size + 1);
+    expect(written).toBe(plan.tech.size - 1 + plan.category.size + 2);
     expect(await readFile(join(out, "companies-using", "shopify", "index.html"), "utf8")).toBe("hand-written");
     expect(existsSync(join(out, "companies-using", "klaviyo", "index.html"))).toBe(true);
     expect(existsSync(join(out, "sitemaps", "technologies.xml"))).toBe(true);

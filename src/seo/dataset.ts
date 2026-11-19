@@ -1,6 +1,7 @@
 import type { Snapshot } from "../data/snapshot.js";
 import { CWV_GOOD } from "../data/schema.js";
 import { adultSitesSql } from "./adult.js";
+import type { CatalogEntry } from "./catalog.js";
 import { SEO_RULES, type SeoRules } from "./config.js";
 
 /**
@@ -29,6 +30,9 @@ export interface SeoTechnology {
   categories: string[];
   vendor_domain: string | null;
   note: string | null;
+  /** Icon file on HTTP Archive's CDN and its one-line description, when its catalog has them. */
+  icon?: string | null;
+  description?: string | null;
   sites: number;
   /** Sites in the previous month's dataset, when there was one. */
   previous_sites: number | null;
@@ -83,7 +87,7 @@ type TechRow = Omit<SeoTechnology, "previous_sites" | "by_rank" | "top_sites" | 
  */
 export async function buildSeoDataset(
   snapshot: Snapshot,
-  opts: { previous?: SeoDataset | null; now?: Date; rules?: Partial<SeoRules> } = {},
+  opts: { previous?: SeoDataset | null; now?: Date; rules?: Partial<SeoRules>; catalog?: Map<string, CatalogEntry> } = {},
 ): Promise<SeoDataset> {
   const R: SeoRules = { ...SEO_RULES, ...opts.rules };
   const q = <T>(sql: string) => snapshot.query<T>(sql);
@@ -109,12 +113,14 @@ export async function buildSeoDataset(
     GROUP BY st.tech_id, s.rank_bucket`);
 
   // Named sites leave out adult sites (src/seo/adult.ts); the counts above still include them.
+  // DISTINCT here and in the co-usage sample: a domain listed twice, or a share over 100%, is never right on a page.
   await q(adultSitesSql());
   const topSites = await q<{ tech_id: number; domain: string; rank_bucket: number }>(`
-    SELECT st.tech_id, s.domain, s.rank_bucket
-    FROM site_tech st JOIN seo_tech t USING (tech_id) JOIN sites s USING (site_id)
-    WHERE s.rank_bucket <= ${R.topSitesMaxRank} AND st.site_id NOT IN (SELECT site_id FROM adult_sites)
-    QUALIFY row_number() OVER (PARTITION BY st.tech_id ORDER BY s.rank_bucket, hash(s.domain), s.domain) <= ${R.topSites}`);
+    SELECT tech_id, domain, rank_bucket FROM (
+      SELECT DISTINCT st.tech_id, s.domain, s.rank_bucket
+      FROM site_tech st JOIN seo_tech t USING (tech_id) JOIN sites s USING (site_id)
+      WHERE s.rank_bucket <= ${R.topSitesMaxRank} AND st.site_id NOT IN (SELECT site_id FROM adult_sites))
+    QUALIFY row_number() OVER (PARTITION BY tech_id ORDER BY rank_bucket, hash(domain), domain) <= ${R.topSites}`);
 
   const tlds = await q<{ tech_id: number; tld: string; sites: number }>(`
     SELECT tech_id, tld, sites FROM (
@@ -137,7 +143,7 @@ export async function buildSeoDataset(
   const every = R.coUsageSampleEvery;
   await q(`
     CREATE OR REPLACE TEMP TABLE seo_sample AS
-    SELECT st.site_id, st.tech_id FROM site_tech st JOIN seo_tech t USING (tech_id)
+    SELECT DISTINCT st.site_id, st.tech_id FROM site_tech st JOIN seo_tech t USING (tech_id)
     WHERE hash(st.site_id) % ${every} = 0`);
   const [sampleTotal] = await q<{ n: number }>(`SELECT count(*)::INTEGER AS n FROM sites WHERE hash(site_id) % ${every} = 0`);
   const total = Math.max(sampleTotal?.n ?? 0, 1);
@@ -191,6 +197,8 @@ export async function buildSeoDataset(
       categories: t.categories ?? [],
       vendor_domain: t.vendor_domain ?? null,
       note: t.note ?? null,
+      icon: opts.catalog?.get(t.name)?.icon ?? null,
+      description: opts.catalog?.get(t.name)?.description ?? null,
       sites,
       previous_sites: previous.get(t.slug) ?? null,
       by_rank: ranks.map((r) => ({ rank_bucket: r.rank_bucket, sites: r.sites })).sort(sortRank),

@@ -10,6 +10,7 @@ import { publicCors, publicRouter } from "./http/public.js";
 import { restRouter } from "./http/rest.js";
 import { operations as allOperations } from "./operations/index.js";
 import type { Operation } from "./operations/types.js";
+import { ogRouter } from "./og/routes.js";
 import { seoRouter } from "./seo/routes.js";
 import type { PagePlan } from "./seo/pages.js";
 import type { Services } from "./services.js";
@@ -79,6 +80,7 @@ export function createApp({
 
   // Before the web router, so public pages never set a session cookie.
   app.use(seoRouter(getSeoPlan));
+  app.use(ogRouter(getSeoPlan));
 
   if (services) app.use(webRouter(services));
 

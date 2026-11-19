@@ -29,6 +29,20 @@ description, zod input, REST route, handler) and exposed through both MCP and
 REST, so the two can't drift. Every response carries `meta.crawl_date`,
 `meta.credits_used`, `meta.credits_remaining` and `meta.attribution`.
 
+## Tools
+
+| Tool | REST | Cost |
+| --- | --- | --- |
+| `find_technologies` | `GET /v1/technologies?q=` | free |
+| `count_sites` | `GET /v1/counts` | free |
+| `search_sites` | `GET /v1/sites` | 1 credit per site returned (`max_credits` caps it) |
+| `lookup_domain` | `GET /v1/domains/:domain` | 2 credits; free when the domain isn't covered |
+| `get_balance` | `GET /v1/balance` | free (signed in) |
+| `buy_credits` | `POST /v1/checkout` | free (signed in); returns a checkout link a human pays |
+
+`count_sites` and `search_sites` share one filter (`src/operations/siteFilters.ts`).
+REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV as `cwv=lcp:pass,cls:fail`.
+
 ## Accounts, credits and billing
 
 - **Sign-up** (`src/web/signup.ts`): magic links only, no passwords. Disposable domains are refused;

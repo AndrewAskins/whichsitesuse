@@ -48,6 +48,20 @@ describe("REST", () => {
     expect(body.error.issues[0].field).toBe("q");
   });
 
+  it("serves the free site tools with comma lists and keeps paid ones behind accounts", async () => {
+    const count: any = await (await fetch(`${base}/v1/counts?technologies=shopify,klaviyo`)).json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(count.data).toMatchObject({ total: 1, full_list_credits: 1 });
+    expect(count.meta.credits_used).toBe(0);
+
+    // Paid tools need a signed-in caller (charging is covered in dataToolsBilling.test.ts).
+    const sites = await fetch(`${base}/v1/sites?technologies=shopify&technologies=klaviyo&match=any&limit=1`);
+    expect(sites.status).toBe(401);
+
+    const unknown = await fetch(`${base}/v1/counts?technologies=nope`);
+    expect(unknown.status).toBe(400);
+    expect(((await unknown.json()) as any).error.unknown_technologies).toEqual(["nope"]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  });
+
   it("returns 503 while no snapshot is loaded", async () => {
     const saved = snapshot;
     snapshot = null;
@@ -69,6 +83,14 @@ describe("MCP over Streamable HTTP", () => {
     expect(result.isError).toBeFalsy();
     const body = result.structuredContent as { data: { matches: { slug: string }[] } };
     expect(body.data.matches[0]?.slug).toBe("wordpress");
+    await client.close();
+  });
+
+  it("answers paid tools with an error, not a protocol failure, without accounts", async () => {
+    const client = new Client({ name: "test", version: "0.0.0" });
+    await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
+    const result = await client.callTool({ name: "search_sites", arguments: { technologies: ["shopify"] } });
+    expect(result.isError).toBe(true);
     await client.close();
   });
 

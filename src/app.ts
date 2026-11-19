@@ -1,10 +1,12 @@
 import express from "express";
 import { RateLimiter } from "./abuse/rateLimit.js";
+import { turnstileEnabled } from "./auth/turnstile.js";
 import { stripeWebhookHandler } from "./billing/webhooks.js";
 import type { Config } from "./config.js";
 import type { Snapshot } from "./data/snapshot.js";
 import type { GateDeps } from "./http/gate.js";
 import { mcpHandler } from "./http/mcp.js";
+import { publicCors, publicRouter } from "./http/public.js";
 import { restRouter } from "./http/rest.js";
 import { operations as allOperations } from "./operations/index.js";
 import type { Operation } from "./operations/types.js";
@@ -43,7 +45,7 @@ export function createApp({
 
   const deps: GateDeps = { config, getSnapshot, services, limiter };
 
-  app.get("/health", (_req, res) => {
+  app.get("/health", publicCors(), (_req, res) => {
     const snapshot = getSnapshot();
     res.json({
       ok: true,
@@ -52,9 +54,12 @@ export function createApp({
       serving_httparchive: config.SERVE_HTTPARCHIVE,
       accounts: services !== null,
       billing: services?.stripe != null,
+      // The site key is public; the homepage needs it to show the bot check.
+      turnstile_site_key: turnstileEnabled(config) ? config.TURNSTILE_SITE_KEY : null,
     });
   });
 
+  app.use("/v1/public", publicRouter({ config, getSnapshot, services }));
   app.use("/v1", restRouter(operations, deps));
 
   const mcp = mcpHandler(operations, deps, VERSION);

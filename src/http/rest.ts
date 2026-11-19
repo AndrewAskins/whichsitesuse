@@ -43,7 +43,7 @@ export function toOperationError(err: unknown, opName: string): OperationError {
   return new OperationError("internal", "Something went wrong on our side.");
 }
 
-function sendError(res: Response, err: unknown, opName: string) {
+export function sendError(res: Response, err: unknown, opName: string) {
   const opErr = toOperationError(err, opName);
   if (opErr.code === "rate_limited") res.set("Retry-After", String(opErr.details.retry_after_seconds ?? 60));
   res.status(opErr.httpStatus).json(opErr.toJSON());

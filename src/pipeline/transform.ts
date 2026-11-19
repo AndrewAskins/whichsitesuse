@@ -141,18 +141,31 @@ export async function buildSnapshot(opts: BuildOptions): Promise<SnapshotManifes
     log.info({ step: "sites built" }, "snapshot build progress");
 
     // first_seen carries forward from last month by (domain, technology name).
+    // Last month's site_tech is as big as this month's, so a single (domain, name)
+    // table of it doesn't fit in memory. Keep last month's sites (small) with their
+    // slice number, and build each slice's first_seen rows next to that slice.
+    const prevPath = (f: string) => lit(join(opts.previousDir!, f));
     if (opts.previousDir) {
-      const prev = (f: string) => lit(join(opts.previousDir!, f));
+      await db.run(`
+        CREATE TABLE prev_sites AS
+        SELECT site_id, domain, (hash(domain) % ${partitions})::INTEGER AS part
+        FROM read_parquet(${prevPath(SNAPSHOT_FILES.sites)})`);
+      await db.run(`CREATE TABLE prev_tech AS SELECT tech_id, name FROM read_parquet(${prevPath(SNAPSHOT_FILES.technologies)})`);
+    }
+    const loadPrevSeen = async (part: number) => {
+      await db.run("DROP TABLE IF EXISTS prev_seen");
+      if (!opts.previousDir) {
+        await db.run("CREATE TABLE prev_seen (domain VARCHAR, name VARCHAR, first_seen DATE)");
+        return;
+      }
       await db.run(`
         CREATE TABLE prev_seen AS
-        SELECT s.domain, t.name, min(st.first_seen) AS first_seen
-        FROM read_parquet(${prev(SNAPSHOT_FILES.siteTech)}) st
-        JOIN read_parquet(${prev(SNAPSHOT_FILES.sites)}) s USING (site_id)
-        JOIN read_parquet(${prev(SNAPSHOT_FILES.technologies)}) t USING (tech_id)
+        SELECT ps.domain, pt.name, min(st.first_seen) AS first_seen
+        FROM read_parquet(${prevPath(SNAPSHOT_FILES.siteTech)}) st
+        JOIN (SELECT site_id, domain FROM prev_sites WHERE part = ${part}) ps USING (site_id)
+        JOIN prev_tech pt USING (tech_id)
         GROUP BY ALL`);
-    } else {
-      await db.run(`CREATE TABLE prev_seen (domain VARCHAR, name VARCHAR, first_seen DATE)`);
-    }
+    };
 
     // The extract already has one row per (domain, technology), so only technologies
     // that our overrides fold together need grouping. Grouping all 257M rows spills
@@ -179,12 +192,12 @@ export async function buildSnapshot(opts: BuildOptions): Promise<SnapshotManifes
       WHERE hash(r.domain) % ${partitions} = ${part}
       ${folded ? "GROUP BY s.site_id, i.tech_id" : ""}`;
     // Same slices as the sites aggregate, so each join and group stays in memory.
-    await db.run(`CREATE TABLE site_tech AS ${siteTechSelect(false, 0)}`);
     for (let part = 0; part < partitions; part++) {
-      if (part > 0) await db.run(`INSERT INTO site_tech ${siteTechSelect(false, part)}`);
+      await loadPrevSeen(part);
+      await db.run(part === 0 ? `CREATE TABLE site_tech AS ${siteTechSelect(false, 0)}` : `INSERT INTO site_tech ${siteTechSelect(false, part)}`);
       if (anyFolded) await db.run(`INSERT INTO site_tech ${siteTechSelect(true, part)}`);
     }
-    await db.run("DROP TABLE prev_seen; DROP TABLE tech_src; DROP TABLE tech_ids");
+    await db.run("DROP TABLE prev_seen; DROP TABLE IF EXISTS prev_sites; DROP TABLE IF EXISTS prev_tech; DROP TABLE tech_src; DROP TABLE tech_ids");
     log.info({ step: "site_tech built" }, "snapshot build progress");
     if (opts.onRawConsumed) await opts.onRawConsumed();
 

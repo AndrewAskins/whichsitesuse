@@ -31,11 +31,13 @@ describe("count_sites", () => {
       { rank_bucket: 1000, sites: 1 },
       { rank_bucket: 10000, sites: 2 },
       { rank_bucket: 100000, sites: 1 },
-      { rank_bucket: 1000000, sites: 0 },
-      { rank_bucket: 10000000, sites: 0 },
-      { rank_bucket: 100000000, sites: 0 },
       { rank_bucket: null, sites: 1 },
     ]);
+  });
+
+  it("accepts HTTP Archive's in-between buckets such as 500000", async () => {
+    // The Nov 2026 crawl put allbirds.com in the 500000 bucket, which a fixed 10x list rejected.
+    expect(await total({ technologies: ["shopify"], rank_buckets: [500000, 5000] })).toBe(0);
   });
 
   it("matches all listed technologies by default, or any of them", async () => {

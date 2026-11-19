@@ -1,6 +1,6 @@
 import { listValue, type DuckDBValue } from "@duckdb/node-api";
 import { z } from "zod";
-import { CWV_GOOD, RANK_BUCKETS } from "../data/schema.js";
+import { CWV_GOOD } from "../data/schema.js";
 import type { Snapshot } from "../data/snapshot.js";
 import { OperationError } from "./types.js";
 
@@ -36,12 +36,7 @@ const slug = z.string().trim().toLowerCase().min(1).max(100);
 const verdict = z.enum(["pass", "fail"]);
 const rankBucket = z.union([
   z.literal("unknown"),
-  z.coerce
-    .number()
-    .int()
-    .refine((n) => (RANK_BUCKETS as readonly number[]).includes(n), {
-      message: `Rank buckets are ${RANK_BUCKETS.join(", ")} or "unknown".`,
-    }),
+  z.coerce.number().int().positive(),
 ]);
 
 export const DEVICES = ["mobile", "desktop", "any"] as const;
@@ -72,10 +67,10 @@ export const siteFilterShape = {
     .max(50)
     .optional()
     .describe('Version prefix for the matched technologies, e.g. "6" or "6.8" (matches 6.8.1, not 60.1).'),
-  rank_buckets: listOf(rankBucket, RANK_BUCKETS.length + 1)
+  rank_buckets: listOf(rankBucket, 20)
     .optional()
     .describe(
-      `Popularity buckets to include: ${RANK_BUCKETS.join(", ")} (1000 = top 1k, 10000 = 1k to 10k, ...) or "unknown".`,
+      'CrUX popularity buckets to include, as count_sites lists them (e.g. 1000 = top 1k, 5000 = 1k to 5k, 500000 = 100k to 500k) or "unknown".',
     ),
   max_rank: z.coerce
     .number()

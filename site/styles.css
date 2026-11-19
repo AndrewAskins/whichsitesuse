@@ -347,3 +347,13 @@ pre.config {
 .lookup-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; background: var(--moon); vertical-align: 1px; animation: blink 1.2s steps(1) infinite; }
 @media (prefers-reduced-motion: reduce) { .lookup-status::before { animation: none; } }
 .turnstile-box:not(:empty) { margin-top: var(--s3); }
+
+/* Inner page prose: lists, spacing after tables and code */
+.prose ul, .prose ol { padding-left: 1.2em; margin: 0 0 var(--s4); }
+.prose li { margin-bottom: var(--s2); }
+.prose li::marker { color: var(--muted); }
+.table-wrap + p, .table-wrap + .table-wrap, pre.config + p { margin-top: var(--s4); }
+.prose pre.config, .row pre.config { margin-top: var(--s3); }
+.prose h2 { margin-top: var(--s6); }
+.prose h3 { margin-top: var(--s5); }
+.prose h2:first-child, .prose h3:first-child { margin-top: 0; }

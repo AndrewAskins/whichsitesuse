@@ -70,8 +70,9 @@
     <section class="hero">
       <div class="wrap">
         <p class="label">Website technology lookup for people and agents</p>
-        <h1>Which sites use <span class="mark" id="tech-word" data-words="Shopify,React,HubSpot,Stripe,WordPress,Next.js">Shopify</span>?</h1>
-        <p class="lede">WhichSitesUse lists the sites running any technology and shows what any domain is built with, for you or your AI agent over MCP and a REST API.</p>
+        <h1>Which sites use <span class="mark" id="tech-word">Shopify</span>?</h1>
+        <p class="answer" id="tech-answer"><strong id="tech-count">458,536</strong> in HTTP Archive's October 2026 crawl, and WhichSitesUse can list every one of them.</p>
+        <p class="lede">Look up what any domain is built with, or pull the list of sites running a technology, from your browser or from your AI agent over MCP and a REST API.</p>
 
         <div class="lookup-block">
           <h2 class="lookup-title">What is this website built with?</h2>
@@ -83,31 +84,24 @@
           <p class="hero-alt">Free on this page, no account needed. Want a list instead? <a href="#ask">Search sites by technology</a>.</p>
         </div>
 
-        <div class="result" id="result" aria-live="polite">
-          <div class="result-head">
-            <span><strong id="result-domain">acme-outdoor.com</strong> <span class="muted" id="result-tag">example result for a made-up store</span></span>
-            <span class="muted" id="result-crawl">crawl: monthly snapshot</span>
-          </div>
+        <div class="result" id="result" aria-live="polite" hidden></div>
+
+        <figure class="adoption">
           <div class="table-wrap">
-            <table>
-              <thead><tr><th scope="col">Category</th><th scope="col">Detected</th><th scope="col">Version</th></tr></thead>
-              <tbody id="result-rows">
-                <tr><td>Ecommerce</td><td><span class="tech">Shopify</span></td><td></td></tr>
-                <tr><td>JavaScript frameworks</td><td>React</td><td>18</td></tr>
-                <tr><td>Analytics</td><td>Google Analytics, Hotjar</td><td>GA4</td></tr>
-                <tr><td>Tag managers</td><td>Google Tag Manager</td><td></td></tr>
-                <tr><td>CDN</td><td>Cloudflare</td><td></td></tr>
-                <tr><td>Payment processors</td><td>Stripe, Shop Pay</td><td></td></tr>
+            <table id="adoption">
+              <thead><tr><th scope="col">Technology</th><th scope="col">Sites using it</th><th scope="col">Passing Core Web Vitals</th></tr></thead>
+              <tbody>
+                <tr data-tech="Shopify" class="is-current"><td>Shopify</td><td>458,536</td><td>77%</td></tr>
+                <tr data-tech="React"><td>React</td><td>1,298,021</td><td>44%</td></tr>
+                <tr data-tech="HubSpot"><td>HubSpot</td><td>227,030</td><td>45%</td></tr>
+                <tr data-tech="Stripe"><td>Stripe</td><td>141,609</td><td>42%</td></tr>
+                <tr data-tech="WordPress"><td>WordPress</td><td>2,570,255</td><td>49%</td></tr>
+                <tr data-tech="Next.js"><td>Next.js</td><td>424,877</td><td>37%</td></tr>
               </tbody>
             </table>
           </div>
-          <div class="pills" id="result-pills">
-            <span class="pill">top 100k</span>
-            <span class="pill pill-pass">LCP pass</span>
-            <span class="pill">INP fail</span>
-            <span class="pill pill-pass">CLS pass</span>
-          </div>
-        </div>
+          <figcaption>Sites are origins in <a href="https://httparchive.org/reports/techreport/tech?client=mobile&amp;tech=Shopify,React,HubSpot,Stripe,WordPress,Next.js&amp;geo=ALL&amp;rank=ALL">HTTP Archive's Tech Report</a> for the October 2026 crawl, mobile. Core Web Vitals are Chrome UX Report field data.</figcaption>
+        </figure>
       </div>
     </section>
 

@@ -33,22 +33,27 @@
   }
   syncSwitch();
 
-  // H1 "Which sites use [technology]?": the static word (Shopify) is what crawlers and no-JS readers see.
+  // H1 "Which sites use [technology]?": cycles through the rows of the adoption table (real HTTP Archive counts).
+  // The static Shopify text is what crawlers, no-JS readers and reduced-motion readers see.
   var word = document.getElementById("tech-word");
+  var count = document.getElementById("tech-count");
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#adoption tbody tr[data-tech]"));
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (word && !reduce) {
-    var words = (word.getAttribute("data-words") || "").split(",").filter(Boolean);
+  if (word && count && rows.length > 1 && !reduce) {
     var i = 0;
-    if (words.length > 1) {
-      setInterval(function () {
-        word.classList.add("is-swapping");
-        setTimeout(function () {
-          i = (i + 1) % words.length;
-          word.textContent = words[i];
-          word.classList.remove("is-swapping");
-        }, 180);
-      }, 2200);
-    }
+    setInterval(function () {
+      word.classList.add("is-swapping");
+      count.classList.add("is-swapping");
+      setTimeout(function () {
+        rows[i].classList.remove("is-current");
+        i = (i + 1) % rows.length;
+        rows[i].classList.add("is-current");
+        word.textContent = rows[i].getAttribute("data-tech");
+        count.textContent = rows[i].children[1].textContent;
+        word.classList.remove("is-swapping");
+        count.classList.remove("is-swapping");
+      }, 180);
+    }, 2400);
   }
   if (!form || !input || !result) return;
 
@@ -67,15 +72,11 @@
     return /^([a-z0-9-]+\.)+[a-z]{2,}$/.test(s) ? s : null;
   }
 
-  var exampleHTML = result.innerHTML;
-  var PRELAUNCH = "Free lookups open when WhichSitesUse launches. The example below shows what a result looks like.";
+  var PRELAUNCH = "Free lookups open when WhichSitesUse launches. Until then, the table below shows real counts from HTTP Archive's latest crawl.";
 
-  function showNotice(message, withExample) {
-    if (withExample) result.innerHTML = exampleHTML;
-    else result.replaceChildren();
-    var note = el("div", { class: "notice" }, message);
-    if (withExample) note.style.marginBottom = "16px";
-    result.insertBefore(note, result.firstChild);
+  function showNotice(message) {
+    result.hidden = false;
+    result.replaceChildren(el("div", { class: "notice" }, message));
   }
 
   function render(domain, body) {
@@ -137,6 +138,7 @@
       pills.appendChild(el("span", { class: "pill" + (pass ? " pill-pass" : "") }, m.toUpperCase() + (pass ? " pass" : " fail")));
     });
 
+    result.hidden = false;
     result.replaceChildren(head, wrap, pills);
   }
 
@@ -148,7 +150,7 @@
       return;
     }
     if (!api) {
-      showNotice(PRELAUNCH, true);
+      showNotice(PRELAUNCH);
       return;
     }
     showNotice("Looking up " + domain + "...");
@@ -160,10 +162,10 @@
         if (r.res.ok) return render(domain, r.body);
         if (r.res.status === 404) return render(domain, { data: { covered: false } });
         if (r.res.status === 429) return showNotice("Too many lookups from your network. Try again in a minute.");
-        showNotice(PRELAUNCH, true);
+        showNotice(PRELAUNCH);
       })
       .catch(function () {
-        showNotice(PRELAUNCH, true);
+        showNotice(PRELAUNCH);
       });
   });
 })();

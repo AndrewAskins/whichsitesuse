@@ -1,6 +1,6 @@
 import { Router, type Response } from "express";
 import type { PagePlan, RenderedPage } from "./pages.js";
-import { renderCategoryIndex, renderCategoryPage, renderSitemap, renderTechPage } from "./pages.js";
+import { renderCategoryIndex, renderCategoryPage, renderHub, renderSitemap, renderTechPage } from "./pages.js";
 
 /**
  * The programmatic pages. whichsitesuse.com serves them through Render rewrites
@@ -24,6 +24,11 @@ export function seoRouter(getPlan: () => PagePlan | null): Router {
   // Pages need a trailing slash, like the static site's folders.
   const slash = (path: string, res: Response) => res.redirect(301, `${path}/`);
 
+  router.get("/companies-using", (_req, res) => slash("/companies-using", res));
+  router.get("/companies-using/", (_req, res) => {
+    const plan = getPlan();
+    send(res, plan ? renderHub(plan) : null);
+  });
   router.get("/companies-using/:slug", (req, res) => slash(req.path, res));
   router.get("/companies-using/:slug/", (req, res) => {
     const plan = getPlan();

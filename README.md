@@ -29,6 +29,29 @@ description, zod input, REST route, handler) and exposed through both MCP and
 REST, so the two can't drift. Every response carries `meta.crawl_date`,
 `meta.credits_used`, `meta.credits_remaining` and `meta.attribution`.
 
+## Accounts, credits and billing
+
+- **Sign-up** (`src/web/signup.ts`): magic links only, no passwords. Disposable domains are refused;
+  credits arrive only once the link is clicked. Cloudflare Turnstile runs on the form when its keys are set.
+- **Free grant** (`src/auth/freeGrant.ts`): 250 credits, once per person, decided at verification.
+  Withheld for non-work emails (they can still pay, and can use `/request-credits`), an inbox that already
+  had one, a repeat device fingerprint, or a third grant from one /24 in a week. Device and network holds
+  lift on the first payment.
+- **Credits** (`src/billing/ledger.ts`): lots per bucket (plan, top-up, trial) with their own expiry, and
+  an append-only ledger. Plan credits are spent first, then top-ups, then the free grant. Prices, plans and
+  costs live only in `src/billing/plans.ts`.
+- **The gate** (`src/http/gate.ts`): every MCP and REST call goes through it. It authenticates the API key,
+  rate-limits, builds `ctx.billing` (what the call may spend after balance, the key's monthly cap and
+  `max_credits`; trial caps for accounts that have never paid), runs the operation, then charges its
+  `credits_used` with a usage event. Paid operations set `pricing: "paid"` and call
+  `ctx.billing.require(n)`; the 402 `insufficient_credits` error carries checkout links.
+- **Stripe** (`src/billing/stripe.ts`, `webhooks.ts`, `src/web/buy.ts`): Checkout for plans and top-ups,
+  webhooks at `POST /stripe/webhook` into the ledger. Prices are found or created by lookup key, so there
+  is no price id to configure. `buy_credits` returns a signed `/buy/<token>` link a human opens; it lasts 7 days.
+- **Pages**: `/signup`, `/login`, `/account` (balance, API keys and caps, buy), `/request-credits`, `/admin`
+  (abuse dashboard, request review, revoke and suspend). Accounts in `ADMIN_EMAILS` become admins when they verify.
+- Background jobs run in the web service (`src/jobs.ts`): hourly credit expiry, weekly email-list refresh.
+
 ## Running locally
 
 ```sh

@@ -3,12 +3,13 @@ import { Snapshot } from "../src/data/snapshot.js";
 import { findTechnologies, normalizeKey } from "../src/operations/findTechnologies.js";
 import { OperationError, type OperationContext } from "../src/operations/types.js";
 import { testConfig } from "./helpers/config.js";
+import { anonymousContext } from "./helpers/context.js";
 import { buildFixtureSnapshot } from "./helpers/fixtureSnapshot.js";
 
 let ctx: OperationContext;
 beforeAll(async () => {
   const snapshot = await Snapshot.open(await buildFixtureSnapshot(), { serveHttpArchive: true });
-  ctx = { config: testConfig(), snapshot };
+  ctx = anonymousContext(testConfig(), snapshot);
 });
 afterAll(() => ctx.snapshot?.close());
 

@@ -1,23 +1,24 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { log } from "../log.js";
-import { envelope } from "../operations/envelope.js";
-import { OperationError, type Operation, type OperationContext } from "../operations/types.js";
+import { OperationError, type Operation } from "../operations/types.js";
+import { credentialFrom, runOperation, type GateDeps } from "./gate.js";
 
-/** Mounts each operation at /v1<path>, sharing its schema and handler with MCP. */
-export function restRouter(
-  operations: Operation<z.ZodRawShape, unknown>[],
-  getContext: () => OperationContext,
-): Router {
+/** Mounts each operation at /v1<path>, sharing its schema, handler and billing gate with MCP. */
+export function restRouter(operations: Operation<z.ZodRawShape, unknown>[], deps: GateDeps): Router {
   const router = Router();
   for (const op of operations) {
     router[op.rest.method](op.rest.path, async (req: Request, res: Response) => {
       const raw = op.rest.method === "get" ? { ...req.query, ...req.params } : { ...req.body, ...req.params };
-      const ctx = getContext();
       try {
         const input = parseInput(op, raw);
-        const result = await op.run(input, ctx);
-        res.json(envelope(result, ctx));
+        const body = await runOperation(
+          op,
+          input,
+          { channel: "rest", credential: credentialFrom(req.headers), ip: req.ip ?? "unknown" },
+          deps,
+        );
+        res.json(body);
       } catch (err) {
         sendError(res, err, op.name);
       }
@@ -26,14 +27,14 @@ export function restRouter(
   return router;
 }
 
-export function parseInput(op: Operation<z.ZodRawShape, unknown>, raw: unknown) {
+export function parseInput(op: Operation<z.ZodRawShape, unknown>, raw: unknown): Record<string, unknown> {
   const parsed = op.input.safeParse(raw);
   if (!parsed.success) {
     throw new OperationError("invalid_input", "Some inputs are missing or invalid.", {
       issues: parsed.error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
     });
   }
-  return parsed.data;
+  return parsed.data as Record<string, unknown>;
 }
 
 export function toOperationError(err: unknown, opName: string): OperationError {
@@ -44,5 +45,6 @@ export function toOperationError(err: unknown, opName: string): OperationError {
 
 function sendError(res: Response, err: unknown, opName: string) {
   const opErr = toOperationError(err, opName);
+  if (opErr.code === "rate_limited") res.set("Retry-After", String(opErr.details.retry_after_seconds ?? 60));
   res.status(opErr.httpStatus).json(opErr.toJSON());
 }

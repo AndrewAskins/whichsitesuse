@@ -6,7 +6,7 @@ const TTL_MINUTES = { verify: 24 * 60, login: 30 } as const;
 export type LinkPurpose = keyof typeof TTL_MINUTES;
 
 /** Emails a one-time sign-in link. An unverified account always gets a "verify" link. */
-export async function sendMagicLink(services: Services, account: Account): Promise<void> {
+export async function sendMagicLink(services: Services, account: Account, next: string | null = null): Promise<void> {
   const purpose: LinkPurpose = account.email_verified_at ? "login" : "verify";
   const token = randomToken(32);
   await services.db.query(
@@ -14,10 +14,13 @@ export async function sendMagicLink(services: Services, account: Account): Promi
      VALUES ($1, $2, $3, now() + make_interval(mins => $4))`,
     [account.id, sha256(token), purpose, TTL_MINUTES[purpose]],
   );
-  const url = `${services.config.PUBLIC_BASE_URL}/auth/${token}`;
+  // `next` is a same-site path (checked by the caller), e.g. an OAuth consent page to return to.
+  const url = `${services.config.PUBLIC_BASE_URL}/auth/${token}${next ? `?next=${encodeURIComponent(next)}` : ""}`;
   const verify = purpose === "verify";
   await services.mailer.send({
     to: account.email,
+    template: verify ? "verify" : "login",
+    data: { link: url },
     subject: verify ? "Confirm your WhichSitesUse email" : "Your WhichSitesUse sign-in link",
     text: verify
       ? `Hi,\n\nConfirm your email to finish signing up for WhichSitesUse:\n\n${url}\n\n` +

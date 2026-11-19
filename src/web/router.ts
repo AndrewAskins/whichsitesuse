@@ -3,6 +3,7 @@ import type { Services } from "../services.js";
 import { accountRoutes } from "./account.js";
 import { adminRoutes } from "./admin.js";
 import { buyRoutes } from "./buy.js";
+import { oauthConsentRoutes } from "./oauth.js";
 import { sessionMiddleware } from "./session.js";
 import { signupRoutes } from "./signup.js";
 
@@ -14,6 +15,7 @@ export function webRouter(services: Services): Router {
   router.use(signupRoutes(services));
   router.use(accountRoutes(services));
   router.use(buyRoutes(services));
+  router.use(oauthConsentRoutes(services));
   router.use("/admin", adminRoutes(services));
   return router;
 }

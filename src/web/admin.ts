@@ -492,6 +492,8 @@ async function notifyRequester(services: Services, requestId: string, approved: 
   await services.mailer
     .send({
       to,
+      template: approved ? "creditsApproved" : "creditsDenied",
+      data: approved ? { credits: FREE_GRANT.credits, accountUrl: account } : { accountUrl: account },
       subject: approved ? "Your WhichSitesUse free credits are in" : "About your WhichSitesUse free credit request",
       text: approved
         ? `Hi,\n\nThanks for the details. We've added ${FREE_GRANT.credits} free credits to your account:\n\n${account}\n`

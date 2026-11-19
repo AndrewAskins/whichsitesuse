@@ -196,9 +196,9 @@ export function oauthConsentRoutes(services: Services): Router {
         title: "Connect an app",
         signedIn: true,
         isAdmin: account.is_admin,
-        body: html`<h1>Connect <span class="mark">${parsed.client.client_name}</span>?</h1>
-<p>It will be able to search WhichSitesUse and spend credits from <b>${account.email}</b>'s balance. It can't see your payment details or buy credits by itself.</p>
-<p class="muted">After you approve, you'll go back to <code>${returnHost}</code>. Only approve if you just started connecting an app there. You can disconnect it any time on your account page.</p>
+        body: html`<h1>Connect an <span class="mark">app</span>?</h1>
+<p>An app that calls itself <b>${parsed.client.client_name}</b> (a name it chose; WhichSitesUse hasn't verified it) wants to search WhichSitesUse and spend credits from <b>${account.email}</b>'s balance. It can't see your payment details or buy credits by itself.</p>
+<p>After you approve, you go back to <b><code>${returnHost}</code></b>. Only approve if you just started connecting an app there. You can disconnect it any time on your account page.</p>
 <form method="post" action="/oauth/authorize">${csrfField(locals(res).csrf)}
 ${keep.filter((k) => typeof q[k] === "string").map((k) => html`<input type="hidden" name="${k}" value="${q[k]}">`)}
 <label for="cap" class="label">Monthly credit cap for this app (optional)</label>

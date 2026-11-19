@@ -25,7 +25,7 @@ const schema = z.object({
   BIGQUERY_MAX_BYTES_BILLED: z.coerce.number().int().positive().default(200 * 1024 ** 3),
 
   // Pipeline cron job mode.
-  PIPELINE_MODE: z.enum(["dry-run", "measure", "sample", "monthly", "report"]).default("dry-run"),
+  PIPELINE_MODE: z.enum(["dry-run", "measure", "sample", "monthly", "seo", "report"]).default("dry-run"),
   // report mode: technologies (slugs or names) to profile from the published snapshot, for site copy.
   REPORT_TECHNOLOGIES: z.string().default("hubspot,salesforce,shopify,stripe"),
   // sample mode: one real domain and a few technology counts, for site copy.
@@ -42,9 +42,13 @@ const schema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().default("whichsitesuse-snapshots"),
   // DuckDB memory caps; DuckDB spills to disk beyond them.
-  PIPELINE_MEMORY_LIMIT: z.string().default("400MB"),
+  PIPELINE_MEMORY_LIMIT: z.string().default("1200MB"),
+  PIPELINE_THREADS: z.coerce.number().int().positive().default(2),
   SNAPSHOT_MEMORY_LIMIT: z.string().default("256MB"),
-  // How often the query service checks R2 for a newer snapshot.
+  // A local SEO dataset file for the programmatic pages (local work and the static preview).
+  // Unset in production, where the API reads seo/current.json from R2.
+  SEO_DATASET_PATH: z.string().optional(),
+  // How often the query service checks R2 for a newer snapshot (and SEO dataset).
   SNAPSHOT_POLL_MINUTES: z.coerce.number().int().positive().default(360),
 
   CRAWL_DATE: z

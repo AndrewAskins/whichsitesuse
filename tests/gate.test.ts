@@ -97,6 +97,15 @@ describe.skipIf(!TEST_DATABASE_URL)("billing gate", () => {
     expect(capped.error).toMatchObject({ reason: "key_cap", credits_available: 1 });
   });
 
+  it("holds a key to its cap when calls race each other", async () => {
+    const { account, key, secret } = await makeAccount(t.services, "racing@acme.com", { credits: 100, paid: true });
+    await t.services.accounts.setKeyCap(account.id, key.id, 5);
+    const results = await Promise.all(Array.from({ length: 6 }, () => call("/v1/spend?n=3", secret)));
+    expect(results.filter((r) => r.status === 200)).toHaveLength(1);
+    const used = await t.db.query("SELECT coalesce(sum(credits), 0)::int AS n FROM usage_events WHERE api_key_id = $1", [key.id]);
+    expect(used.rows[0].n).toBe(3);
+  });
+
   it("puts accounts that never paid on the trial caps", async () => {
     const { secret } = await makeAccount(t.services, "trial@acme.com", { credits: 250, bucket: "trial" });
     const body: any = await (await call("/v1/spend?n=0", secret)).json();

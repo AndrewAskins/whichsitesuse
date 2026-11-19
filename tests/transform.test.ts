@@ -96,3 +96,50 @@ describe("buildSnapshot", () => {
     second.snap.close();
   });
 });
+
+describe("slicesFor", () => {
+  it("sizes slices to the memory limit", async () => {
+    const { slicesFor } = await import("../src/pipeline/transform.js");
+    expect(slicesFor(257_695_327, "1200MB")).toBe(43);
+    expect(slicesFor(257_695_327, "1.2GB")).toBe(42);
+    expect(slicesFor(1_000, "1GB")).toBe(1);
+  });
+});
+
+describe("buildSnapshot in slices", () => {
+  it("gives the same snapshot in many slices as in one, sorted by technology", async () => {
+    const read = async (partitions: number) => {
+      const outDir = await mkdtemp(join(tmpdir(), "wsu-out-"));
+      const consumed: string[] = [];
+      await buildSnapshot({
+        rawGlob, outDir, crawlDate: "2026-11-01", cruxDate: "2026-10-01", overrides: OVERRIDES, memoryLimit: "256MB",
+        partitions, onRawConsumed: async () => { consumed.push("raw"); },
+      });
+      const snap = await Snapshot.open(outDir, { serveHttpArchive: true });
+      const rows = await snap.query<{ tech_id: number; site_id: number; on_mobile: boolean }>(
+        "SELECT tech_id, site_id, on_mobile FROM read_parquet($1)",
+        [join(outDir, "site_tech.parquet")],
+      );
+      snap.close();
+      return { rows, consumed };
+    };
+    const one = await read(1);
+    const many = await read(5);
+    expect(many.rows).toEqual(one.rows);
+    expect(many.consumed).toEqual(["raw"]);
+    const sorted = [...many.rows].sort((a, b) => a.tech_id - b.tech_id || a.site_id - b.site_id);
+    expect(many.rows).toEqual(sorted);
+  });
+});
+
+describe("sites.parquet", () => {
+  it("is sorted by domain, so a domain lookup reads one row group", async () => {
+    const outDir = await mkdtemp(join(tmpdir(), "wsu-out-"));
+    await buildSnapshot({ rawGlob, outDir, crawlDate: "2026-11-01", cruxDate: "2026-10-01", overrides: OVERRIDES, memoryLimit: "256MB" });
+    const snap = await Snapshot.open(outDir, { serveHttpArchive: true });
+    const rows = await snap.query<{ domain: string }>("SELECT domain FROM read_parquet($1)", [join(outDir, "sites.parquet")]);
+    snap.close();
+    const domains = rows.map((r) => r.domain);
+    expect(domains).toEqual([...domains].sort());
+  });
+});

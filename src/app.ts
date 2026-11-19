@@ -1,13 +1,17 @@
 import express from "express";
 import { RateLimiter } from "./abuse/rateLimit.js";
+import { turnstileEnabled } from "./auth/turnstile.js";
 import { stripeWebhookHandler } from "./billing/webhooks.js";
 import type { Config } from "./config.js";
 import type { Snapshot } from "./data/snapshot.js";
 import type { GateDeps } from "./http/gate.js";
 import { mcpHandler } from "./http/mcp.js";
+import { publicCors, publicRouter } from "./http/public.js";
 import { restRouter } from "./http/rest.js";
 import { operations as allOperations } from "./operations/index.js";
 import type { Operation } from "./operations/types.js";
+import { seoRouter } from "./seo/routes.js";
+import type { PagePlan } from "./seo/pages.js";
 import type { Services } from "./services.js";
 import { cors, oauthApiRoutes } from "./web/oauth.js";
 import { webRouter } from "./web/router.js";
@@ -23,6 +27,8 @@ export interface AppDeps {
   /** Tests swap in extra operations; the app serves the real list. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   operations?: Operation<any, any>[];
+  /** The programmatic SEO pages' data; without it those routes answer 404. */
+  getSeoPlan?: () => PagePlan | null;
 }
 
 export function createApp({
@@ -31,6 +37,7 @@ export function createApp({
   services = null,
   limiter = new RateLimiter(),
   operations = allOperations,
+  getSeoPlan = () => null,
 }: AppDeps) {
   const app = express();
   app.disable("x-powered-by");
@@ -44,7 +51,7 @@ export function createApp({
 
   const deps: GateDeps = { config, getSnapshot, services, limiter };
 
-  app.get("/health", (_req, res) => {
+  app.get("/health", publicCors(), (_req, res) => {
     const snapshot = getSnapshot();
     res.json({
       ok: true,
@@ -53,9 +60,12 @@ export function createApp({
       serving_httparchive: config.SERVE_HTTPARCHIVE,
       accounts: services !== null,
       billing: services?.stripe != null,
+      // The site key is public; the homepage needs it to show the bot check.
+      turnstile_site_key: turnstileEnabled(config) ? config.TURNSTILE_SITE_KEY : null,
     });
   });
 
+  app.use("/v1/public", publicRouter({ config, getSnapshot, services }));
   app.use("/v1", restRouter(operations, deps));
 
   if (services) app.use(oauthApiRoutes(services));
@@ -66,6 +76,9 @@ export function createApp({
   // Stateless server: no SSE stream to resume and no session to delete.
   app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").end());
   app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").end());
+
+  // Before the web router, so public pages never set a session cookie.
+  app.use(seoRouter(getSeoPlan));
 
   if (services) app.use(webRouter(services));
 

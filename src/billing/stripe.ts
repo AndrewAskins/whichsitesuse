@@ -93,7 +93,7 @@ function requireStripe(services: Services): Stripe {
 }
 
 /** Subscription states in which a second plan checkout would start a second subscription. */
-const LIVE_SUBSCRIPTION = new Set(["active", "trialing", "past_due"]);
+export const LIVE_SUBSCRIPTION = new Set(["active", "trialing", "past_due"]);
 
 export function hasActiveSubscription(account: Pick<Account, "stripe_subscription_id" | "plan_status">): boolean {
   return account.stripe_subscription_id !== null && LIVE_SUBSCRIPTION.has(account.plan_status ?? "");
@@ -127,7 +127,16 @@ export async function checkoutUrl(services: Services, account: Account, item: Ch
   const stripe = requireStripe(services);
   if (item !== "topup" && hasActiveSubscription(account)) return portalUrl(services, account);
 
+  const hadCustomer = account.stripe_customer_id !== null;
   const [customer, prices] = await Promise.all([ensureCustomer(services, account), ensurePrices(stripe)]);
+  if (item !== "topup" && hadCustomer) {
+    // Our copy of the plan can lag Stripe by a webhook: ask Stripe before starting a second plan.
+    const subs = await stripe.subscriptions.list({ customer, status: "all", limit: 10 });
+    if (subs.data.some((s) => LIVE_SUBSCRIPTION.has(s.status))) return portalUrl(services, account);
+    // A plan checkout left open in another tab would start a second subscription if paid later.
+    const open = await stripe.checkout.sessions.list({ customer, status: "open", limit: 10 });
+    for (const s of open.data) if (s.mode === "subscription") await stripe.checkout.sessions.expire(s.id);
+  }
   const quantity = item === "topup" ? clampUnits(units) : 1;
   // The webhook reads these back to know whose credits and how many.
   const metadata = { account_id: account.id, item, units: String(quantity) };

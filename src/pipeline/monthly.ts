@@ -5,6 +5,7 @@ import type { BigQuery, Query } from "@google-cloud/bigquery";
 import type { Config } from "../config.js";
 import { SNAPSHOT_FILES } from "../data/schema.js";
 import { log } from "../log.js";
+import { publishSeoDataset } from "../seo/publish.js";
 import { downloadSnapshot, r2Client, readCurrent, uploadSnapshot } from "../storage/r2.js";
 import { run } from "./bigquery.js";
 import { deletePrefix, downloadPrefix, exportPrefix, gcsClient } from "./gcs.js";
@@ -58,12 +59,18 @@ export async function runMonthly(
     overrides: await loadTechnologyOverrides(config.DATABASE_URL),
     previousDir: existsSync(join(prevDir, SNAPSHOT_FILES.manifest)) ? prevDir : null,
     memoryLimit: config.PIPELINE_MEMORY_LIMIT,
+    threads: config.PIPELINE_THREADS,
     tempDir: join(work, "duckdb-tmp"),
+    // The raw extract is several GB; drop it as soon as the working tables hold it.
+    onRawConsumed: () => rm(rawDir, { recursive: true, force: true }),
   });
   log.info({ manifest }, "snapshot built");
 
   const pointer = await uploadSnapshot(s3, config.R2_BUCKET, outDir, manifest);
   log.info({ pointer }, "PIPELINE SNAPSHOT PUBLISHED");
+
+  // The programmatic pages' data. A failure here leaves last month's pages up; rerun with PIPELINE_MODE=seo.
+  await publishSeoDataset(config, s3, outDir).catch((err) => log.error({ err }, "seo dataset failed; rerun with PIPELINE_MODE=seo"));
 
   await deletePrefix(storage, config.GCS_BUCKET, prefix);
   await rm(work, { recursive: true, force: true });

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Snapshot } from "../src/data/snapshot.js";
 import { countSites } from "../src/operations/countSites.js";
-import { decodeCursor, encodeCursor, searchSites } from "../src/operations/searchSites.js";
+import { decodeCursor, encodeCursor, searchSites, sitesCsv } from "../src/operations/searchSites.js";
 import { OperationError, type OperationContext } from "../src/operations/types.js";
 import { testConfig } from "./helpers/config.js";
 import { anonymousContext, fixedBilling } from "./helpers/context.js";
@@ -134,5 +134,23 @@ describe("search_sites", () => {
     const { data } = await search({ technologies: ["shopify"] }, killed);
     expect(data.sites.map((s) => s.domain)).toEqual(["live-c.io"]);
     expect(data.sites[0]?.technologies[0]).toMatchObject({ slug: "shopify", confidence: 0.9 });
+  });
+
+  it("renders CSV with escaping and no spreadsheet formulas", async () => {
+    const { data } = await search({ technologies: ["shopify"], limit: 2 });
+    const csv = sitesCsv({
+      next_cursor: null,
+      sites: [{ ...data.sites[0]!, domain: "=cmd.example", root_url: 'https://x.example/"a",b' }],
+    });
+    const [header, row] = csv.trim().split("\r\n");
+    expect(header!.split(",")).toContain("lcp_pass");
+    expect(row!.startsWith("'=cmd.example,")).toBe(true);
+    expect(row).toContain('"https://x.example/""a"",b"');
+  });
+
+  it("refuses CSV for accounts that can't export", async () => {
+    const trial = { ...ctx, billing: fixedBilling(100, { canExport: false }) };
+    const err = await search({ technologies: ["shopify"], format: "csv" }, trial).catch((e: unknown) => e);
+    expect((err as OperationError).code).toBe("export_not_allowed");
   });
 });

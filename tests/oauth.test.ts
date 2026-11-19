@@ -125,7 +125,11 @@ describe.skipIf(!TEST_DATABASE_URL)("OAuth for MCP clients", () => {
 
     const consent = await b.get(path);
     expect(consent.status).toBe(200);
-    expect(await consent.text()).toContain("Connect <span class=\"mark\">Claude</span>?");
+    const consentHtml = await consent.text();
+    expect(consentHtml).toContain("calls itself <b>Claude</b>");
+    expect(consentHtml).toContain("hasn't verified it");
+    expect(consent.headers.get("content-security-policy")).toBe("frame-ancestors 'none'");
+    expect(consent.headers.get("x-frame-options")).toBe("DENY");
     const code = await approve(b, path, { cap: "40" });
 
     const tokenRes = await form("/oauth/token", {

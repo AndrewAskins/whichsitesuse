@@ -1,5 +1,6 @@
-// Free domain lookup on the homepage. Calls GET {api}/v1/domains/{domain} and renders the stack.
-// Until that endpoint is live (or when it fails), the example result stays and a notice explains why.
+// Free domain lookup on the homepage. Checks GET {api}/health for a published snapshot, then calls the
+// anonymous, rate-limited GET {api}/v1/public/domains/{domain} and renders the stack. Until the first
+// snapshot is published the box shows a "data loading" note instead.
 (function () {
   "use strict";
 
@@ -49,18 +50,85 @@
     return /^([a-z0-9-]+\.)+[a-z]{2,}$/.test(s) ? s : null;
   }
 
-  var PRELAUNCH = "Free lookups open when WhichSitesUse launches. Until then, the table on this page shows real counts from HTTP Archive's November 2026 crawl.";
+  var base = api.replace(/\/$/, "");
+  var LOADING = "We're loading this month's HTTP Archive crawl into the lookup. It opens as soon as the first snapshot is published, so check back shortly. The table on this page already shows real counts from the November 2026 crawl.";
+  var UNREACHABLE = "The lookup service isn't answering right now. Try again in a minute.";
+
+  // Ask the API once whether a snapshot is live. null = unknown (network/CORS), true/false = known.
+  var ready = null;
+  function checkHealth() {
+    if (!base || !window.fetch) return Promise.resolve(false);
+    return fetch(base + "/health", { headers: { Accept: "application/json" } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (body) {
+        if (body && body.turnstile_site_key) setUpTurnstile(body.turnstile_site_key);
+        ready = body ? Boolean(body.snapshot) : null;
+        return ready;
+      })
+      .catch(function () { ready = null; return null; });
+  }
+  // Bot check: only when the API says Turnstile is on (/health returns its site key). The widget stays
+  // invisible unless Cloudflare needs an interaction; each lookup sends a fresh token and then resets it.
+  var turnstileId = null;
+  var turnstileWaiters = [];
+  function setUpTurnstile(siteKey) {
+    var box = el("div", { class: "turnstile-box" });
+    form.parentNode.insertBefore(box, form.nextSibling);
+    window.onWsuTurnstileLoad = function () {
+      turnstileId = window.turnstile.render(box, {
+        sitekey: siteKey,
+        appearance: "interaction-only",
+        callback: function () { turnstileWaiters.splice(0).forEach(function (fn) { fn(); }); },
+      });
+    };
+    var script = el("script", { src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onWsuTurnstileLoad", async: "", defer: "" });
+    document.head.appendChild(script);
+  }
+  function turnstileToken() {
+    if (turnstileId === null && !window.onWsuTurnstileLoad) return Promise.resolve(null);
+    var current = turnstileId !== null ? window.turnstile.getResponse(turnstileId) : "";
+    if (current) return Promise.resolve(current);
+    return new Promise(function (resolve) {
+      var done = false;
+      var finish = function () { if (done) return; done = true; resolve(turnstileId !== null ? window.turnstile.getResponse(turnstileId) || null : null); };
+      turnstileWaiters.push(finish);
+      setTimeout(finish, 15000);
+    });
+  }
+
+  var health = checkHealth();
+  var status = document.getElementById("lookup-status");
+  health.then(function (isReady) {
+    if (status && isReady !== true) {
+      status.textContent = "Data loading: this month's crawl is being loaded into the lookup, and it opens as soon as that finishes.";
+      status.hidden = false;
+    }
+  });
 
   function showNotice(message) {
     result.hidden = false;
     result.replaceChildren(el("div", { class: "notice" }, message));
   }
 
+  function bucketLabel(n) {
+    if (!n) return null;
+    if (n >= 1000000) return "top " + n / 1000000 + "M";
+    if (n >= 1000) return "top " + n / 1000 + "k";
+    return "top " + n;
+  }
+
+  function msLabel(metric, v) {
+    if (v == null) return "";
+    if (metric === "cls") return " " + Math.round(v * 100) / 100;
+    if (metric === "lcp") return " " + Math.round(v / 100) / 10 + " s";
+    return " " + Math.round(v) + " ms";
+  }
+
   function render(domain, body) {
     var data = (body && body.data) || {};
     var meta = (body && body.meta) || {};
     if (data.covered === false) {
-      showNotice(domain + " isn't in the latest HTTP Archive crawl, usually because it gets too little Chrome traffic. Not covered lookups are always free.");
+      showNotice((data.domain || domain) + " isn't in this month's HTTP Archive crawl, usually because it gets too little Chrome traffic. Lookups for sites that aren't covered are always free.");
       return;
     }
 
@@ -68,37 +136,26 @@
     var left = el("span");
     left.appendChild(el("strong", null, data.domain || domain));
     head.appendChild(left);
-    head.appendChild(el("span", { class: "muted" }, "crawl: " + (meta.crawl_date || data.crawl_date || "latest")));
+    head.appendChild(el("span", { class: "muted" }, "crawl: " + (meta.crawl_date || data.last_crawl_date || "latest")));
 
     var table = el("table");
     var thead = el("thead");
     var hr = el("tr");
-    ["Category", "Detected", "Version"].forEach(function (h) { hr.appendChild(el("th", { scope: "col" }, h)); });
+    ["Category", "Detected"].forEach(function (h) { hr.appendChild(el("th", { scope: "col" }, h)); });
     thead.appendChild(hr);
     table.appendChild(thead);
     var tbody = el("tbody");
-
-    // Accept either { categories: [{ name, technologies: [{ name, version }] }] } or a flat technologies list.
-    var groups = data.categories;
-    if (!Array.isArray(groups) && Array.isArray(data.technologies)) {
-      var byCat = {};
-      data.technologies.forEach(function (t) {
-        var cat = (t.categories && t.categories[0]) || t.category || "Other";
-        (byCat[cat] = byCat[cat] || []).push(t);
-      });
-      groups = Object.keys(byCat).map(function (name) { return { name: name, technologies: byCat[name] }; });
-    }
-    (groups || []).forEach(function (g) {
-      var techs = g.technologies || [];
+    (data.stack || []).forEach(function (group) {
       var tr = el("tr");
-      tr.appendChild(el("td", null, g.name || g.category || ""));
-      tr.appendChild(el("td", null, techs.map(function (t) { return t.name || t.technology; }).join(", ")));
-      tr.appendChild(el("td", null, techs.map(function (t) { return t.version; }).filter(Boolean).join(", ")));
+      tr.appendChild(el("td", null, group.category));
+      tr.appendChild(el("td", null, (group.technologies || []).map(function (t) {
+        return t.version ? t.name + " " + t.version : t.name;
+      }).join(", ")));
       tbody.appendChild(tr);
     });
     if (!tbody.children.length) {
       var empty = el("tr");
-      empty.appendChild(el("td", { colspan: "3" }, "No technologies detected on this site's crawled pages."));
+      empty.appendChild(el("td", { colspan: "2" }, "No technologies were detected on this site's crawled pages."));
       tbody.appendChild(empty);
     }
     table.appendChild(tbody);
@@ -106,17 +163,42 @@
     wrap.appendChild(table);
 
     var pills = el("div", { class: "pills" });
-    if (data.rank_bucket) pills.appendChild(el("span", { class: "pill" }, "top " + data.rank_bucket));
-    var cwv = data.cwv || data.core_web_vitals || {};
+    var bucket = bucketLabel(data.rank_bucket);
+    if (bucket) pills.appendChild(el("span", { class: "pill" }, bucket));
+    var cwv = (data.cwv && data.cwv.mobile) || {};
     ["lcp", "inp", "cls"].forEach(function (m) {
       var v = cwv[m];
-      if (v == null) return;
-      var pass = v === true || v === "pass" || v === "passing";
-      pills.appendChild(el("span", { class: "pill" + (pass ? " pill-pass" : "") }, m.toUpperCase() + (pass ? " pass" : " fail")));
+      if (!v || v.pass == null) return;
+      pills.appendChild(el("span", { class: "pill" + (v.pass ? " pill-pass" : "") }, m.toUpperCase() + msLabel(m, v.p75) + (v.pass ? " pass" : " fail")));
     });
 
     result.hidden = false;
     result.replaceChildren(head, wrap, pills);
+  }
+
+  function lookup(domain) {
+    showNotice("Looking up " + domain + "...");
+    return turnstileToken().then(function (token) {
+      var headers = { Accept: "application/json" };
+      if (token) headers["x-turnstile-token"] = token;
+      if (turnstileId !== null) window.turnstile.reset(turnstileId);
+      return fetch(base + "/v1/public/domains/" + encodeURIComponent(domain), { headers: headers });
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return null; }).then(function (body) { return { res: res, body: body }; });
+      })
+      .then(function (r) {
+        var code = r.body && r.body.error && r.body.error.code;
+        if (r.res.ok) return render(domain, r.body);
+        if (r.res.status === 429) return showNotice("You've run a lot of lookups from your network. Try again in a minute, or sign up for an API key.");
+        if (r.res.status === 400 && code === "invalid_input") return showNotice("Enter a domain like example.com.");
+        if (r.res.status === 401) return showNotice("We couldn't confirm you're a person. Complete the check under the search box and try again.");
+        if (r.res.status === 503 || code === "snapshot_unavailable") { ready = false; return showNotice(LOADING); }
+        showNotice(ready === false ? LOADING : UNREACHABLE);
+      })
+      .catch(function () {
+        showNotice(ready === false ? LOADING : UNREACHABLE);
+      });
   }
 
   form.addEventListener("submit", function (e) {
@@ -126,23 +208,13 @@
       showNotice("Enter a domain like example.com.");
       return;
     }
-    if (!api) {
-      showNotice(PRELAUNCH);
+    if (!base) {
+      showNotice(LOADING);
       return;
     }
-    showNotice("Looking up " + domain + "...");
-    fetch(api.replace(/\/$/, "") + "/v1/domains/" + encodeURIComponent(domain), { headers: { Accept: "application/json" } })
-      .then(function (res) {
-        return res.json().catch(function () { return null; }).then(function (body) { return { res: res, body: body }; });
-      })
-      .then(function (r) {
-        if (r.res.ok) return render(domain, r.body);
-        if (r.res.status === 404) return render(domain, { data: { covered: false } });
-        if (r.res.status === 429) return showNotice("Too many lookups from your network. Try again in a minute.");
-        showNotice(PRELAUNCH);
-      })
-      .catch(function () {
-        showNotice(PRELAUNCH);
-      });
+    health.then(function (isReady) {
+      if (isReady === false) return showNotice(LOADING);
+      lookup(domain);
+    });
   });
 })();

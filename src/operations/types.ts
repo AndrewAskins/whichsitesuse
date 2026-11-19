@@ -61,12 +61,15 @@ export interface Operation<S extends z.ZodRawShape = z.ZodRawShape, T = unknown>
   pricing?: "free" | "account" | "paid";
   input: z.ZodObject<S>;
   run(input: z.infer<z.ZodObject<S>>, ctx: OperationContext): Promise<OperationResult<T>>;
+  /** REST only: renders the result as CSV when the call passes format=csv. */
+  csv?: { filename: string; render(data: T): string };
 }
 
 export type ErrorCode =
   | "invalid_input"
   | "unauthorized"
   | "account_suspended"
+  | "export_not_allowed"
   | "insufficient_credits"
   | "not_found"
   | "rate_limited"
@@ -78,6 +81,7 @@ const HTTP_STATUS: Record<ErrorCode, number> = {
   invalid_input: 400,
   unauthorized: 401,
   account_suspended: 403,
+  export_not_allowed: 403,
   insufficient_credits: 402,
   not_found: 404,
   rate_limited: 429,

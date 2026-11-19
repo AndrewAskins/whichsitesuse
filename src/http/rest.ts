@@ -19,6 +19,20 @@ export function restRouter(operations: Operation<z.ZodRawShape, unknown>[], deps
           { channel: "rest", credential: credentialFrom(req.headers), ip: req.ip ?? "unknown" },
           deps,
         );
+        if (op.csv && input.format === "csv") {
+          // Same charge as JSON; the meta the envelope carries moves to headers.
+          res
+            .type("text/csv")
+            .set("Content-Disposition", `attachment; filename="${op.csv.filename}"`)
+            .set("X-Credits-Used", String(body.meta.credits_used))
+            .set("X-Credits-Remaining", body.meta.credits_remaining === null ? "" : String(body.meta.credits_remaining))
+            .set("X-Crawl-Date", body.meta.crawl_date ?? "")
+            .set("X-Attribution", body.meta.attribution);
+          const next = (body.data as { next_cursor?: string | null }).next_cursor;
+          if (next) res.set("X-Next-Cursor", next);
+          res.send(op.csv.render(body.data));
+          return;
+        }
         res.json(body);
       } catch (err) {
         sendError(res, err, op.name, deps);

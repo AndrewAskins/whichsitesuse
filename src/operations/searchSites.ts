@@ -28,6 +28,10 @@ const input = z.object({
     .max(1000)
     .optional()
     .describe("next_cursor from the previous page, unchanged, to get the next page."),
+  format: z
+    .enum(["json", "csv"])
+    .default("json")
+    .describe('REST only: "csv" returns the page as a CSV file (paid plans). Same credits as JSON.'),
 });
 
 export interface MatchedTechnology {
@@ -104,6 +108,12 @@ export const searchSites: Operation<typeof input.shape, SiteSearch> = {
   pricing: "paid",
   input,
   async run(args, ctx) {
+    if (args.format === "csv" && !ctx.billing.canExport) {
+      throw new OperationError(
+        "export_not_allowed",
+        "CSV export comes with paid plans. Free-grant credits work with JSON results.",
+      );
+    }
     const snapshot = requireSnapshot(ctx);
     const filters = await resolveSiteFilters(snapshot, args);
     const after = args.cursor ? decodeCursor(args.cursor) : null;
@@ -154,7 +164,35 @@ export const searchSites: Operation<typeof input.shape, SiteSearch> = {
     }));
     return { data: { sites, next_cursor }, credits_used: sites.length * CREDIT_COSTS.site };
   },
+  csv: { filename: "whichsitesuse-sites.csv", render: sitesCsv },
 };
+
+const CSV_COLUMNS = [
+  "domain", "root_url", "rank_bucket", "tld", "technologies", "versions",
+  "cwv_device", "lcp_p75", "inp_p75", "cls_p75", "lcp_pass", "inp_pass", "cls_pass", "source",
+] as const;
+
+function csvCell(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  // Quote anything with a delimiter, and neutralise leading formula characters for spreadsheets.
+  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return /[",\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
+}
+
+/** One row per site; matched technologies and their versions joined with "; ". */
+export function sitesCsv(data: SiteSearch): string {
+  const rows = data.sites.map((s) =>
+    [
+      s.domain, s.root_url, s.rank_bucket, s.tld,
+      s.technologies.map((t) => t.name).join("; "),
+      s.technologies.map((t) => (t.version ? `${t.name} ${t.version}` : "")).filter(Boolean).join("; "),
+      s.cwv.device, s.cwv.lcp.p75, s.cwv.inp.p75, s.cwv.cls.p75, s.cwv.lcp.pass, s.cwv.inp.pass, s.cwv.cls.pass,
+      s.source,
+    ].map(csvCell).join(","),
+  );
+  return [CSV_COLUMNS.join(","), ...rows].join("\r\n") + "\r\n";
+}
 
 async function matchedTechnologies(
   snapshot: Snapshot,

@@ -33,8 +33,16 @@ export async function fetchAdultBlocklist(fetchFn: typeof fetch = fetch): Promis
   if (!res.ok) throw new Error(`adult blocklist download failed: HTTP ${res.status}`);
   const domains = parseHostsList(await res.text());
   if (domains.length < ADULT_BLOCKLIST_MIN) throw new Error(`adult blocklist has only ${domains.length} domains`);
-  return domains;
+  return [...new Set([...domains, ...ADULT_DOMAINS_EXTRA])];
 }
+
+/**
+ * Adult sites the blocklist misses, added by hand. Add a domain here when one shows up
+ * in a top-sites table; it's matched like a blocklist entry, subdomains included.
+ */
+export const ADULT_DOMAINS_EXTRA: readonly string[] = [
+  "av19t.com", // Korean adult video site, Google Analytics top 1k (Nov 2026)
+];
 
 /** HTTP Archive technology names of ad networks that serve adult sites. */
 export const ADULT_AD_NETWORKS: readonly string[] = [

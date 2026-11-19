@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Snapshot } from "../src/data/snapshot.js";
-import { ADULT_BLOCKLIST_MIN, fetchAdultBlocklist, parseHostsList } from "../src/seo/adult.js";
+import { ADULT_BLOCKLIST_MIN, ADULT_DOMAINS_EXTRA, fetchAdultBlocklist, parseHostsList } from "../src/seo/adult.js";
 import { checkPassed, checkSeoDataset } from "../src/seo/check.js";
 import { buildSeoDataset, type SeoDataset } from "../src/seo/dataset.js";
 import { buildFixtureSnapshot, detection, QUERY_FIXTURE_ROWS, site } from "./helpers/fixtureSnapshot.js";
@@ -72,7 +72,9 @@ describe("the adult blocklist", () => {
     await expect(fetchAdultBlocklist(ok("0.0.0.0 qorno.com\n"))).rejects.toThrow("only 1 domains");
     await expect(fetchAdultBlocklist((async () => new Response("", { status: 500 })) as unknown as typeof fetch)).rejects.toThrow("HTTP 500");
     const big = Array.from({ length: ADULT_BLOCKLIST_MIN }, (_, i) => `0.0.0.0 site${i}.com`).join("\n");
-    expect(await fetchAdultBlocklist(ok(big))).toHaveLength(ADULT_BLOCKLIST_MIN);
+    const list = await fetchAdultBlocklist(ok(big));
+    expect(list).toHaveLength(ADULT_BLOCKLIST_MIN + ADULT_DOMAINS_EXTRA.length);
+    expect(list).toContain("av19t.com");
   });
 });
 

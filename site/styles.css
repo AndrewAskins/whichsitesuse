@@ -346,3 +346,4 @@ pre.config {
 .lookup-status { margin-top: var(--s2); }
 .lookup-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; background: var(--moon); vertical-align: 1px; animation: blink 1.2s steps(1) infinite; }
 @media (prefers-reduced-motion: reduce) { .lookup-status::before { animation: none; } }
+.turnstile-box:not(:empty) { margin-top: var(--s3); }

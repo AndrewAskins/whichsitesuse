@@ -60,9 +60,42 @@
     if (!base || !window.fetch) return Promise.resolve(false);
     return fetch(base + "/health", { headers: { Accept: "application/json" } })
       .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (body) { ready = body ? Boolean(body.snapshot) : null; return ready; })
+      .then(function (body) {
+        if (body && body.turnstile_site_key) setUpTurnstile(body.turnstile_site_key);
+        ready = body ? Boolean(body.snapshot) : null;
+        return ready;
+      })
       .catch(function () { ready = null; return null; });
   }
+  // Bot check: only when the API says Turnstile is on (/health returns its site key). The widget stays
+  // invisible unless Cloudflare needs an interaction; each lookup sends a fresh token and then resets it.
+  var turnstileId = null;
+  var turnstileWaiters = [];
+  function setUpTurnstile(siteKey) {
+    var box = el("div", { class: "turnstile-box" });
+    form.parentNode.insertBefore(box, form.nextSibling);
+    window.onWsuTurnstileLoad = function () {
+      turnstileId = window.turnstile.render(box, {
+        sitekey: siteKey,
+        appearance: "interaction-only",
+        callback: function () { turnstileWaiters.splice(0).forEach(function (fn) { fn(); }); },
+      });
+    };
+    var script = el("script", { src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onWsuTurnstileLoad", async: "", defer: "" });
+    document.head.appendChild(script);
+  }
+  function turnstileToken() {
+    if (turnstileId === null && !window.onWsuTurnstileLoad) return Promise.resolve(null);
+    var current = turnstileId !== null ? window.turnstile.getResponse(turnstileId) : "";
+    if (current) return Promise.resolve(current);
+    return new Promise(function (resolve) {
+      var done = false;
+      var finish = function () { if (done) return; done = true; resolve(turnstileId !== null ? window.turnstile.getResponse(turnstileId) || null : null); };
+      turnstileWaiters.push(finish);
+      setTimeout(finish, 15000);
+    });
+  }
+
   var health = checkHealth();
   var status = document.getElementById("lookup-status");
   health.then(function (isReady) {
@@ -145,7 +178,12 @@
 
   function lookup(domain) {
     showNotice("Looking up " + domain + "...");
-    return fetch(base + "/v1/public/domains/" + encodeURIComponent(domain), { headers: { Accept: "application/json" } })
+    return turnstileToken().then(function (token) {
+      var headers = { Accept: "application/json" };
+      if (token) headers["x-turnstile-token"] = token;
+      if (turnstileId !== null) window.turnstile.reset(turnstileId);
+      return fetch(base + "/v1/public/domains/" + encodeURIComponent(domain), { headers: headers });
+    })
       .then(function (res) {
         return res.json().catch(function () { return null; }).then(function (body) { return { res: res, body: body }; });
       })
@@ -154,6 +192,7 @@
         if (r.res.ok) return render(domain, r.body);
         if (r.res.status === 429) return showNotice("You've run a lot of lookups from your network. Try again in a minute, or sign up for an API key.");
         if (r.res.status === 400 && code === "invalid_input") return showNotice("Enter a domain like example.com.");
+        if (r.res.status === 401) return showNotice("We couldn't confirm you're a person. Complete the check under the search box and try again.");
         if (r.res.status === 503 || code === "snapshot_unavailable") { ready = false; return showNotice(LOADING); }
         showNotice(ready === false ? LOADING : UNREACHABLE);
       })

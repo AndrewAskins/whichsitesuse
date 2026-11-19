@@ -86,3 +86,22 @@
 .seo-hit { display: flex; justify-content: space-between; gap: var(--s3); padding: 10px var(--s4); color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
 .seo-hit:hover, .seo-hit:focus { background: var(--bg); }
 .seo-hit span { font: 400 12px/1.6 var(--mono); color: var(--muted); white-space: nowrap; }
+
+/* Phones: denser lists and smaller boxes, so a 25-site list doesn't run for screens */
+@media (max-width: 560px) {
+  .seo-hero { padding: var(--s5) 0 var(--s4); }
+  .seo-title { gap: var(--s3); }
+  .seo-title .ti-l { width: 56px; height: 56px; }
+  .seo-block { padding-bottom: var(--s6); }
+  .seo-block-head { flex-wrap: wrap; gap: var(--s2) var(--s3); }
+  .seo-sites { gap: var(--s2); }
+  .seo-sites .seo-card { padding: 10px var(--s3); }
+  .seo-chips { grid-template-columns: minmax(0, 1fr); gap: var(--s2); }
+  .seo-chips .seo-card { padding: 12px var(--s3); }
+  .seo-cats { grid-template-columns: minmax(0, 1fr); }
+  .seo-stats > div { padding: var(--s3); }
+  .seo-stats dd { font-size: 20px; }
+  .seo-cta { padding: var(--s4); gap: var(--s4); }
+  .seo-cta-actions .btn { flex: 1 1 auto; }
+  .seo-search input { height: 52px; font-size: 16px; }
+}

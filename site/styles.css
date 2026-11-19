@@ -310,3 +310,6 @@ pre.config {
 .adoption tr.is-current td:first-child { box-shadow: inset 3px 0 0 var(--moon); }
 .adoption figcaption { margin-top: var(--s3); font: 400 12px/1.6 var(--mono); color: var(--muted); }
 .result[hidden] { display: none; }
+.lede, .answer, .section-head .intro { text-wrap: balance; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .adoption tr.is-current td { background: color-mix(in srgb, var(--moon) 14%, var(--surface)); } }
+:root[data-theme="dark"] .adoption tr.is-current td { background: color-mix(in srgb, var(--moon) 14%, var(--surface)); }

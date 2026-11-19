@@ -5,6 +5,7 @@ import type { BigQuery, Query } from "@google-cloud/bigquery";
 import type { Config } from "../config.js";
 import { SNAPSHOT_FILES } from "../data/schema.js";
 import { log } from "../log.js";
+import { publishSeoDataset } from "../seo/publish.js";
 import { downloadSnapshot, r2Client, readCurrent, uploadSnapshot } from "../storage/r2.js";
 import { run } from "./bigquery.js";
 import { deletePrefix, downloadPrefix, exportPrefix, gcsClient } from "./gcs.js";
@@ -67,6 +68,9 @@ export async function runMonthly(
 
   const pointer = await uploadSnapshot(s3, config.R2_BUCKET, outDir, manifest);
   log.info({ pointer }, "PIPELINE SNAPSHOT PUBLISHED");
+
+  // The programmatic pages' data. A failure here leaves last month's pages up; rerun with PIPELINE_MODE=seo.
+  await publishSeoDataset(config, s3, outDir).catch((err) => log.error({ err }, "seo dataset failed; rerun with PIPELINE_MODE=seo"));
 
   await deletePrefix(storage, config.GCS_BUCKET, prefix);
   await rm(work, { recursive: true, force: true });

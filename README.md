@@ -101,13 +101,31 @@ Without a snapshot on disk the data tools answer `snapshot_unavailable` (HTTP 50
 
 - `dry-run` reports the bytes the extract would scan and whether it fits the free tier. Free.
 - `measure` runs an aggregate-only version of the extract: rows, sites, average detections per site, and a size estimate. Scans the same bytes as the extract.
-- `monthly` runs `EXPORT DATA` to `gs://$GCS_BUCKET/extract/<month>/`, downloads the files, builds the snapshot with DuckDB (`src/pipeline/transform.ts`: technology overrides from Postgres applied, `first_seen` carried from last month), uploads it to R2 under `snapshots/<month>/`, then rewrites `snapshots/current.json`. It skips a month that is already current unless `CRAWL_DATE` pins one.
+- `monthly` runs `EXPORT DATA` to `gs://$GCS_BUCKET/extract/<month>/`, downloads the files, builds the snapshot with DuckDB (`src/pipeline/transform.ts`: technology overrides from Postgres applied, `first_seen` carried from last month), uploads it to R2 under `snapshots/<month>/`, then rewrites `snapshots/current.json`. It skips a month that is already current unless `CRAWL_DATE` pins one. Last, it publishes the SEO dataset (below).
+- `seo` rebuilds the SEO dataset from the snapshot already on R2. No BigQuery. Use it after a failed SEO step, or after changing `src/seo/dataset.ts`.
 
 The query service (`src/data/sync.ts`) downloads the month `current.json` points at into its own directory and swaps to it without dropping in-flight queries.
 
 Every BigQuery job carries `maximumBytesBilled` (`BIGQUERY_MAX_BYTES_BILLED`,
 default 200 GiB), and the client refuses a service account from any project
 other than `GCP_PROJECT_ID`.
+
+## Programmatic pages
+
+`/companies-using/<slug>/` for every technology with at least 100 sites, plus `/categories/` and
+`/categories/<slug>/`. The plan (templates, quality bar, rollout) is the Notion page "WhichSitesUse
+programmatic SEO plan"; the thresholds live only in `src/seo/config.ts`.
+
+- `src/seo/dataset.ts` turns a snapshot into one JSON file per month: counts by popularity bucket, the
+  best-ranked sites, co-usage from a hash sample, CWV pass rates, versions, TLDs and categories.
+  The pipeline writes it to R2 as `seo/<month>/dataset.json` with its own pointer, `seo/current.json`.
+- `src/seo/pages.ts` renders the pages from that file with the site's shared partials
+  (`scripts/site-partials`) and `site/seo.css`. A section only shows when its data clears the bar in `SEO_RULES`.
+- The API serves them (`src/seo/routes.ts`) and whichsitesuse.com reaches them through Render rewrites on the
+  static site: `/companies-using/*`, `/categories/*` and `/sitemaps/*` to the same path on `https://api.whichsitesuse.com`.
+  Render serves a real file before a rewrite, so the hand-written pages in `site/companies-using/` win.
+  The API host's own robots.txt disallows these paths, so only the whichsitesuse.com copies get indexed.
+- `npm run seo:export -- <dataset.json> <outDir>` writes the site plus every page as static files, for previews.
 
 ## Deploying on Render
 

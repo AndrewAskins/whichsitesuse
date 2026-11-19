@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://whichsitesuse.com/sitemap.xml
+Sitemap: https://whichsitesuse.com/sitemaps/technologies.xml

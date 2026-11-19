@@ -10,6 +10,8 @@ import { publicCors, publicRouter } from "./http/public.js";
 import { restRouter } from "./http/rest.js";
 import { operations as allOperations } from "./operations/index.js";
 import type { Operation } from "./operations/types.js";
+import { seoRouter } from "./seo/routes.js";
+import type { PagePlan } from "./seo/pages.js";
 import type { Services } from "./services.js";
 import { cors, oauthApiRoutes } from "./web/oauth.js";
 import { webRouter } from "./web/router.js";
@@ -25,6 +27,8 @@ export interface AppDeps {
   /** Tests swap in extra operations; the app serves the real list. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   operations?: Operation<any, any>[];
+  /** The programmatic SEO pages' data; without it those routes answer 404. */
+  getSeoPlan?: () => PagePlan | null;
 }
 
 export function createApp({
@@ -33,6 +37,7 @@ export function createApp({
   services = null,
   limiter = new RateLimiter(),
   operations = allOperations,
+  getSeoPlan = () => null,
 }: AppDeps) {
   const app = express();
   app.disable("x-powered-by");
@@ -71,6 +76,9 @@ export function createApp({
   // Stateless server: no SSE stream to resume and no session to delete.
   app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").end());
   app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").end());
+
+  // Before the web router, so public pages never set a session cookie.
+  app.use(seoRouter(getSeoPlan));
 
   if (services) app.use(webRouter(services));
 

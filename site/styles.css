@@ -298,7 +298,7 @@ pre.config {
 .plan-table tbody th { font: 500 12px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
 .plan-table td { font-variant-numeric: tabular-nums; }
 .plan-table .price-row td { font: 400 14px/1 var(--mono); color: var(--muted); }
-.plan-table .price-row strong { font: 500 34px/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); margin-right: 4px; }
+.plan-table .price-row strong { font: 500 30px/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); margin-right: 4px; }
 .plan-table .is-rec { background: color-mix(in srgb, var(--moon) 16%, var(--surface)); }
 .plan-table thead .is-rec { box-shadow: inset 0 3px 0 var(--moon); }
 .rec-tag { display: block; margin-top: 6px; font: 500 10px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }

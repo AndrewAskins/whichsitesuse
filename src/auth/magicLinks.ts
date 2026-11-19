@@ -19,6 +19,8 @@ export async function sendMagicLink(services: Services, account: Account, next: 
   const verify = purpose === "verify";
   await services.mailer.send({
     to: account.email,
+    template: verify ? "verify" : "login",
+    data: { link: url },
     subject: verify ? "Confirm your WhichSitesUse email" : "Your WhichSitesUse sign-in link",
     text: verify
       ? `Hi,\n\nConfirm your email to finish signing up for WhichSitesUse:\n\n${url}\n\n` +

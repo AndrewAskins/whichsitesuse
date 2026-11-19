@@ -71,6 +71,17 @@ REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV a
   tools stay anonymous.
 - **Pages**: `/signup`, `/login`, `/account` (balance, API keys and caps, buy), `/request-credits`, `/admin`
   (abuse dashboard, request review, revoke and suspend). Accounts in `ADMIN_EMAILS` become admins when they verify.
+- **Email** (`src/mail/mailer.ts`): Loops transactional emails. Without `LOOPS_API_KEY` (or a template's id)
+  the email is written to the log instead. Create these transactional emails in Loops, then put each one's
+  id in the matching env var:
+
+  | Env var | Sent when | Data variables |
+  | --- | --- | --- |
+  | `LOOPS_TEMPLATE_VERIFY` | someone signs up (confirm email, 24-hour link) | `link` |
+  | `LOOPS_TEMPLATE_LOGIN` | a verified account asks to sign in (30-minute link) | `link` |
+  | `LOOPS_TEMPLATE_CREDITS_APPROVED` | an admin approves a free-credit request | `credits`, `accountUrl` |
+  | `LOOPS_TEMPLATE_CREDITS_DENIED` | an admin denies one | `accountUrl` |
+  | `LOOPS_TEMPLATE_ADMIN_ALERT` | an abuse alert fires (to `ADMIN_ALERT_EMAIL`) | `subject`, `text` |
 - Background jobs run in the web service (`src/jobs.ts`): hourly credit expiry, weekly email-list refresh.
 
 ## Running locally

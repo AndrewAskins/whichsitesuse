@@ -48,7 +48,7 @@ export function signupRoutes(services: Services): Router {
     ? html`<div class="cf-turnstile" data-sitekey="${config.TURNSTILE_SITE_KEY}" style="margin-top:16px"></div>`
     : html``;
 
-  const signupPage = (res: Response, error?: string, email = "") =>
+  const signupPage = (res: Response, error?: string, email = "", next = "") =>
     res.status(error ? 400 : 200).send(
       page({
         title: "Sign up",
@@ -56,12 +56,12 @@ export function signupRoutes(services: Services): Router {
         body: html`<h1>Get an <span class="mark">API key</span></h1>
 <p>Verified work emails get ${FREE_GRANT.credits} free credits, once. Any email can buy credits.</p>
 ${notice(error)}
-<form method="post" action="/signup">${csrfField(locals(res).csrf)}<input type="hidden" name="fp" value="">
+<form method="post" action="/signup">${csrfField(locals(res).csrf)}<input type="hidden" name="fp" value=""><input type="hidden" name="next" value="${next}">
 <label for="email" class="label">Email</label>
 <input id="email" name="email" type="email" required autocomplete="email" value="${email}" placeholder="you@company.com">
 ${turnstileWidget}
 <button>email me a link</button></form>
-<p class="muted">Already signed up? <a href="/login">Sign in</a>.</p>${FINGERPRINT_SCRIPT}`,
+<p class="muted">Already signed up? <a href="${withNext("/login", next)}">Sign in</a>.</p>${FINGERPRINT_SCRIPT}`,
       }),
     );
 
@@ -77,25 +77,27 @@ ${turnstileWidget}
 
   const limited = (req: Request) => emailLimiter.hit(`email:${req.ip}`, EMAILS_PER_IP_PER_HOUR) > 0;
 
-  router.get("/signup", (_req, res) => {
-    if (locals(res).account) return res.redirect(303, "/account");
-    signupPage(res);
+  router.get("/signup", (req, res) => {
+    const next = safeNext(req.query.next);
+    if (locals(res).account) return res.redirect(303, next ?? "/account");
+    signupPage(res, undefined, "", next ?? "");
   });
 
   router.post("/signup", requireCsrf, async (req, res) => {
     const rawEmail = String(req.body.email ?? "");
+    const next = safeNext(req.body.next);
     const parsed = parseEmail(rawEmail);
-    if (!parsed) return signupPage(res, "That doesn't look like an email address.", rawEmail);
-    if (limited(req)) return signupPage(res, "Too many sign-ups from this network. Try again in an hour.", rawEmail);
+    if (!parsed) return signupPage(res, "That doesn't look like an email address.", rawEmail, next ?? "");
+    if (limited(req)) return signupPage(res, "Too many sign-ups from this network. Try again in an hour.", rawEmail, next ?? "");
 
     if (!(await verifyTurnstile(config, String(req.body["cf-turnstile-response"] ?? "") || undefined, req.ip))) {
       await recordSignal(services, { kind: "turnstile_failed", ip: req.ip, emailDomain: parsed.domain });
-      return signupPage(res, "The bot check didn't pass. Reload the page and try again.", rawEmail);
+      return signupPage(res, "The bot check didn't pass. Reload the page and try again.", rawEmail, next ?? "");
     }
     const status = await emailDomainStatus(services, parsed.domain);
     if (status === "disposable") {
       await recordSignal(services, { kind: "disposable_signup", ip: req.ip, emailDomain: parsed.domain });
-      return signupPage(res, "Disposable email addresses can't sign up. Use your work email.", rawEmail);
+      return signupPage(res, "Disposable email addresses can't sign up. Use your work email.", rawEmail, next ?? "");
     }
 
     // The same inbox (dots and +tags aside) is the same account: send it a sign-in link instead.
@@ -113,21 +115,22 @@ ${turnstileWidget}
         account = await services.accounts.byNormalizedEmail(parsed.normalized);
       }
     }
-    if (account) await sendMagicLink(services, account);
+    if (account) await sendMagicLink(services, account, next);
     checkInbox(res, parsed.email);
   });
 
-  router.get("/login", (_req, res) => {
-    if (locals(res).account) return res.redirect(303, "/account");
+  router.get("/login", (req, res) => {
+    const next = safeNext(req.query.next);
+    if (locals(res).account) return res.redirect(303, next ?? "/account");
     res.send(
       page({
         title: "Sign in",
         body: html`<h1>Sign <span class="mark">in</span></h1>
-<form method="post" action="/login">${csrfField(locals(res).csrf)}
+<form method="post" action="/login">${csrfField(locals(res).csrf)}<input type="hidden" name="next" value="${next ?? ""}">
 <label for="email" class="label">Email</label>
 <input id="email" name="email" type="email" required autocomplete="email">
 <button>email me a link</button></form>
-<p class="muted">New here? <a href="/signup">Sign up</a>.</p>`,
+<p class="muted">New here? <a href="${withNext("/signup", next ?? "")}">Sign up</a>.</p>`,
       }),
     );
   });
@@ -138,7 +141,7 @@ ${turnstileWidget}
     if (!limited(req)) {
       const account = await services.accounts.byNormalizedEmail(parsed.normalized);
       // Same answer either way, so the form doesn't reveal who has an account.
-      if (account) await sendMagicLink(services, account);
+      if (account) await sendMagicLink(services, account, safeNext(req.body.next));
     }
     checkInbox(res, parsed.email);
   });
@@ -151,7 +154,7 @@ ${turnstileWidget}
         title: "Sign in",
         body: valid
           ? html`<h1>One <span class="mark">click</span> left</h1>
-<form method="post" action="/auth/${String(req.params.token)}">${csrfField(locals(res).csrf)}<button>continue to whichsitesuse</button></form>`
+<form method="post" action="${withNext(`/auth/${String(req.params.token)}`, safeNext(req.query.next) ?? "")}">${csrfField(locals(res).csrf)}<button>continue to whichsitesuse</button></form>`
           : expiredLink(),
       }),
     );
@@ -173,7 +176,9 @@ ${turnstileWidget}
       }
     }
     await startSession(services, res, account.id);
-    res.redirect(303, welcome ? `/account?welcome=${welcome}` : "/account");
+    // Someone connecting an app (OAuth) goes straight back to it.
+    const next = safeNext(req.query.next);
+    res.redirect(303, next ?? (welcome ? `/account?welcome=${welcome}` : "/account"));
   });
 
   router.post("/logout", async (req, res) => {
@@ -228,4 +233,15 @@ check got it wrong, tell us who you are and what you'll use WhichSitesUse for. A
 <label for="message" class="label">About you</label>
 <textarea id="message" name="message" maxlength="2000" required placeholder="Your company or site, and what you're building"></textarea>
 <button>send request</button></form>`;
+}
+
+/** A same-site path to return to after signing in, or null. Never another host. */
+export function safeNext(value: unknown): string | null {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return null;
+  if (value.length > 4000 || /[\r\n]/.test(value)) return null;
+  return value;
+}
+
+function withNext(path: string, next: string): string {
+  return next ? `${path}?next=${encodeURIComponent(next)}` : path;
 }

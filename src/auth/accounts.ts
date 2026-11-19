@@ -26,6 +26,8 @@ export interface ApiKey {
   name: string;
   prefix: string;
   monthly_credit_cap: number | null;
+  /** Set when the "key" is an OAuth connection approved for an app like Claude or ChatGPT. */
+  oauth_client_id: string | null;
   last_used_at: Date | null;
   revoked_at: Date | null;
   created_at: Date;
@@ -33,10 +35,12 @@ export interface ApiKey {
 
 const ACCOUNT_COLS = `id, email, email_normalized, email_domain, email_verified_at, status, suspended_reason,
   plan, plan_status, plan_renews_at, stripe_customer_id, stripe_subscription_id, first_paid_at, is_admin, created_at`;
-const KEY_COLS = `id, account_id, name, prefix, monthly_credit_cap, last_used_at, revoked_at, created_at`;
+const KEY_COLS = `id, account_id, name, prefix, monthly_credit_cap, oauth_client_id, last_used_at, revoked_at, created_at`;
 
 /** Keys look like wsu_live_<random>. The prefix shown in the dashboard is the first 12 characters. */
 export const KEY_PREFIX = "wsu_live_";
+/** OAuth access tokens, issued to apps like Claude and ChatGPT; they last an hour. */
+export const OAUTH_ACCESS_PREFIX = "wsu_oat_";
 
 /** An account that has never paid is on the trial caps. */
 export function isTrial(account: Pick<Account, "first_paid_at">): boolean {
@@ -150,22 +154,39 @@ export class Accounts {
     return (res.rowCount ?? 0) > 0;
   }
 
-  /** The account and key behind a secret, or null for an unknown or revoked key. */
+  /**
+   * The account and key behind a credential: an API key, or an OAuth access token
+   * (which resolves to its connection's api_keys row). Null for an unknown, expired
+   * or revoked credential.
+   */
   async authenticate(secret: string): Promise<{ account: Account; key: ApiKey } | null> {
-    if (!secret.startsWith(KEY_PREFIX)) return null;
-    const { rows } = await this.db.query<{ key_id: string; account_id: string }>(
-      `UPDATE api_keys SET last_used_at = now()
-        WHERE key_hash = $1 AND revoked_at IS NULL
-        RETURNING id AS key_id, account_id`,
-      [sha256(secret)],
-    );
-    const row = rows[0];
-    if (!row) return null;
-    const [account, key] = await Promise.all([
-      this.byId(row.account_id),
-      this.db.query<ApiKey>(`SELECT ${KEY_COLS} FROM api_keys WHERE id = $1`, [row.key_id]).then((r) => r.rows[0]!),
-    ]);
-    return account ? { account, key } : null;
+    let keyId: string | undefined;
+    if (secret.startsWith(KEY_PREFIX)) {
+      const { rows } = await this.db.query<{ id: string }>(
+        `UPDATE api_keys SET last_used_at = now() WHERE key_hash = $1 AND revoked_at IS NULL RETURNING id`,
+        [sha256(secret)],
+      );
+      keyId = rows[0]?.id;
+    } else if (secret.startsWith(OAUTH_ACCESS_PREFIX)) {
+      const { rows } = await this.db.query<{ id: string }>(
+        `UPDATE api_keys k SET last_used_at = now()
+           FROM oauth_tokens t
+          WHERE t.access_hash = $1 AND t.revoked_at IS NULL AND t.access_expires_at > now()
+            AND k.id = t.api_key_id AND k.revoked_at IS NULL
+        RETURNING k.id`,
+        [sha256(secret)],
+      );
+      keyId = rows[0]?.id;
+    }
+    if (!keyId) return null;
+    const key = await this.keyById(keyId);
+    const account = key ? await this.byId(key.account_id) : null;
+    return account && key ? { account, key } : null;
+  }
+
+  async keyById(id: string, client: DbClient = this.db): Promise<ApiKey | null> {
+    const { rows } = await client.query<ApiKey>(`SELECT ${KEY_COLS} FROM api_keys WHERE id = $1`, [id]);
+    return rows[0] ?? null;
   }
 
   /** Credits this key has spent in the current UTC calendar month. */

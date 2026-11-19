@@ -88,4 +88,12 @@ describe("free homepage lookup", () => {
     expect(res.status).toBe(401);
     expect(((await (await fetch(`${base}/health`)).json()) as { turnstile_site_key: unknown }).turnstile_site_key).toBe("site");
   });
+
+  it("hides HTTP Archive rows when the kill switch is off", async () => {
+    const killed = await Snapshot.open(await buildFixtureSnapshot(), { serveHttpArchive: false });
+    const base = await serve(createApp({ config: testConfig(), getSnapshot: () => killed }));
+    const body: any = await (await fetch(`${base}/v1/public/domains/shop-a.com`)).json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(body.data.covered).toBe(false);
+    killed.close();
+  });
 });

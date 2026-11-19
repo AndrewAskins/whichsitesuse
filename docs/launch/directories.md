@@ -8,7 +8,7 @@ what each one needs and the exact steps.
 
 These block every submission below:
 
-1. **api.whichsitesuse.com points at the API.** `server.json` and the homepage
+1. **api.whichsitesuse.com points at the API**, and `PUBLIC_BASE_URL` on the API service is set to it. `server.json` and the homepage
    both use `https://api.whichsitesuse.com/mcp`. It needs a custom domain on the
    `whichsitesuse-api` Render service and a CNAME on Cloudflare.
 2. **A first snapshot is published.** Reviewers call the tools; until the
@@ -48,8 +48,10 @@ one listing feeds them.
 
 Needs, beyond the blockers:
 
-- **OAuth.** Remote servers in the directory sign users in with OAuth. Not
-  built yet (see the accounts thread). API-key headers alone don't qualify.
+- **OAuth.** Built (PR #16): OAuth 2.1 with PKCE and dynamic client
+  registration, or an API key as a Bearer token. Scope `mcp`. The issuer and
+  resource come from `PUBLIC_BASE_URL`, so it must be
+  `https://api.whichsitesuse.com` on the API service before submitting.
 - **Tool annotations.** Done: every tool sets `readOnlyHint`,
   `destructiveHint: false`, `idempotentHint` and `openWorldHint` (tested in
   `tests/http.test.ts`).
@@ -69,7 +71,7 @@ Listing copy draft:
 
 ## ChatGPT app (v1.1)
 
-Needs OAuth, a verified OpenAI Platform organization, the privacy policy, and a
+Needs OAuth (built, PR #16), a verified OpenAI Platform organization, the privacy policy, and a
 demo login with sample data that works without sign-up or 2FA. Credits can't be
 sold or promoted inside ChatGPT, so `buy_credits` must be left out of the
 ChatGPT build of the server. Reuses Chartjuice's MCP Apps setup.

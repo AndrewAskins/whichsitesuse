@@ -21,16 +21,36 @@ export interface CurrentPointer {
 
 export const CURRENT_KEY = "snapshots/current.json";
 
+const R2_VARS = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"] as const;
+
+/** The R2 variables that are unset or blank. */
+export function missingR2Vars(config: Config): string[] {
+  return R2_VARS.filter((name) => !config[name]?.trim());
+}
+
 export function r2Configured(config: Config): boolean {
-  return Boolean(config.R2_ACCOUNT_ID && config.R2_ACCESS_KEY_ID && config.R2_SECRET_ACCESS_KEY);
+  return missingR2Vars(config).length === 0;
+}
+
+/**
+ * Names what is missing and any environment variable names that look like a
+ * misspelled R2 key. Names only, never values.
+ */
+export function r2ConfigError(config: Config, env: NodeJS.ProcessEnv = process.env): Error {
+  const missing = missingR2Vars(config);
+  const lookalikes = Object.keys(env)
+    .filter((k) => /R2|CLOUDFLARE|ACCESS_KEY|SECRET_KEY/i.test(k) && !(R2_VARS as readonly string[]).includes(k))
+    .sort();
+  const hint = lookalikes.length > 0 ? ` Similar names that are set: ${lookalikes.join(", ")}.` : "";
+  return new Error(`R2 is not configured. Missing or blank: ${missing.join(", ")}.${hint}`);
 }
 
 export function r2Client(config: Config): S3Client {
-  if (!r2Configured(config)) throw new Error("R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY must be set.");
+  if (!r2Configured(config)) throw r2ConfigError(config);
   return new S3Client({
     region: "auto",
-    endpoint: `https://${config.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId: config.R2_ACCESS_KEY_ID!, secretAccessKey: config.R2_SECRET_ACCESS_KEY! },
+    endpoint: `https://${config.R2_ACCOUNT_ID!.trim()}.r2.cloudflarestorage.com`,
+    credentials: { accessKeyId: config.R2_ACCESS_KEY_ID!.trim(), secretAccessKey: config.R2_SECRET_ACCESS_KEY!.trim() },
   });
 }
 

@@ -308,3 +308,12 @@ pre.config {
 .topup strong { font-weight: 600; }
 .pricing-note { margin-top: var(--s3); font-size: 15px; }
 @media (max-width: 560px) { .plan-table th, .plan-table td { padding: 12px 10px; } .plan-table .price-row strong { font-size: 24px; } }
+
+/* Pricing spans the full width so four plans fit without wrapping */
+#pricing .split { grid-template-columns: 1fr; gap: var(--s5); }
+#pricing .split .section-head { position: static; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s4) clamp(40px, 6vw, 96px); align-items: end; }
+#pricing .section-head .intro { margin-top: 0; }
+#pricing .section-head h2 { max-width: none; }
+.plan-table td, .plan-table th { white-space: nowrap; }
+.plan-table tbody th { width: 22%; }
+@media (max-width: 900px) { #pricing .split .section-head { grid-template-columns: 1fr; } }

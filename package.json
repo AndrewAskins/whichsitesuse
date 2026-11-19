@@ -21,7 +21,8 @@
     "site:sync": "node scripts/sync-site.mjs",
     "site:check": "node scripts/sync-site.mjs --check",
     "seo:export": "tsx src/seo/export.ts",
-    "og:static": "tsx src/og/static.ts"
+    "og:static": "tsx src/og/static.ts",
+    "site:meta": "tsx src/site/meta.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1172.0",

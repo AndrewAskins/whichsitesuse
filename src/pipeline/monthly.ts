@@ -58,7 +58,10 @@ export async function runMonthly(
     overrides: await loadTechnologyOverrides(config.DATABASE_URL),
     previousDir: existsSync(join(prevDir, SNAPSHOT_FILES.manifest)) ? prevDir : null,
     memoryLimit: config.PIPELINE_MEMORY_LIMIT,
+    threads: config.PIPELINE_THREADS,
     tempDir: join(work, "duckdb-tmp"),
+    // The raw extract is several GB; drop it as soon as the working tables hold it.
+    onRawConsumed: () => rm(rawDir, { recursive: true, force: true }),
   });
   log.info({ manifest }, "snapshot built");
 

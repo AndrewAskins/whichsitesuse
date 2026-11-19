@@ -40,7 +40,8 @@ const schema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().default("whichsitesuse-snapshots"),
   // DuckDB memory caps; DuckDB spills to disk beyond them.
-  PIPELINE_MEMORY_LIMIT: z.string().default("400MB"),
+  PIPELINE_MEMORY_LIMIT: z.string().default("1200MB"),
+  PIPELINE_THREADS: z.coerce.number().int().positive().default(2),
   SNAPSHOT_MEMORY_LIMIT: z.string().default("256MB"),
   // How often the query service checks R2 for a newer snapshot.
   SNAPSHOT_POLL_MINUTES: z.coerce.number().int().positive().default(360),

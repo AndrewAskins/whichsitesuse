@@ -16,7 +16,7 @@ export const CREDIT_COSTS = {
   liveCheck: 10,
 } as const;
 
-export type PlanId = "starter" | "growth" | "pro";
+export type PlanId = "starter" | "growth" | "pro" | "scale";
 
 export interface Plan {
   id: PlanId;
@@ -25,26 +25,30 @@ export interface Plan {
   priceCents: number;
   /** Credits added each billing month; unspent plan credits reset at renewal. */
   monthlyCredits: number;
-  /** Stripe price lookup key, so prices are found (or created) by name, not by id. */
+  /**
+   * Stripe price lookup key, so prices are found (or created) by name, not by id.
+   * Stripe prices can't change amount, so a new price gets a new key (v2 = Nov 19, 2026 prices).
+   */
   lookupKey: string;
 }
 
 export const PLANS: Record<PlanId, Plan> = {
-  starter: { id: "starter", name: "Starter", priceCents: 1900, monthlyCredits: 5_000, lookupKey: "wsu_starter_monthly_v1" },
-  growth: { id: "growth", name: "Growth", priceCents: 4900, monthlyCredits: 20_000, lookupKey: "wsu_growth_monthly_v1" },
-  pro: { id: "pro", name: "Pro", priceCents: 14900, monthlyCredits: 100_000, lookupKey: "wsu_pro_monthly_v1" },
+  starter: { id: "starter", name: "Starter", priceCents: 4900, monthlyCredits: 15_000, lookupKey: "wsu_starter_monthly_v2" },
+  growth: { id: "growth", name: "Growth", priceCents: 14900, monthlyCredits: 60_000, lookupKey: "wsu_growth_monthly_v2" },
+  pro: { id: "pro", name: "Pro", priceCents: 39900, monthlyCredits: 200_000, lookupKey: "wsu_pro_monthly_v2" },
+  scale: { id: "scale", name: "Scale", priceCents: 99900, monthlyCredits: 750_000, lookupKey: "wsu_scale_monthly_v2" },
 };
 
 export const PLAN_IDS = Object.keys(PLANS) as PlanId[];
 
-/** Top-ups: $10 per 1,000 credits, anyone can buy, they last 12 months. */
+/** Top-ups: $15 per 1,000 credits, anyone can buy, they last 12 months. */
 export const TOPUP = {
   name: "Top-up",
   creditsPerUnit: 1_000,
-  priceCentsPerUnit: 1000,
+  priceCentsPerUnit: 1500,
   maxUnits: 100,
   validMonths: 12,
-  lookupKey: "wsu_topup_1000_v1",
+  lookupKey: "wsu_topup_1000_v2",
 } as const;
 
 export type CheckoutItem = PlanId | "topup";

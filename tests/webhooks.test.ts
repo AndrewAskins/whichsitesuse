@@ -14,7 +14,7 @@ vi.mock("../src/auth/freeGrant.js", async (importOriginal) => ({
   releaseWithheldGrant: vi.fn(async () => {}),
 }));
 
-const PRICE = { starter: "price_starter", growth: "price_growth", pro: "price_pro", topup: "price_topup" } as const;
+const PRICE = { starter: "price_starter", growth: "price_growth", pro: "price_pro", scale: "price_scale", topup: "price_topup" } as const;
 
 describe.skipIf(!TEST_DATABASE_URL)("Stripe webhooks", () => {
   let t: TestDb;
@@ -25,6 +25,7 @@ describe.skipIf(!TEST_DATABASE_URL)("Stripe webhooks", () => {
       { id: PRICE.starter, lookup_key: PLANS.starter.lookupKey, unit_amount: PLANS.starter.priceCents, active: true },
       { id: PRICE.growth, lookup_key: PLANS.growth.lookupKey, unit_amount: PLANS.growth.priceCents, active: true },
       { id: PRICE.pro, lookup_key: PLANS.pro.lookupKey, unit_amount: PLANS.pro.priceCents, active: true },
+      { id: PRICE.scale, lookup_key: PLANS.scale.lookupKey, unit_amount: PLANS.scale.priceCents, active: true },
       { id: PRICE.topup, lookup_key: TOPUP.lookupKey, unit_amount: TOPUP.priceCentsPerUnit, active: true },
     ],
   });
@@ -194,6 +195,15 @@ describe.skipIf(!TEST_DATABASE_URL)("Stripe webhooks", () => {
 
     const expired = await t.db.query(`SELECT 1 FROM credit_ledger WHERE account_id = $1 AND kind = 'expire'`, [account.id]);
     expect(expired.rowCount).toBe(2);
+  });
+
+  it("puts a Scale subscription on the Scale plan", async () => {
+    const { account } = await makeAccount(t.services, "scale@acme.test");
+    const end = Math.floor(Date.now() / 1000) + 30 * 86400;
+    const res = await send(event("invoice.paid", invoice({ id: "in_scale", accountId: account.id, price: PRICE.scale, periodEnd: end, sub: "sub_scale" })));
+    expect(res.status).toBe(200);
+    expect((await balance(account.id)).plan).toBe(750_000);
+    expect((await accountRow(account.id)).plan).toBe("scale");
   });
 
   it("finds the account by Stripe customer when metadata is missing", async () => {

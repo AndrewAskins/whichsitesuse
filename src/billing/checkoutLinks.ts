@@ -46,7 +46,8 @@ export function unitsFor(credits: number): number {
   return clampUnits(Math.ceil(credits / TOPUP.creditsPerUnit));
 }
 
-/** The smallest plan whose monthly credits cover `credits`, or Pro. */
+/** The smallest plan whose monthly credits cover `credits`, or the biggest plan. */
 export function planFor(credits: number): PlanId {
-  return Object.values(PLANS).find((p) => p.monthlyCredits >= credits)?.id ?? "pro";
+  const plans = Object.values(PLANS);
+  return (plans.find((p) => p.monthlyCredits >= credits) ?? plans.at(-1)!).id;
 }

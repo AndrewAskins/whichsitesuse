@@ -10,9 +10,12 @@ describe("ensurePrices", () => {
     const fake = fakeStripe();
     const index = await ensurePrices(fake.stripe);
 
-    expect(fake.calls.pricesCreate).toHaveLength(4);
+    // Four plans and the top-up.
+    expect(fake.calls.pricesCreate).toHaveLength(5);
     const starter = fake.calls.pricesCreate.find((p) => p.lookup_key === PLANS.starter.lookupKey);
-    expect(starter).toMatchObject({ currency: "usd", unit_amount: 1900, recurring: { interval: "month" }, product_data: { name: expect.any(String) } });
+    expect(starter).toMatchObject({ currency: "usd", unit_amount: 4900, recurring: { interval: "month" }, product_data: { name: expect.any(String) } });
+    const scale = fake.calls.pricesCreate.find((p) => p.lookup_key === PLANS.scale.lookupKey);
+    expect(scale).toMatchObject({ unit_amount: 99900, recurring: { interval: "month" } });
     const topup = fake.calls.pricesCreate.find((p) => p.lookup_key === TOPUP.lookupKey);
     expect(topup).toMatchObject({ currency: "usd", unit_amount: TOPUP.priceCentsPerUnit });
     expect(topup).not.toHaveProperty("recurring");

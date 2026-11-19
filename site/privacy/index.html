@@ -49,7 +49,7 @@
         <a class="nav-link" href="/docs/">docs</a>
         <a class="nav-link" href="/companies-using/">companies</a>
         <a class="nav-link" href="/#pricing">pricing</a>
-        <a class="btn btn-secondary btn-small" href="/signup">get 250 free credits</a>
+        <a class="btn btn-secondary btn-small" href="https://api.whichsitesuse.com/signup">get 250 free credits</a>
       </nav>
     </div>
   </header>
@@ -119,6 +119,10 @@
               <p>We store each API key only as a hash, with its first few characters so you can recognise it, its name, its monthly cap, and when it was created, last used and revoked. Sign-in links and session tokens are also stored only as hashes.</p>
             </div>
             <div class="row">
+              <h3>Apps you connect with OAuth</h3>
+              <p>When an app such as Claude or ChatGPT registers with WhichSitesUse to let you sign in, we store the name it gives, the addresses it asks us to send you back to, how it authenticates, a hash of its client secret if it has one, and the IP address it registered from. When you approve it on the consent page, we record a short-lived, single-use authorization code (as a hash) with your account, the app, its return address, its security challenge and the monthly cap you chose. The approved connection is then stored like an API key, with the app's name, your cap, its usage and when it was last used, and its access and refresh tokens are stored only as hashes with their expiry and revocation times. We use these to let the app act for you within the limits you set, and to cut it off if you disconnect it or a token is misused.</p>
+            </div>
+            <div class="row">
               <h3>What you do with the service</h3>
               <p>For every call made with one of your keys, over MCP or REST, we record the operation, the channel, the time, the credits it used, whether it worked and the error code if not, and the inputs you sent, such as the domain you looked up or the filters you searched with. We use this to charge credits, enforce caps, show you your usage, investigate abuse and fix problems.</p>
               <p>Calls made without a key (the free technology search and counts) are rate limited by IP address. The service keeps that count only in the server's memory and doesn't write the address to the database. The sign-up and sign-in forms count emails per IP address the same way.</p>
@@ -129,7 +133,7 @@
             </div>
             <div class="row">
               <h3>Messages and emails</h3>
-              <p>If you ask for free credits after the work-email check turned you away, we keep the message you write so a person can review it. We send sign-in and verification links by email through Resend, which processes your address and the message to deliver it.</p>
+              <p>If you ask for free credits after the work-email check turned you away, we keep the message you write so a person can review it. We send account emails through Loops: verification and sign-in links, and the answer to a free-credit request. Loops receives your email address and what goes into each email, such as the link or the number of credits.</p>
             </div>
             <div class="row">
               <h3>The website</h3>
@@ -169,7 +173,7 @@
           <div class="prose">
             <p>We use your information to provide the service you signed up for: your account, sign-in, credits, billing and support. That's the contract between us. We use the sign-up checks, abuse records and usage records to keep the free credits for real new users and to protect the service, which is our legitimate interest in preventing fraud and abuse. We keep billing records because tax and accounting law requires it.</p>
             <p>We email you about your account, such as sign-in links and replies to your requests. We don't send marketing email from this service today, and if we start we'll ask first where the law requires it.</p>
-            <p>We don't sell or share your personal information for advertising, and we don't use it to make decisions about you that have legal or similarly significant effects. The free-credit check is automated, and you can ask a person to review it from <a href="/request-credits">/request-credits</a>. [Lawyer review: legal bases under GDPR and the automated free-credit decision.]</p>
+            <p>We don't sell or share your personal information for advertising, and we don't use it to make decisions about you that have legal or similarly significant effects. The free-credit check is automated, and you can ask a person to review it from the <a href="https://api.whichsitesuse.com/request-credits">free-credit request page</a>. [Lawyer review: legal bases under GDPR and the automated free-credit decision.]</p>
           </div>
         </div>
       </div>
@@ -190,7 +194,7 @@
                 <tbody>
                   <tr><td>Render</td><td>Hosting the website, the API and the database</td><td>Everything stored about your account and usage</td></tr>
                   <tr><td>Stripe</td><td>Payments, invoices and the billing portal</td><td>Email, account ID, payment details you give Stripe</td></tr>
-                  <tr><td>Resend</td><td>Sending sign-in and verification emails</td><td>Email address and the email we send</td></tr>
+                  <tr><td>Loops</td><td>Sending account emails: verification, sign-in and free-credit request answers</td><td>Email address and the contents of each email</td></tr>
                   <tr><td>Cloudflare</td><td>The Turnstile bot check on sign-up, and storage (R2) for the monthly website dataset</td><td>IP address and browser data for Turnstile; the dataset holds no account data</td></tr>
                   <tr><td>Google</td><td>BigQuery and Cloud Storage to build the dataset from public data, and Google Fonts</td><td>No account data; your IP address when your browser loads fonts</td></tr>
                 </tbody>
@@ -210,8 +214,8 @@
             <h2>How long we keep it</h2>
           </div>
           <div class="prose">
-            <p>Some things expire on their own: a sign-up link after 24 hours, a sign-in link after 30 minutes, a signed-in session after 30 days and a checkout link from an agent after 7 days.</p>
-            <p>We keep your account, keys and credit history for as long as the account is open, and delete them within [deletion period] after you ask us to close it. We keep usage records for [usage retention period], sign-up check and abuse records for [abuse record retention period], and billing records for [billing record retention period] to meet tax rules. Free-credit decisions are kept for as long as we need to stop the same person claiming them twice, [free grant record retention period].</p>
+            <p>Some things expire on their own: a sign-up link after 24 hours, a sign-in link after 30 minutes, a signed-in session after 30 days and a checkout link from an agent after 7 days. For connected apps, an authorization code expires after 10 minutes, an access token after an hour and a refresh token after 90 days, and each refresh replaces the old token.</p>
+            <p>We keep your account, keys, connected apps and credit history for as long as the account is open, and delete them within [deletion period] after you ask us to close it. We keep usage records for [usage retention period], sign-up check and abuse records for [abuse record retention period], and billing records for [billing record retention period] to meet tax rules. Free-credit decisions are kept for as long as we need to stop the same person claiming them twice, [free grant record retention period].</p>
           </div>
         </div>
       </div>
@@ -238,7 +242,7 @@
         <div class="split">
           <div class="section-head">
             <h2>Cookies</h2>
-            <p class="intro">The marketing site sets none. The sign-up, sign-in and account pages set two, both needed for those pages to work, and none for analytics or ads.</p>
+            <p class="intro">The marketing site sets none. The sign-up, sign-in, account and app consent pages set two, both needed for those pages to work, and none for analytics or ads.</p>
           </div>
           <div>
             <div class="table-wrap">
@@ -264,7 +268,7 @@
             <h2>Security</h2>
           </div>
           <div class="prose">
-            <p>The service runs over HTTPS, and API keys, sign-in links and session tokens are stored only as hashes, so a copy of our database wouldn't reveal them, and there are no passwords to leak. No system is perfectly secure, and if a breach affects your information we'll tell you as the law requires.</p>
+            <p>The service runs over HTTPS, and API keys, sign-in links, session tokens and connected apps' tokens are stored only as hashes, so a copy of our database wouldn't reveal them, and there are no passwords to leak. No system is perfectly secure, and if a breach affects your information we'll tell you as the law requires.</p>
           </div>
         </div>
       </div>

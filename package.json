@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "site:sync": "node scripts/sync-site.mjs",
-    "site:check": "node scripts/sync-site.mjs --check"
+    "site:check": "node scripts/sync-site.mjs --check",
+    "seo:export": "tsx src/seo/export.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1172.0",

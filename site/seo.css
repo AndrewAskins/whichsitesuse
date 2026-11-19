@@ -1,0 +1,15 @@
+/* Programmatic pages (/companies-using/<slug>/, /categories/): key numbers and small notes. Everything else comes from styles.css. */
+.seo-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: var(--s5) 0 0; border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.seo-stats > div { padding: var(--s3) var(--s4); border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--surface); }
+.seo-stats dt { margin-bottom: var(--s2); }
+.seo-stats dd { margin: 0; font: 500 22px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.seo-stats dd small { font-size: 13px; color: var(--muted); font-weight: 400; }
+.seo-stats dd a { color: var(--ink); }
+@media (max-width: 720px) { .seo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.seo-source { margin-top: var(--s3); font: 400 12px/1.6 var(--mono); color: var(--muted); }
+.seo-note { border: 1px solid var(--rule); box-shadow: inset 4px 0 0 var(--moon); padding: var(--s3) var(--s4); background: var(--surface); max-width: 62ch; }
+.seo-cta { margin-top: var(--s4); }
+.seo-cta pre.config { margin: var(--s3) 0; white-space: pre-wrap; word-break: break-all; }
+.prose h3 { margin: var(--s5) 0 var(--s3); font-size: 18px; }
+.prose h3:first-child { margin-top: 0; }
+.prose .table-wrap + .table-wrap, .prose .table-wrap + h3 { margin-top: var(--s4); }

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What Is This Website Built With? Free Lookup | WhichSitesUse</title>
+  <meta name="description" content="What is this website built with? Look up any domain free to see its CMS, frameworks, analytics and Core Web Vitals, or list sites by technology over MCP and API.">
+  <link rel="canonical" href="https://whichsitesuse.com/">
+  <meta name="wsu-api" content="https://api.whichsitesuse.com">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://whichsitesuse.com/">
+  <meta property="og:title" content="What is this website built with? | WhichSitesUse">
+  <meta property="og:description" content="Look up any domain to see its stack, or list the sites that use a technology, over MCP and a REST API.">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-180.png">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: dark)">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"WebApplication","name":"WhichSitesUse","url":"https://whichsitesuse.com/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Website technology lookup for people and AI agents: see what any website is built with, or list the sites that use a technology, over MCP and a REST API.","offers":[{"@type":"Offer","name":"Starter","price":"19","priceCurrency":"USD","description":"5,000 credits a month"},{"@type":"Offer","name":"Growth","price":"49","priceCurrency":"USD","description":"20,000 credits a month"},{"@type":"Offer","name":"Pro","price":"149","priceCurrency":"USD","description":"100,000 credits a month"}]},
+   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"How can I tell what CMS a website uses?","acceptedAnswer":{"@type":"Answer","text":"Enter the domain in the lookup at the top of this page. The CMS or ecommerce platform shows first, with its version when the site exposes one. You can also look in the page source for a generator meta tag or platform-specific file paths, which are the same clues detection rules look for."}},
+    {"@type":"Question","name":"Why does a domain show \"not covered\"?","acceptedAnswer":{"@type":"Answer","text":"HTTP Archive only crawls sites that get enough Chrome traffic to appear in the Chrome UX Report, so new or very small sites are often missing. A \"not covered\" lookup never costs credits."}},
+    {"@type":"Question","name":"How fresh is the data?","acceptedAnswer":{"@type":"Answer","text":"We load each monthly crawl after HTTP Archive publishes it, so results are up to about six weeks old, and every result shows its crawl date."}},
+    {"@type":"Question","name":"Is there a free plan?","acceptedAnswer":{"@type":"Answer","text":"No. New accounts with a verified work email get 250 credits once, and paid plans start at $19 a month."}},
+    {"@type":"Question","name":"Which AI agents can use it?","acceptedAnswer":{"@type":"Answer","text":"Any MCP client that supports remote servers, including Claude and Cursor, can connect to the MCP server, and anything that can send an HTTP request with an API key can use the REST API."}}
+   ]}]
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="/" aria-label="WhichSitesUse home">
+        <picture>
+          <source srcset="/assets/whichsitesuse-logo-dark.svg" media="(prefers-color-scheme: dark)">
+          <img src="/assets/whichsitesuse-logo-light.svg" alt="WhichSitesUse" width="173" height="20">
+        </picture>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav-link" href="#agents">agents</a>
+        <a class="nav-link" href="#data">data</a>
+        <a class="nav-link" href="#pricing">pricing</a>
+        <a class="btn btn-secondary btn-small" href="/signup">get 250 free credits</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="label">Website technology lookup for people and agents</p>
+        <h1>What is this website <span class="mark">built with</span>?</h1>
+        <p class="lede">Enter any domain and the lookup shows its stack grouped by category, with versions where the site exposes them, its Chrome popularity bucket, its Core Web Vitals status and the date it was crawled. The same data answers the reverse question, which sites use a technology, for you or for your AI agent over MCP and a REST API.</p>
+
+        <form class="lookup" id="lookup" role="search" aria-label="Look up a domain" novalidate>
+          <label class="visually-hidden" for="domain" style="position:absolute;left:-9999px">Domain</label>
+          <input id="domain" name="domain" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="example.com" required>
+          <button class="btn btn-primary" type="submit">look up</button>
+        </form>
+        <p class="hero-alt">Free on this page, no account needed. Want a list instead? <a href="#ask">Search sites by technology</a>.</p>
+
+        <div class="result" id="result" aria-live="polite">
+          <div class="result-head">
+            <span><strong id="result-domain">acme-outdoor.com</strong> <span class="muted" id="result-tag">example result for a made-up store</span></span>
+            <span class="muted" id="result-crawl">crawl: monthly snapshot</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Category</th><th scope="col">Detected</th><th scope="col">Version</th></tr></thead>
+              <tbody id="result-rows">
+                <tr><td>Ecommerce</td><td><span class="tech">Shopify</span></td><td></td></tr>
+                <tr><td>JavaScript frameworks</td><td>React</td><td>18</td></tr>
+                <tr><td>Analytics</td><td>Google Analytics, Hotjar</td><td>GA4</td></tr>
+                <tr><td>Tag managers</td><td>Google Tag Manager</td><td></td></tr>
+                <tr><td>CDN</td><td>Cloudflare</td><td></td></tr>
+                <tr><td>Payment processors</td><td>Stripe, Shop Pay</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pills" id="result-pills">
+            <span class="pill">top 100k</span>
+            <span class="pill pill-pass">LCP pass</span>
+            <span class="pill">INP fail</span>
+            <span class="pill pill-pass">CLS pass</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="ask">
+      <div class="wrap">
+        <p class="label">What you can ask</p>
+        <h2>Two questions, one dataset</h2>
+        <div class="cols">
+          <div class="card">
+            <h3>What is this website built with?</h3>
+            <p>A domain lookup returns the CMS or ecommerce platform, JavaScript frameworks, analytics and tag managers, CDN, fonts and the other tools detected on the site, along with its popularity bucket and whether it passes LCP, INP and CLS.</p>
+            <p class="muted">Through the API a lookup costs 2 credits, and a "not covered" lookup costs nothing.</p>
+          </div>
+          <div class="card">
+            <h3>Which sites use this technology?</h3>
+            <p>A reverse search returns a list of sites at one credit per site, and you can narrow it by:</p>
+            <ul>
+              <li>technologies a site must use (all of them or any of them) and ones it must not use</li>
+              <li>category and version, such as sites on WordPress 6.x</li>
+              <li>popularity bucket, from the top 1k up to the top 10M sites</li>
+              <li>TLD, and mobile or desktop</li>
+              <li>passing or failing LCP, INP or CLS</li>
+            </ul>
+          </div>
+        </div>
+        <div class="examples">
+          <h3>Lists that take a single search</h3>
+          <ul class="example-list">
+            <li><span class="who">SEO agency</span><span>WordPress sites in the top 1M that fail INP, ready to pitch a speed fix.</span></li>
+            <li><span class="who">Shopify agency</span><span>Shopify stores in the top 100k, split by TLD for the markets you serve.</span></li>
+            <li><span class="who">SaaS founder</span><span>Sites running a competitor's script but not yours.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="agents">
+      <div class="wrap">
+        <p class="label">How agents use it</p>
+        <h2>An MCP server and a REST API</h2>
+        <div class="cols">
+          <div>
+            <p>WhichSitesUse is an MCP server and a REST API with the same operations behind both, so an agent in Claude, Cursor or any other MCP client can look up a domain or pull a list of sites without scraping anything. Results are typed and paginated, and every response includes the crawl date, the credits the call used and the balance left.</p>
+            <p>An agent usually calls the tools in this order:</p>
+            <ol class="steps">
+              <li><span><code>find_technologies</code> turns a plain name like "hubspot" into the exact technology, with a note when two products share a name. Free.</span></li>
+              <li><span><code>count_sites</code> says how many sites match and what the full list would cost. Free.</span></li>
+              <li><span><code>search_sites</code> returns the list, and its <code>max_credits</code> setting stops it from spending more than you allowed.</span></li>
+              <li><span><code>lookup_domain</code> returns one domain's full stack.</span></li>
+              <li><span><code>get_balance</code> shows what's left, and <code>buy_credits</code> gives a person a checkout link to approve, since an agent never pays on its own.</span></li>
+            </ol>
+          </div>
+          <div>
+<pre class="config"><code>{
+  "mcpServers": {
+    "WhichSitesUse": {
+      "url": "https://api.whichsitesuse.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}</code></pre>
+            <p class="config-note">Add this to your MCP client's config, or call the same operations at <code>/v1/*</code> with the same key.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="data">
+      <div class="wrap narrow">
+        <p class="label">Where the data comes from</p>
+        <h2>Open data, with its limits stated</h2>
+        <p>Every result comes from a monthly snapshot of <a href="https://httparchive.org">HTTP Archive</a>'s public crawl, which tests the homepage and one inner page of about 16 million websites that real Chrome users visit (<a href="https://almanac.httparchive.org/en/2025/methodology">methodology</a>). Technologies are detected with <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's fork of the open-source Wappalyzer rules</a>, which cover about 3,900 technologies in 108 categories, and Core Web Vitals come from <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a> field data collected from real visitors.</p>
+        <p>The crawl runs once a month, so a result can be up to about six weeks old. Small sites with little Chrome traffic are often missing from it, and tools that never load on a public page, like a CRM's back office or payroll software, can't be detected at all. When we don't have a domain we tell you it isn't covered rather than guessing, and that lookup is free.</p>
+      </div>
+    </section>
+
+    <section class="block" id="pricing">
+      <div class="wrap">
+        <p class="label">Pricing in credits</p>
+        <h2>Pay per site, not per seat</h2>
+        <p class="narrow">One credit is one site in a list and a domain lookup is 2 credits, while counts, technology search, balance checks and "not covered" lookups are free.</p>
+        <div class="costs">
+          <span class="pill">1 credit per site in a list</span>
+          <span class="pill">2 credits per domain lookup</span>
+          <span class="pill pill-pass">counts and technology search free</span>
+        </div>
+        <div class="plans">
+          <div class="plan"><p class="name">Starter</p><p class="price">$19<small> a month</small></p><p class="credits">5,000 credits a month, with CSV export</p></div>
+          <div class="plan plan-featured"><p class="name">Growth</p><p class="price">$49<small> a month</small></p><p class="credits">20,000 credits a month</p></div>
+          <div class="plan"><p class="name">Pro</p><p class="price">$149<small> a month</small></p><p class="credits">100,000 credits a month</p></div>
+          <div class="plan"><p class="name">Top-up</p><p class="price">$10</p><p class="credits">1,000 credits that last 12 months</p></div>
+        </div>
+        <p class="narrow" style="margin-top:24px">Plan credits reset each month and are spent before top-up credits. A list of 500 Shopify stores costs 500 credits, which is about $1.25 on Growth, while <a href="https://builtwith.com/plans">BuiltWith's plans</a> start at $295 a month and <a href="https://www.wappalyzer.com/pricing/">Wappalyzer Pro</a> is $250 a month (both checked November 2026).</p>
+        <div class="free-grant">
+          <p>There's no free plan, but every new account with a verified work email gets 250 free credits once, which is enough to try a real search on your own market before you pay.</p>
+          <a class="btn btn-primary" href="/signup">get 250 free credits</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block faq" id="faq">
+      <div class="wrap narrow">
+        <p class="label">Common questions</p>
+        <h2>FAQ</h2>
+        <details>
+          <summary><h3>How can I tell what CMS a website uses?</h3></summary>
+          <p>Enter the domain in the lookup at the top of this page. The CMS or ecommerce platform shows first, with its version when the site exposes one. You can also look in the page source for a generator meta tag or platform-specific file paths, which are the same clues detection rules look for.</p>
+        </details>
+        <details>
+          <summary><h3>Why does a domain show "not covered"?</h3></summary>
+          <p>HTTP Archive only crawls sites that get enough Chrome traffic to appear in the Chrome UX Report, so new or very small sites are often missing. A "not covered" lookup never costs credits.</p>
+        </details>
+        <details>
+          <summary><h3>How fresh is the data?</h3></summary>
+          <p>We load each monthly crawl after HTTP Archive publishes it, so results are up to about six weeks old, and every result shows its crawl date.</p>
+        </details>
+        <details>
+          <summary><h3>Is there a free plan?</h3></summary>
+          <p>No. New accounts with a verified work email get 250 credits once, and paid plans start at $19 a month.</p>
+        </details>
+        <details>
+          <summary><h3>Which AI agents can use it?</h3></summary>
+          <p>Any MCP client that supports remote servers, including Claude and Cursor, can connect to the MCP server, and anything that can send an HTTP request with an API key can use the REST API.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Technology detections come from <a href="https://httparchive.org">HTTP Archive</a>, using its open-source Wappalyzer fork. Core Web Vitals come from the <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a>.</p>
+      <p>&copy; <span id="year">2026</span> WhichSitesUse</p>
+    </div>
+  </footer>
+
+  <script src="/lookup.js" defer></script>
+</body>
+</html>

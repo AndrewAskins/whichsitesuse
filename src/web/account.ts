@@ -150,9 +150,9 @@ function keysTable(keys: ApiKey[], used: Map<string, number>, csrf: string): Htm
 ${keys.map((k) =>
   k.revoked_at
     ? html`<tr class="muted"><td>${k.name}</td><td class="mono">${k.prefix}…</td><td>${fmtNum(used.get(k.id))}</td><td></td><td>${fmtDate(k.last_used_at)}</td><td>revoked ${fmtDate(k.revoked_at)}</td></tr>`
-    : html`<tr><td>${k.name}</td><td class="mono">${k.prefix}…</td><td>${fmtNum(used.get(k.id))}</td>
+    : html`<tr><td>${k.name}</td><td class="mono">${k.oauth_client_id ? "connected app" : `${k.prefix}…`}</td><td>${fmtNum(used.get(k.id))}</td>
 <td><form method="post" action="/account/keys/${k.id}/cap" class="row">${csrfField(csrf)}<input name="cap" type="number" min="0" value="${k.monthly_credit_cap ?? ""}" placeholder="none" style="width:100px"><button class="small secondary">save</button></form></td>
 <td>${fmtDate(k.last_used_at) || "never"}</td>
-<td><form method="post" action="/account/keys/${k.id}/revoke">${csrfField(csrf)}<button class="small secondary">revoke</button></form></td></tr>`,
+<td><form method="post" action="/account/keys/${k.id}/revoke">${csrfField(csrf)}<button class="small secondary">${k.oauth_client_id ? "disconnect" : "revoke"}</button></form></td></tr>`,
 )}</table>`;
 }

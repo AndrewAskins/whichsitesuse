@@ -148,10 +148,13 @@ describe.skipIf(!TEST_DATABASE_URL)("billing gate", () => {
     expect((bal.structuredContent as any).data.credits.total).toBe(5);
     await client.close();
 
-    const anon = new Client({ name: "test", version: "0.0.0" });
-    await anon.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
-    const denied = await anon.callTool({ name: "spend_n", arguments: { n: 1 } });
-    expect(denied.isError).toBe(true);
-    await anon.close();
+    // Without a credential the transport answers 401, which is what starts OAuth in MCP clients.
+    const anon = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    expect(anon.status).toBe(401);
+    expect(anon.headers.get("www-authenticate")).toMatch(/resource_metadata=".*\/\.well-known\/oauth-protected-resource"/);
   });
 });

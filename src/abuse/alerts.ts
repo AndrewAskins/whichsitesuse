@@ -72,7 +72,7 @@ export async function alertAdmin(
   const to = services.config.ADMIN_ALERT_EMAIL;
   if (to) {
     try {
-      await services.mailer.send({ to, subject: `[WhichSitesUse] ${subject}`, text });
+      await services.mailer.send({ to, template: "adminAlert", data: { subject, text }, subject: `[WhichSitesUse] ${subject}`, text });
     } catch (err) {
       log.error({ err, kind, dedupeKey }, "admin alert email failed");
     }

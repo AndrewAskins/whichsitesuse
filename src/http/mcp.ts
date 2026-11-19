@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { z } from "zod";
 import type { Operation } from "../operations/types.js";
 import { credentialFrom, runOperation, type CallInfo, type GateDeps } from "./gate.js";
+import { wwwAuthenticate } from "../web/oauth.js";
 import { parseInput, toOperationError } from "./rest.js";
 
 export const MCP_INSTRUCTIONS =
@@ -11,7 +12,7 @@ export const MCP_INSTRUCTIONS =
   "Start with find_technologies to get canonical slugs. count_sites is free and shows what a full " +
   "list would cost before you spend anything; pass max_credits on paid calls to cap spend. " +
   "Every response includes the crawl date, credits used and left, and an attribution line to keep. " +
-  "Paid tools need an API key (Authorization: Bearer). When credits run out, call buy_credits and give the " +
+  "Sign in with OAuth or send an API key as a Bearer token. When credits run out, call buy_credits and give the " +
   "person you're working for the checkout link: a human pays, and the credits show on the next get_balance.";
 
 export function buildMcpServer(
@@ -65,6 +66,23 @@ export function mcpHandler(
 ) {
   return async (req: Request, res: Response) => {
     const call: CallInfo = { channel: "mcp", credential: credentialFrom(req.headers), ip: req.ip ?? "unknown" };
+    // With accounts on, MCP needs a credential. Claude, ChatGPT and other clients only start
+    // OAuth when the transport answers 401 with WWW-Authenticate, so this can't be a tool error.
+    if (deps.services) {
+      const found = call.credential ? await deps.services.accounts.authenticate(call.credential) : null;
+      if (!found) {
+        res
+          .status(401)
+          .set("WWW-Authenticate", wwwAuthenticate(deps.services, call.credential ? "invalid_token" : undefined))
+          .json({
+            jsonrpc: "2.0",
+            error: { code: -32001, message: "Sign in to WhichSitesUse (OAuth) or send an API key as a Bearer token." },
+            id: null,
+          });
+        return;
+      }
+      call.caller = found;
+    }
     const server = buildMcpServer(operations, deps, call, version);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

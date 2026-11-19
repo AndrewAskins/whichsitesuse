@@ -1,6 +1,6 @@
 import type { Snapshot } from "../data/snapshot.js";
 import { CWV_GOOD } from "../data/schema.js";
-import { adultSitesSql } from "./adult.js";
+import { adultListSql, adultSitesSql } from "./adult.js";
 import type { CatalogEntry } from "./catalog.js";
 import { SEO_RULES, type SeoRules } from "./config.js";
 
@@ -87,7 +87,14 @@ type TechRow = Omit<SeoTechnology, "previous_sites" | "by_rank" | "top_sites" | 
  */
 export async function buildSeoDataset(
   snapshot: Snapshot,
-  opts: { previous?: SeoDataset | null; now?: Date; rules?: Partial<SeoRules>; catalog?: Map<string, CatalogEntry> } = {},
+  opts: {
+    previous?: SeoDataset | null;
+    now?: Date;
+    rules?: Partial<SeoRules>;
+    catalog?: Map<string, CatalogEntry>;
+    /** Domains from the adult blocklist (src/seo/adult.ts), left out of top-sites tables. */
+    adultDomains?: readonly string[];
+  } = {},
 ): Promise<SeoDataset> {
   const R: SeoRules = { ...SEO_RULES, ...opts.rules };
   const q = <T>(sql: string) => snapshot.query<T>(sql);
@@ -114,6 +121,7 @@ export async function buildSeoDataset(
 
   // Named sites leave out adult sites (src/seo/adult.ts); the counts above still include them.
   // DISTINCT here and in the co-usage sample: a domain listed twice, or a share over 100%, is never right on a page.
+  await q(adultListSql(opts.adultDomains ?? []));
   await q(adultSitesSql());
   const topSites = await q<{ tech_id: number; domain: string; rank_bucket: number }>(`
     SELECT tech_id, domain, rank_bucket FROM (

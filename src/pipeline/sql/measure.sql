@@ -3,7 +3,7 @@
 -- Scans the same source bytes as the extract itself. The placeholder below is replaced
 -- with extract.sql.
 SELECT
-  COUNT(*) AS rows,
+  COUNT(*) AS row_count,
   COUNT(DISTINCT domain) AS sites,
   COUNTIF(technology IS NOT NULL) AS detections,
   SAFE_DIVIDE(COUNTIF(technology IS NOT NULL), COUNT(DISTINCT domain)) AS avg_detections_per_site,

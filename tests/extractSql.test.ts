@@ -31,3 +31,13 @@ describe("export SQL", () => {
     expect(sql).not.toContain("{{");
   });
 });
+
+describe("SQL aliases", () => {
+  // BigQuery rejects reserved keywords as bare aliases (the first measure run failed on "AS rows").
+  const RESERVED = ["rows", "range", "groups", "window", "lookup", "hash", "limit", "order", "partition"];
+  it.each(["extract.sql", "measure.sql", "sample-stack.sql", "sample-cwv.sql", "sample-counts.sql"])("%s uses no reserved alias", async (file) => {
+    const { readFileSync } = await import("node:fs");
+    const sql = readFileSync(new URL(`../src/pipeline/sql/${file}`, import.meta.url), "utf8");
+    for (const word of RESERVED) expect(sql).not.toMatch(new RegExp(`\\bAS\\s+${word}\\b`, "i"));
+  });
+});

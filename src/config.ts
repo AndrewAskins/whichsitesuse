@@ -25,7 +25,12 @@ const schema = z.object({
   BIGQUERY_MAX_BYTES_BILLED: z.coerce.number().int().positive().default(200 * 1024 ** 3),
 
   // Pipeline cron job mode.
-  PIPELINE_MODE: z.enum(["dry-run", "measure", "monthly"]).default("dry-run"),
+  PIPELINE_MODE: z.enum(["dry-run", "measure", "sample", "monthly"]).default("dry-run"),
+  // sample mode: one real domain and a few technology counts, for site copy.
+  SAMPLE_ORIGIN: z.string().url().default("https://www.allbirds.com"),
+  SAMPLE_TECHNOLOGIES: z.string().default("Shopify,React,HubSpot,Stripe,WordPress,Next.js"),
+  // sample mode skips any query whose dry run is bigger than this many GiB.
+  SAMPLE_MAX_GIB: z.coerce.number().positive().default(60),
   // Pipeline storage. GCS holds BigQuery's raw Parquet export for a few hours;
   // R2 holds the finished snapshots the query service downloads.
   GCS_BUCKET: z.string().optional(),

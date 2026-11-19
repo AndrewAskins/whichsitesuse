@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { RANK_BUCKETS } from "../data/schema.js";
 import { matchingSitesSql, resolveSiteFilters, siteFilterShape, SqlParams } from "./siteFilters.js";
 import { requireSnapshot } from "./snapshotGuard.js";
 import type { Operation } from "./types.js";
@@ -37,11 +36,10 @@ export const countSites: Operation<typeof input.shape, SiteCount> = {
       `SELECT rank_bucket, count(*)::INTEGER AS sites FROM (${matchingSitesSql(filters, p)}) GROUP BY rank_bucket`,
       p.values,
     );
-    const counts = new Map(rows.map((r) => [r.rank_bucket, r.sites]));
-    const by_rank_bucket = [...RANK_BUCKETS, null].map((bucket) => ({
-      rank_bucket: bucket,
-      sites: counts.get(bucket) ?? 0,
-    }));
+    // Buckets come from the data (HTTP Archive uses 1000, 5000, 10000, 50000, ...), most popular first, unknown last.
+    const by_rank_bucket = rows
+      .map((r) => ({ rank_bucket: r.rank_bucket, sites: r.sites }))
+      .sort((a, b) => (a.rank_bucket ?? Infinity) - (b.rank_bucket ?? Infinity));
     const total = rows.reduce((sum, r) => sum + r.sites, 0);
     return { data: { total, by_rank_bucket, full_list_credits: total }, credits_used: 0 };
   },

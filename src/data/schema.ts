@@ -72,6 +72,3 @@ export type SnapshotTable = keyof typeof SNAPSHOT_COLUMNS;
 
 /** Google's "good" thresholds for p75 field data. */
 export const CWV_GOOD = { lcp: 2500, inp: 200, cls: 0.1 } as const;
-
-/** HTTP Archive rank buckets (CrUX popularity), smallest first. */
-export const RANK_BUCKETS = [1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000] as const;

@@ -38,55 +38,66 @@ export async function decideFreeGrant(services: Services, account: Account): Pro
   );
   const { ip, fp, prefix } = rows[0] ?? { ip: null, fp: null, prefix: null };
 
-  const reason = await withheldReason(services, account, fp, prefix);
-  if (reason) {
-    await services.db.query(
-      `INSERT INTO free_grants (account_id, email_normalized, status, reason, credits, ip, ip_prefix, fingerprint_hash)
-       VALUES ($1, $2, 'withheld', $3, 0, $4, $5, $6) ON CONFLICT DO NOTHING`,
-      [account.id, account.email_normalized, reason, ip, prefix, fp],
-    );
-    await recordSignal(services, {
-      accountId: account.id,
-      kind: `grant_withheld_${reason}`,
-      ip,
-      ipPrefix: prefix,
-      fingerprintHash: fp,
-      emailDomain: account.email_domain,
-    });
-    await checkGrantAlerts(services, prefix);
-    return { status: "withheld", reason };
-  }
+  const domain = await emailDomainStatus(services, account.email_domain);
 
-  await withTransaction(services.db, async (c) => {
+  // One decision at a time: the device and network checks count earlier grants, so two
+  // verifications racing each other must not both see "none yet" (they are rare, so one
+  // lock for all of them costs nothing).
+  const decision = await withTransaction(services.db, async (c): Promise<GrantDecision> => {
+    await c.query("SELECT pg_advisory_xact_lock($1)", [GRANT_DECISION_LOCK]);
+    const already = await c.query(`SELECT 1 FROM free_grants WHERE account_id = $1`, [account.id]);
+    if (already.rowCount) return (await currentGrant(services, account.id, c))!;
+    const reason = domain === "work" || domain === "allowed" ? await withheldReason(c, account, fp, prefix) : "not_work_email";
+    if (reason) {
+      await c.query(
+        `INSERT INTO free_grants (account_id, email_normalized, status, reason, credits, ip, ip_prefix, fingerprint_hash)
+         VALUES ($1, $2, 'withheld', $3, 0, $4, $5, $6) ON CONFLICT DO NOTHING`,
+        [account.id, account.email_normalized, reason, ip, prefix, fp],
+      );
+      return { status: "withheld", reason };
+    }
     await c.query(
       `INSERT INTO free_grants (account_id, email_normalized, status, credits, ip, ip_prefix, fingerprint_hash)
        VALUES ($1, $2, 'granted', $3, $4, $5, $6)`,
       [account.id, account.email_normalized, FREE_GRANT.credits, ip, prefix, fp],
     );
     await addGrantLot(services, account.id, "system", c);
+    return { status: "granted", credits: FREE_GRANT.credits };
   });
+
+  if (decision.status === "withheld") {
+    await recordSignal(services, {
+      accountId: account.id,
+      kind: `grant_withheld_${decision.reason}`,
+      ip,
+      ipPrefix: prefix,
+      fingerprintHash: fp,
+      emailDomain: account.email_domain,
+    });
+  }
   await checkGrantAlerts(services, prefix);
-  return { status: "granted", credits: FREE_GRANT.credits };
+  return decision;
 }
 
+/** Advisory lock key that serializes free-grant decisions. */
+const GRANT_DECISION_LOCK = 727002;
+
+/** Checks run inside the decision's transaction, after the work-email check. */
 async function withheldReason(
-  services: Services,
+  c: pg.PoolClient,
   account: Account,
   fingerprint: string | null,
   prefix: string | null,
 ): Promise<GrantWithheldReason | null> {
-  const domain = await emailDomainStatus(services, account.email_domain);
-  if (domain !== "work" && domain !== "allowed") return "not_work_email";
-
   // One grant per person: the same inbox (normalized) can't have had one on another account.
-  const sameEmail = await services.db.query(
+  const sameEmail = await c.query(
     `SELECT 1 FROM free_grants WHERE email_normalized = $1 AND account_id <> $2 LIMIT 1`,
     [account.email_normalized, account.id],
   );
   if (sameEmail.rowCount) return "already_granted";
 
   if (fingerprint) {
-    const sameDevice = await services.db.query(
+    const sameDevice = await c.query(
       `SELECT 1 FROM free_grants WHERE fingerprint_hash = $1 AND status IN ('granted', 'manual') LIMIT 1`,
       [fingerprint],
     );
@@ -94,7 +105,7 @@ async function withheldReason(
   }
 
   if (prefix) {
-    const { rows } = await services.db.query<{ n: string }>(
+    const { rows } = await c.query<{ n: string }>(
       `SELECT count(*)::text AS n FROM free_grants
         WHERE ip_prefix = $1::cidr AND status IN ('granted', 'manual')
           AND created_at > now() - make_interval(days => $2)`,
@@ -105,8 +116,12 @@ async function withheldReason(
   return null;
 }
 
-export async function currentGrant(services: Services, accountId: string): Promise<GrantDecision | null> {
-  const { rows } = await services.db.query<{ status: string; reason: string | null; credits: number }>(
+export async function currentGrant(
+  services: Services,
+  accountId: string,
+  client: pg.PoolClient | pg.Pool = services.db,
+): Promise<GrantDecision | null> {
+  const { rows } = await client.query<{ status: string; reason: string | null; credits: number }>(
     `SELECT status, reason, credits FROM free_grants WHERE account_id = $1`,
     [accountId],
   );

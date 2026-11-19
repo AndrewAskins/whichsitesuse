@@ -11,6 +11,17 @@ const WELCOME: Record<string, string> = {
   withheld: "You're verified. Free credits didn't apply to this account (see below), but you can buy credits any time.",
 };
 
+/** Messages a redirect can ask for by code, so a link can't put its own words on the page. */
+const MESSAGES: Record<string, string> = {
+  key_revoked: "Key revoked.",
+  cap_saved: "Cap saved.",
+};
+
+/** A known message for `code`, or nothing (no inherited keys like "constructor"). */
+function known(table: Record<string, string>, code: unknown): string | undefined {
+  return typeof code === "string" && Object.hasOwn(table, code) ? table[code] : undefined;
+}
+
 const WITHHELD: Record<string, string> = {
   not_work_email: "Free credits go to work email addresses, and this one looks like a personal or generic address.",
   already_granted: "This inbox already had free credits on another account.",
@@ -95,11 +106,10 @@ ${ledger.length
   router.get("/account", requireAccount, async (req, res) => {
     const q = req.query;
     const message =
-      typeof q.welcome === "string" ? WELCOME[q.welcome]
+      typeof q.welcome === "string" ? known(WELCOME, q.welcome)
       : q.paid ? "Payment received. Credits appear here as soon as Stripe confirms it, usually within seconds."
       : q.requested ? "Request sent. We'll email you when it's reviewed."
-      : typeof q.msg === "string" ? q.msg.slice(0, 200)
-      : undefined;
+      : known(MESSAGES, q.msg);
     await render(res, { message });
   });
 
@@ -115,12 +125,12 @@ ${ledger.length
 
   router.post("/account/keys/:id/revoke", requireAccount, requireCsrf, async (req, res) => {
     await services.accounts.revokeKey(locals(res).account!.id, req.params.id as string);
-    res.redirect(303, "/account?msg=Key%20revoked.");
+    res.redirect(303, "/account?msg=key_revoked");
   });
 
   router.post("/account/keys/:id/cap", requireAccount, requireCsrf, async (req, res) => {
     await services.accounts.setKeyCap(locals(res).account!.id, req.params.id as string, parseCap(req.body.cap));
-    res.redirect(303, "/account?msg=Cap%20saved.");
+    res.redirect(303, "/account?msg=cap_saved");
   });
 
   return router;

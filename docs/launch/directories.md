@@ -8,9 +8,8 @@ what each one needs and the exact steps.
 
 These block every submission below:
 
-1. **api.whichsitesuse.com points at the API**, and `PUBLIC_BASE_URL` on the API service is set to it. `server.json` and the homepage
-   both use `https://api.whichsitesuse.com/mcp`. It needs a custom domain on the
-   `whichsitesuse-api` Render service and a CNAME on Cloudflare.
+1. **api.whichsitesuse.com points at the API.** Done Nov 19: the custom domain
+   is live with its certificate and `PUBLIC_BASE_URL` is set to it.
 2. **A first snapshot is published.** Reviewers call the tools; until the
    snapshot loads, data tools answer `snapshot_unavailable`.
 3. **Privacy policy and terms pages** on whichsitesuse.com. Claude and ChatGPT

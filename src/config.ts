@@ -26,6 +26,20 @@ const schema = z.object({
 
   // Pipeline cron job mode.
   PIPELINE_MODE: z.enum(["dry-run", "measure", "monthly"]).default("dry-run"),
+  // Pipeline storage. GCS holds BigQuery's raw Parquet export for a few hours;
+  // R2 holds the finished snapshots the query service downloads.
+  GCS_BUCKET: z.string().optional(),
+  PIPELINE_WORK_DIR: z.string().default("./data/pipeline"),
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET: z.string().default("whichsitesuse-snapshots"),
+  // DuckDB memory caps; DuckDB spills to disk beyond them.
+  PIPELINE_MEMORY_LIMIT: z.string().default("400MB"),
+  SNAPSHOT_MEMORY_LIMIT: z.string().default("256MB"),
+  // How often the query service checks R2 for a newer snapshot.
+  SNAPSHOT_POLL_MINUTES: z.coerce.number().int().positive().default(360),
+
   CRAWL_DATE: z
     .string()
     .regex(/^\d{4}-\d{2}-01$/)

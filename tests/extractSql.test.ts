@@ -21,3 +21,13 @@ describe("extract SQL cost guards", () => {
     expect(MEASURE_SQL).not.toContain("{{EXTRACT}}");
   });
 });
+
+describe("export SQL", () => {
+  it("wraps the extract in EXPORT DATA to the given GCS URI", async () => {
+    const { EXPORT_SQL } = await import("../src/pipeline/sql.js");
+    const sql = EXPORT_SQL("gs://bucket/extract/2026-11-01/*.parquet");
+    expect(sql).toContain("uri = 'gs://bucket/extract/2026-11-01/*.parquet'");
+    expect(sql).toContain("FROM `httparchive.crawl.pages`");
+    expect(sql).not.toContain("{{");
+  });
+});

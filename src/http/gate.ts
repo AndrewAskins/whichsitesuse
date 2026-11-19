@@ -30,6 +30,8 @@ export interface CallInfo {
   /** The Authorization header (or x-api-key), if any. */
   credential: string | undefined;
   ip: string;
+  /** Set when the transport already authenticated the credential (MCP does, to answer 401 itself). */
+  caller?: Caller;
 }
 
 /** Reads "Bearer wsu_live_..." or a bare key. */
@@ -54,7 +56,7 @@ export async function runOperation(
 ): Promise<Envelope<unknown>> {
   const { config, services } = deps;
   const pricing = op.pricing ?? "free";
-  const caller = await identify(call.credential, services);
+  const caller = call.caller ?? (await identify(call.credential, services));
 
   if (caller) {
     if (caller.account.status === "suspended") {
@@ -104,7 +106,10 @@ async function identify(credential: string | undefined, services: Services | nul
   }
   const found = await services.accounts.authenticate(credential);
   if (!found) {
-    throw new OperationError("unauthorized", "That API key isn't valid or has been revoked. Create a new one on the account page.");
+    throw new OperationError(
+      "unauthorized",
+      "That API key or token isn't valid, has expired or has been revoked. Create a new key on the account page, or reconnect the app.",
+    );
   }
   return found;
 }

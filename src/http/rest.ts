@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { log } from "../log.js";
 import { OperationError, type Operation } from "../operations/types.js";
+import { wwwAuthenticate } from "../web/oauth.js";
 import { credentialFrom, runOperation, type GateDeps } from "./gate.js";
 
 /** Mounts each operation at /v1<path>, sharing its schema, handler and billing gate with MCP. */
@@ -20,7 +21,7 @@ export function restRouter(operations: Operation<z.ZodRawShape, unknown>[], deps
         );
         res.json(body);
       } catch (err) {
-        sendError(res, err, op.name);
+        sendError(res, err, op.name, deps);
       }
     });
   }
@@ -43,8 +44,10 @@ export function toOperationError(err: unknown, opName: string): OperationError {
   return new OperationError("internal", "Something went wrong on our side.");
 }
 
-export function sendError(res: Response, err: unknown, opName: string) {
+export function sendError(res: Response, err: unknown, opName: string, deps?: GateDeps) {
   const opErr = toOperationError(err, opName);
+  // Points clients at OAuth discovery (RFC 9728), as MCP does.
+  if (opErr.code === "unauthorized" && deps?.services) res.set("WWW-Authenticate", wwwAuthenticate(deps.services));
   if (opErr.code === "rate_limited") res.set("Retry-After", String(opErr.details.retry_after_seconds ?? 60));
   res.status(opErr.httpStatus).json(opErr.toJSON());
 }

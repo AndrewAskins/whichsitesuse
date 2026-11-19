@@ -33,6 +33,31 @@
       }, 180);
     }, 2400);
   }
+
+  // Browse section: live site counts for the technology tiles, from the same data as the directory pages.
+  // The static tiles (name, category, logo) stand on their own if this call fails.
+  var tiles = document.getElementById("tech-tiles");
+  if (tiles && window.fetch) {
+    var cards = Array.prototype.slice.call(tiles.querySelectorAll("a[data-slug]"));
+    var slugs = cards.map(function (a) { return a.getAttribute("data-slug"); });
+    fetch("/companies-using/technologies.json?slugs=" + encodeURIComponent(slugs.join(",")))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (body) {
+        if (!body || !body.technologies) return;
+        var bySlug = {};
+        body.technologies.forEach(function (t) { bySlug[t.slug] = t; });
+        cards.forEach(function (a) {
+          var t = bySlug[a.getAttribute("data-slug")];
+          if (!t) return;
+          var meta = a.querySelector(".seo-card-text span");
+          if (meta) meta.textContent = t.sites_label + (t.category ? " · " + t.category : "");
+          var img = a.querySelector(".ti img");
+          if (img && t.icon && img.getAttribute("src") !== t.icon) img.setAttribute("src", t.icon);
+        });
+      })
+      .catch(function () {});
+  }
+
   if (!form || !input || !result) return;
 
   function el(tag, attrs, text) {

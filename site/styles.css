@@ -191,6 +191,7 @@ section.block { padding: 0 0 var(--section); }
 .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s5) clamp(40px, 6vw, 96px); align-items: start; }
 .split .section-head { position: sticky; top: var(--s5); }
 .section-head .intro { margin-top: var(--s4); color: var(--muted); max-width: 44ch; }
+.section-head .browse-all { margin-top: var(--s4); }
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; }
   .split .section-head { position: static; }
@@ -357,3 +358,18 @@ pre.config {
 .prose h2 { margin-top: var(--s6); }
 .prose h3 { margin-top: var(--s5); }
 .prose h2:first-child, .prose h3:first-child { margin-top: 0; }
+
+/* Technology tiles and cards: the directory pages and the homepage's Browse section.
+   The icon sits over a letter, so a missing icon still reads as a tile. */
+.ti { position: relative; display: inline-grid; place-items: center; flex: none; background: var(--surface); border: 1px solid var(--rule); font: 600 14px/1 var(--sans); color: var(--muted); overflow: hidden; }
+.ti img { position: absolute; inset: 15%; width: 70%; height: 70%; object-fit: contain; background: var(--surface); }
+.ti-s { width: 28px; height: 28px; font-size: 12px; }
+.ti-m { width: 40px; height: 40px; }
+.ti-l { width: 72px; height: 72px; font-size: 28px; }
+.seo-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.seo-chips { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.seo-card { display: flex; align-items: center; gap: var(--s3); padding: var(--s3); background: var(--surface); border: 1px solid var(--rule); color: var(--ink); text-decoration: none; min-width: 0; height: 100%; }
+a.seo-card:hover { border-color: var(--ink); }
+.seo-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.seo-card-text strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seo-card-text span { font: 400 12px/1.4 var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

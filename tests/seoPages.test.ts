@@ -209,6 +209,20 @@ describe("routes", () => {
     expect((await fetch(`${base}/og/companies-using/nope.png`)).status).toBe(404);
   });
 
+  it("serves homepage tiles with live counts, in the order asked", async () => {
+    const res = await fetch(`${base}/companies-using/technologies.json?slugs=klaviyo,nope,doppler,klaviyo`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=3600");
+    const body = (await res.json()) as { crawl_date: string; technologies: { slug: string; sites: number; path: string; sites_label: string }[] };
+    expect(body.technologies.map((t) => t.slug)).toEqual(["klaviyo", "doppler"]);
+    for (const t of body.technologies) {
+      expect(t.sites).toBe(plan.tech.get(t.slug)!.sites);
+      expect(t.path).toBe(`/companies-using/${t.slug}/`);
+      expect(t.sites_label).toMatch(/ sites$/);
+    }
+    expect(body.crawl_date).toBe(plan.data.crawl_date);
+  });
+
   it("404s an unknown technology", async () => {
     expect((await fetch(`${base}/companies-using/nope/`)).status).toBe(404);
   });

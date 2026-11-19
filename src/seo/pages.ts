@@ -101,6 +101,43 @@ export class PagePlan {
   }
 }
 
+/** Most technologies one tiles request returns. */
+export const TILES_MAX = 24;
+
+export interface TechTile {
+  slug: string;
+  name: string;
+  sites: number;
+  /** "571k sites", formatted like the directory's cards. */
+  sites_label: string;
+  category: string | null;
+  icon: string | null;
+  path: string;
+}
+
+/**
+ * Live name, icon and site count for a few technologies, in the order asked, for tiles outside
+ * the generated pages (the homepage). Slugs without a page are left out.
+ */
+export function techTiles(plan: PagePlan, slugs: string[]): { crawl_date: string; technologies: TechTile[] } {
+  const technologies = [...new Set(slugs.map((s) => s.trim().toLowerCase()).filter(Boolean))]
+    .slice(0, TILES_MAX)
+    .flatMap((slug) => {
+      const t = plan.tech.get(slug);
+      if (!t) return [];
+      return [{
+        slug: t.slug,
+        name: t.name,
+        sites: t.sites,
+        sites_label: `${compact(t.sites)} sites`,
+        category: plan.categoriesFor(t)[0]?.name ?? null,
+        icon: t.icon ? TECH_ICON_BASE + encodeURIComponent(t.icon) : null,
+        path: techPath(t.slug),
+      }];
+    });
+  return { crawl_date: plan.data.crawl_date, technologies };
+}
+
 // ---------- small pieces ----------
 
 /** A technology's logo from HTTP Archive's CDN over a letter tile, so a missing icon still looks deliberate. */

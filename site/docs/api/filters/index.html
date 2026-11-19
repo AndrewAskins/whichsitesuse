@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Site filters | WhichSitesUse docs</title>
+  <meta name="description" content="The filters count_sites and search_sites share: technologies, categories, versions, popularity rank, top-level domain, Core Web Vitals and device.">
+  <link rel="canonical" href="https://whichsitesuse.com/docs/api/filters/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://whichsitesuse.com/docs/api/filters/">
+  <meta property="og:title" content="Site filters | WhichSitesUse docs">
+  <meta property="og:description" content="The filters count_sites and search_sites share: technologies, categories, versions, popularity rank, top-level domain, Core Web Vitals and device.">
+  <meta name="twitter:card" content="summary">
+
+  <!-- @partial head -->
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-180.png">
+  <meta name="theme-color" content="#f5f6f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151515" media="(prefers-color-scheme: dark)">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    // Theme follows the visitor's system setting. ?theme=light|dark forces one for this page view only (for checking both).
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        if (q === "light" || q === "dark") document.documentElement.setAttribute("data-theme", q);
+      } catch (e) {}
+    })();
+  </script>
+  <!-- @end head -->
+  <link rel="stylesheet" href="/docs/docs.css">
+
+  <script type="application/ld+json">
+  [{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Site filters", "description": "The filters count_sites and search_sites share: technologies, categories, versions, popularity rank, top-level domain, Core Web Vitals and device.", "url": "https://whichsitesuse.com/docs/api/filters/", "inLanguage": "en", "dateModified": "2026-11-19", "publisher": {"@type": "Organization", "name": "WhichSitesUse", "url": "https://whichsitesuse.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://whichsitesuse.com/"}, {"@type": "ListItem", "position": 2, "name": "Docs", "item": "https://whichsitesuse.com/docs/"}, {"@type": "ListItem", "position": 3, "name": "Site filters", "item": "https://whichsitesuse.com/docs/api/filters/"}]}]
+  </script>
+</head>
+<body>
+  <!-- @partial header -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="/" aria-label="WhichSitesUse home"><svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 842.7 97.2" role="img" aria-label="WhichSitesUse" width="173" height="20"><g transform="translate(0 -24.8)"><g class="logo-hat"><path transform="translate(0 37.6) scale(0.7176)" d="M31 79C39 57 45 37 52 21C56 12 67 12 86 29C72 27 64 29 61 35C65 51 68 65 71 79ZM3 81C28 73 72 73 97 81C72 89 28 89 3 81Z"/></g><path class="logo-word" d="M101.568 100.0 93.84 49.4H103.408L107.64 80.404Q108.008 83.072 108.33 86.292Q108.652 89.512 108.836 91.628Q109.112 89.512 109.572 86.292Q110.032 83.072 110.4 80.404L115.184 49.4H124.108L128.8 80.404Q129.168 83.072 129.628 86.338Q130.088 89.604 130.364 91.72Q130.548 89.512 130.962 86.24600000000001Q131.376 82.98 131.652 80.404L136.16 49.4H145.36L137.448 100.0H125.58L121.164 68.812Q120.79599999999999 66.23599999999999 120.336 63.062Q119.876 59.888 119.6 57.864Q119.324 59.888 118.91 63.062Q118.496 66.23599999999999 118.036 68.812L113.436 100.0Z M152.444 100.0V32.84H163.944V49.4L163.66799999999998 59.06H166.796L163.66799999999998 61.728Q163.66799999999998 55.472 167.30199999999996 51.976Q170.93599999999998 48.480000000000004 177.284 48.480000000000004Q184.736 48.480000000000004 189.19799999999998 53.44800000000001Q193.65999999999997 58.416000000000004 193.65999999999997 66.78800000000001V100.0H182.15999999999997V67.98400000000001Q182.15999999999997 63.384 179.76799999999997 60.900000000000006Q177.37599999999998 58.416000000000004 173.052 58.416000000000004Q168.82 58.416000000000004 166.382 60.992000000000004Q163.944 63.568 163.944 68.352V100.0Z M205.71199999999996 100.0V89.512H223.37599999999998V59.796H208.01199999999997V49.4H234.41599999999997V89.512H250.05599999999998V100.0ZM227.97599999999997 40.936Q224.47999999999996 40.936 222.45599999999996 39.141999999999996Q220.432 37.348 220.432 34.312Q220.432 31.275999999999996 222.45599999999996 29.482Q224.47999999999996 27.688000000000002 227.97599999999997 27.688000000000002Q231.47199999999998 27.688000000000002 233.49599999999998 29.482Q235.51999999999998 31.275999999999996 235.51999999999998 34.312Q235.51999999999998 37.348 233.49599999999998 39.141999999999996Q231.47199999999998 40.936 227.97599999999997 40.936Z M279.95599999999996 100.92Q273.51599999999996 100.92 268.6859999999999 98.482Q263.85599999999994 96.044 261.188 91.582Q258.52 87.12 258.52 81.048V68.352Q258.52 62.188 261.188 57.772000000000006Q263.85599999999994 53.356 268.6859999999999 50.918000000000006Q273.51599999999996 48.480000000000004 279.95599999999996 48.480000000000004Q289.52399999999994 48.480000000000004 295.22799999999995 53.402Q300.93199999999996 58.324 301.20799999999997 66.78800000000001H289.70799999999997Q289.43199999999996 62.832 286.90199999999993 60.67Q284.37199999999996 58.508 279.95599999999996 58.508Q275.35599999999994 58.508 272.688 61.038Q270.02 63.568 270.02 68.26V81.048Q270.02 85.74 272.688 88.316Q275.35599999999994 90.892 279.95599999999996 90.892Q284.37199999999996 90.892 286.90199999999993 88.72999999999999Q289.43199999999996 86.568 289.70799999999997 82.612H301.20799999999997Q300.93199999999996 91.076 295.22799999999995 95.99799999999999Q289.52399999999994 100.92 279.95599999999996 100.92Z M312.52399999999994 100.0V32.84H324.02399999999994V49.4L323.74799999999993 59.06H326.8759999999999L323.74799999999993 61.728Q323.74799999999993 55.472 327.38199999999995 51.976Q331.01599999999996 48.480000000000004 337.3639999999999 48.480000000000004Q344.8159999999999 48.480000000000004 349.2779999999999 53.44800000000001Q353.73999999999995 58.416000000000004 353.73999999999995 66.78800000000001V100.0H342.23999999999995V67.98400000000001Q342.23999999999995 63.384 339.84799999999996 60.900000000000006Q337.45599999999996 58.416000000000004 333.13199999999995 58.416000000000004Q328.8999999999999 58.416000000000004 326.46199999999993 60.992000000000004Q324.02399999999994 63.568 324.02399999999994 68.352V100.0Z M384.46799999999996 100.828Q378.67199999999997 100.828 374.34799999999996 98.988Q370.02399999999994 97.148 367.58599999999996 93.882Q365.14799999999997 90.616 364.96399999999994 86.2H376.46399999999994Q376.64799999999997 88.592 378.80999999999995 90.064Q380.972 91.536 384.46799999999996 91.536H388.51599999999996Q392.74799999999993 91.536 394.8639999999999 89.88Q396.97999999999996 88.224 396.97999999999996 85.372Q396.97999999999996 82.70400000000001 395.09399999999994 81.186Q393.20799999999997 79.668 389.25199999999995 79.208L382.996 78.288Q374.34799999999996 77.092 370.29999999999995 73.68799999999999Q366.25199999999995 70.28399999999999 366.25199999999995 63.476Q366.25199999999995 56.392 371.03599999999994 52.482Q375.81999999999994 48.572 385.11199999999997 48.572H388.60799999999995Q397.07199999999995 48.572 402.13199999999995 52.344Q407.19199999999995 56.116 407.55999999999995 62.464H396.05999999999995Q395.78399999999993 60.44 393.8059999999999 59.152Q391.828 57.864 388.60799999999995 57.864H385.11199999999997Q381.15599999999995 57.864 379.36199999999997 59.29Q377.568 60.716 377.568 63.476Q377.568 66.05199999999999 379.13199999999995 67.294Q380.69599999999997 68.536 384.19199999999995 69.088L390.72399999999993 70.008Q399.73999999999995 71.29599999999999 404.0179999999999 74.838Q408.29599999999994 78.38 408.29599999999994 85.28Q408.29599999999994 92.64 403.2819999999999 96.73400000000001Q398.268 100.828 388.51599999999996 100.828Z M419.152 100.0V89.512H436.816V59.796H421.45199999999994V49.4H447.856V89.512H463.496V100.0ZM441.416 40.936Q437.91999999999996 40.936 435.89599999999996 39.141999999999996Q433.87199999999996 37.348 433.87199999999996 34.312Q433.87199999999996 31.275999999999996 435.89599999999996 29.482Q437.91999999999996 27.688000000000002 441.416 27.688000000000002Q444.912 27.688000000000002 446.936 29.482Q448.96 31.275999999999996 448.96 34.312Q448.96 37.348 446.936 39.141999999999996Q444.912 40.936 441.416 40.936Z M498.64 100.0Q491.37199999999996 100.0 487.27799999999996 95.952Q483.18399999999997 91.904 483.18399999999997 84.82V59.796H469.476V49.4H483.18399999999997V35.14H494.77599999999995V49.4H514.188V59.796H494.77599999999995V84.82Q494.77599999999995 89.604 499.46799999999996 89.604H513.268V100.0Z M546.572 100.92Q540.132 100.92 535.348 98.436Q530.564 95.952 527.942 91.49000000000001Q525.32 87.028 525.32 81.048V68.352Q525.32 62.372 527.942 57.91Q530.564 53.448 535.348 50.964Q540.132 48.480000000000004 546.572 48.480000000000004Q552.92 48.480000000000004 557.6579999999999 50.964Q562.396 53.448 565.018 57.91Q567.64 62.372 567.64 68.352V77.46000000000001H536.452V81.048Q536.452 86.384 539.028 89.098Q541.604 91.812 546.664 91.812Q550.528 91.812 552.9200000000001 90.47800000000001Q555.312 89.144 555.956 86.568H567.2719999999999Q565.984 93.1 560.326 97.00999999999999Q554.668 100.92 546.572 100.92ZM556.508 71.02V68.26Q556.508 63.016 554.024 60.21Q551.54 57.404 546.572 57.404Q541.604 57.404 539.028 60.256Q536.452 63.108000000000004 536.452 68.352V70.28399999999999L557.336 70.1Z M597.908 100.828Q592.112 100.828 587.788 98.988Q583.464 97.148 581.0260000000001 93.882Q578.588 90.616 578.404 86.2H589.904Q590.088 88.592 592.25 90.064Q594.412 91.536 597.908 91.536H601.956Q606.188 91.536 608.304 89.88Q610.42 88.224 610.42 85.372Q610.42 82.70400000000001 608.534 81.186Q606.648 79.668 602.692 79.208L596.436 78.288Q587.788 77.092 583.74 73.68799999999999Q579.692 70.28399999999999 579.692 63.476Q579.692 56.392 584.476 52.482Q589.26 48.572 598.552 48.572H602.048Q610.5120000000001 48.572 615.5720000000001 52.344Q620.6320000000001 56.116 621.0 62.464H609.5Q609.224 60.44 607.2460000000001 59.152Q605.268 57.864 602.048 57.864H598.552Q594.596 57.864 592.802 59.29Q591.008 60.716 591.008 63.476Q591.008 66.05199999999999 592.572 67.294Q594.136 68.536 597.6320000000001 69.088L604.164 70.008Q613.1800000000001 71.29599999999999 617.4580000000001 74.838Q621.736 78.38 621.736 85.28Q621.736 92.64 616.722 96.73400000000001Q611.708 100.828 601.956 100.828Z M653.2 100.92Q643.5400000000001 100.92 638.02 95.53800000000001Q632.5 90.156 632.5 80.864V49.4H644.0V80.772Q644.0 85.648 646.392 88.27Q648.784 90.892 653.2 90.892Q657.524 90.892 659.962 88.27Q662.4 85.648 662.4 80.772V49.4H673.9V80.864Q673.9 90.156 668.288 95.53800000000001Q662.676 100.92 653.2 100.92Z M704.628 100.828Q698.832 100.828 694.508 98.988Q690.1840000000001 97.148 687.7460000000001 93.882Q685.308 90.616 685.124 86.2H696.624Q696.808 88.592 698.97 90.064Q701.1320000000001 91.536 704.628 91.536H708.676Q712.908 91.536 715.024 89.88Q717.14 88.224 717.14 85.372Q717.14 82.70400000000001 715.254 81.186Q713.368 79.668 709.412 79.208L703.1560000000001 78.288Q694.508 77.092 690.46 73.68799999999999Q686.412 70.28399999999999 686.412 63.476Q686.412 56.392 691.196 52.482Q695.98 48.572 705.272 48.572H708.768Q717.2320000000001 48.572 722.2920000000001 52.344Q727.3520000000001 56.116 727.72 62.464H716.22Q715.9440000000001 60.44 713.9660000000001 59.152Q711.988 57.864 708.768 57.864H705.272Q701.316 57.864 699.522 59.29Q697.7280000000001 60.716 697.7280000000001 63.476Q697.7280000000001 66.05199999999999 699.292 67.294Q700.856 68.536 704.3520000000001 69.088L710.884 70.008Q719.9000000000001 71.29599999999999 724.1780000000001 74.838Q728.456 78.38 728.456 85.28Q728.456 92.64 723.442 96.73400000000001Q718.428 100.828 708.676 100.828Z M760.0120000000001 100.92Q753.572 100.92 748.788 98.436Q744.004 95.952 741.3820000000001 91.49000000000001Q738.7600000000001 87.028 738.7600000000001 81.048V68.352Q738.7600000000001 62.372 741.3820000000001 57.91Q744.004 53.448 748.788 50.964Q753.572 48.480000000000004 760.0120000000001 48.480000000000004Q766.36 48.480000000000004 771.098 50.964Q775.836 53.448 778.4580000000001 57.91Q781.08 62.372 781.08 68.352V77.46000000000001H749.892V81.048Q749.892 86.384 752.4680000000001 89.098Q755.0440000000001 91.812 760.104 91.812Q763.9680000000001 91.812 766.3600000000001 90.47800000000001Q768.7520000000001 89.144 769.3960000000001 86.568H780.712Q779.4240000000001 93.1 773.7660000000001 97.00999999999999Q768.1080000000001 100.92 760.0120000000001 100.92ZM769.9480000000001 71.02V68.26Q769.9480000000001 63.016 767.464 60.21Q764.98 57.404 760.0120000000001 57.404Q755.0440000000001 57.404 752.4680000000001 60.256Q749.892 63.108000000000004 749.892 68.352V70.28399999999999L770.7760000000001 70.1Z"/><rect class="logo-cursor" x="796.7" y="32.8" width="46.0" height="67.2"/></g></svg></a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav-link" href="/docs/">docs</a>
+        <a class="nav-link" href="/companies-using/">companies</a>
+        <a class="nav-link" href="/#pricing">pricing</a>
+        <a class="btn btn-secondary btn-small" href="https://api.whichsitesuse.com/signup">get 250 free credits</a>
+      </nav>
+    </div>
+  </header>
+  <!-- @end header -->
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <details class="docs-menu" open>
+        <summary>Docs menu</summary>
+        <!-- @partial docs-nav -->
+        <nav class="docs-nav" aria-label="Docs">
+          <p class="label">Get started</p>
+          <a href="/docs/">Quickstart</a>
+          <a href="/docs/connect/">Connect an MCP client</a>
+          <p class="label">API reference</p>
+          <a href="/docs/api/">Requests and responses</a>
+          <a href="/docs/api/filters/">Site filters</a>
+          <a href="/docs/api/find-technologies/"><code>find_technologies</code></a>
+          <a href="/docs/api/count-sites/"><code>count_sites</code></a>
+          <a href="/docs/api/search-sites/"><code>search_sites</code></a>
+          <a href="/docs/api/lookup-domain/"><code>lookup_domain</code></a>
+          <a href="/docs/api/get-balance/"><code>get_balance</code></a>
+          <a href="/docs/api/buy-credits/"><code>buy_credits</code></a>
+          <p class="label">Account</p>
+          <a href="/docs/credits/">Credits and billing</a>
+          <a href="/docs/errors/">Errors and limits</a>
+          <a href="/docs/data/">Data and coverage</a>
+        </nav>
+        <!-- @end docs-nav -->
+      </details>
+    </aside>
+
+    <main class="docs-main">
+      <article class="docs-article">
+        <p class="crumbs"><a href="/">Home</a> / <a href="/docs/">Docs</a> / <a href="/docs/api/">API reference</a> / Site filters</p>
+        <h1>Site filters</h1>
+        <p class="docs-lede"><code>count_sites</code> and <code>search_sites</code> share one filter definition, so a count always matches the list it prices. Pass <code>technologies</code>, <code>category</code> or both; the other fields narrow the result.</p>
+
+        <h2 id="fields">Filter fields</h2>
+        <div class="table-wrap">
+        <table>
+        <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+        <tr><td>technologies</td><td>list of up to 20 slugs, each 1 to 100 characters</td><td>Slugs from find_technologies, such as ["shopify","klaviyo"].</td></tr>
+        <tr><td>match</td><td>"all" or "any", default "all"</td><td>"all" needs every listed technology on the site, "any" needs at least one.</td></tr>
+        <tr><td>exclude_technologies</td><td>list of up to 20 slugs</td><td>Drops sites that use any of these. A slug can't be both required and excluded.</td></tr>
+        <tr><td>category</td><td>string, 1 to 100 characters</td><td>A technology category such as "Marketing automation", case-insensitive. A site matches if it uses any technology in it.</td></tr>
+        <tr><td>version</td><td>string, 1 to 50 characters</td><td>A version prefix for the matched technologies: "6.8" matches 6.8.1 but not 60.1.</td></tr>
+        <tr><td>rank_buckets</td><td>list of up to 20 positive integers or "unknown"</td><td>Chrome UX Report popularity buckets as count_sites returns them: 1000 is the top 1k, 5000 is 1k to 5k, 500000 is 100k to 500k.</td></tr>
+        <tr><td>max_rank</td><td>positive integer</td><td>Only sites in the top N, such as 100000 for the top 100k. Sites with an unknown rank are dropped.</td></tr>
+        <tr><td>tld</td><td>list of up to 50, each 1 to 30 characters</td><td>Top-level domains such as ["com","co.uk"]. A leading dot is ignored.</td></tr>
+        <tr><td>cwv</td><td>object with lcp, inp and cls, each "pass" or "fail"</td><td>Core Web Vitals at the 75th percentile. Pass means at or under Google's good threshold (LCP 2,500 ms, INP 200 ms, CLS 0.1). Sites without field data match neither. REST: <code>cwv=lcp:fail,inp:pass</code>.</td></tr>
+        <tr><td>device</td><td>"mobile", "desktop" or "any", default "any"</td><td>With mobile or desktop, the technologies must be detected on that device and CWV uses that device's field data. With any, either device counts and CWV uses mobile.</td></tr>
+        </tbody>
+        </table>
+        </div>
+        <p class="note">An unknown slug or category is an <code>invalid_input</code> error that names it, and for slugs lists them in <code>unknown_technologies</code>, so an agent can look them up and retry.</p>
+        <h2 id="example">Example</h2>
+        <p>Shopify stores in the top 100,000 that fail Largest Contentful Paint on mobile. On REST, list fields are comma-separated and <code>cwv</code> pairs each metric with its result:</p>
+<pre data-lang="bash"><code>curl "https://api.whichsitesuse.com/v1/counts?technologies=shopify&amp;max_rank=100000&amp;cwv=lcp:fail"</code></pre>
+        <p>The same filter as MCP arguments:</p>
+<pre data-lang="json"><code>{
+  "technologies": ["shopify"],
+  "max_rank": 100000,
+  "cwv": { "lcp": "fail" }
+}</code></pre>
+        <p class="note">An unknown slug is an <code>invalid_input</code> error that names it, like <code>Unknown technology slug: hubspott. Call find_technologies to look up the right slug.</code> The <a href="/docs/errors/">errors page</a> shows the full body.</p>
+
+        <nav class="docs-pager" aria-label="Previous and next">
+          <a class="prev" href="/docs/api/"><span class="label">Previous</span>Requests and responses</a>
+          <a class="next" href="/docs/api/find-technologies/"><span class="label">Next</span><code>find_technologies</code></a>
+        </nav>
+      </article>
+      <aside class="docs-toc">
+        <p class="label">On this page</p>
+        <ol id="docs-toc"></ol>
+      </aside>
+    </main>
+  </div>
+
+  <!-- @partial footer -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <nav class="footer-nav" aria-label="Footer">
+        <div><p class="label">Product</p><a href="/">Website lookup</a><a href="/docs/">Docs</a><a href="/#pricing">Pricing</a></div>
+        <div><p class="label">Research</p><a href="/companies-using/">Companies using</a><a href="/technographics/">Technographics guide</a></div>
+        <div><p class="label">Compare</p><a href="/builtwith-alternative/">BuiltWith alternative</a><a href="/wappalyzer-alternative/">Wappalyzer alternative</a></div>
+        <div><p class="label">Legal</p><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></div>
+      </nav>
+      <p>Technology detections come from <a href="https://httparchive.org">HTTP Archive</a>, using its open-source Wappalyzer fork. Core Web Vitals come from the <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a>.</p>
+      <p>&copy; <span id="year">2026</span> Disco Shrimp Company, LLC</p>
+    </div>
+  </footer>
+  <!-- @end footer -->
+
+  <script src="/docs/docs.js" defer></script>
+</body>
+</html>

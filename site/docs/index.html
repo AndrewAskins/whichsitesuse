@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>API and MCP Docs | WhichSitesUse</title>
-  <meta name="description" content="Connect WhichSitesUse to Claude, ChatGPT or Cursor over MCP, or call the REST API: each tool's inputs, credit costs, example requests, errors and limits.">
+  <title>Quickstart | WhichSitesUse docs</title>
+  <meta name="description" content="Make a free call to the WhichSitesUse API, then create an account and an API key for MCP clients, paid searches and domain lookups.">
   <link rel="canonical" href="https://whichsitesuse.com/docs/">
 
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://whichsitesuse.com/docs/">
-  <meta property="og:title" content="WhichSitesUse API and MCP docs">
-  <meta property="og:description" content="Connect the MCP server or call the REST API: tools, inputs, credit costs, errors and rate limits.">
+  <meta property="og:title" content="Quickstart | WhichSitesUse docs">
+  <meta property="og:description" content="Make a free call to the WhichSitesUse API, then create an account and an API key for MCP clients, paid searches and domain lookups.">
   <meta name="twitter:card" content="summary">
 
   <!-- @partial head -->
@@ -34,9 +34,10 @@
     })();
   </script>
   <!-- @end head -->
+  <link rel="stylesheet" href="/docs/docs.css">
 
   <script type="application/ld+json">
-  [{"@context": "https://schema.org", "@type": "TechArticle", "headline": "WhichSitesUse API and MCP docs", "description": "How to create an account, connect the WhichSitesUse MCP server to Claude, ChatGPT or Cursor, and call each operation over MCP or the REST API, with credit costs, errors and rate limits.", "url": "https://whichsitesuse.com/docs/", "inLanguage": "en", "dateModified": "2026-11-19", "proficiencyLevel": "Beginner", "about": ["Model Context Protocol", "REST API", "Website technology lookup"], "publisher": {"@type": "Organization", "name": "WhichSitesUse", "url": "https://whichsitesuse.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://whichsitesuse.com/"}, {"@type": "ListItem", "position": 2, "name": "Docs", "item": "https://whichsitesuse.com/docs/"}]}]
+  [{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Quickstart", "description": "Make a free call to the WhichSitesUse API, then create an account and an API key for MCP clients, paid searches and domain lookups.", "url": "https://whichsitesuse.com/docs/", "inLanguage": "en", "dateModified": "2026-11-19", "publisher": {"@type": "Organization", "name": "WhichSitesUse", "url": "https://whichsitesuse.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://whichsitesuse.com/"}, {"@type": "ListItem", "position": 2, "name": "Docs", "item": "https://whichsitesuse.com/docs/"}]}]
   </script>
 </head>
 <body>
@@ -54,684 +55,97 @@
   </header>
   <!-- @end header -->
 
-  <main>
-    <section class="page-hero">
-      <div class="wrap">
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <details class="docs-menu" open>
+        <summary>Docs menu</summary>
+        <!-- @partial docs-nav -->
+        <nav class="docs-nav" aria-label="Docs">
+          <p class="label">Get started</p>
+          <a href="/docs/">Quickstart</a>
+          <a href="/docs/connect/">Connect an MCP client</a>
+          <p class="label">API reference</p>
+          <a href="/docs/api/">Requests and responses</a>
+          <a href="/docs/api/filters/">Site filters</a>
+          <a href="/docs/api/find-technologies/"><code>find_technologies</code></a>
+          <a href="/docs/api/count-sites/"><code>count_sites</code></a>
+          <a href="/docs/api/search-sites/"><code>search_sites</code></a>
+          <a href="/docs/api/lookup-domain/"><code>lookup_domain</code></a>
+          <a href="/docs/api/get-balance/"><code>get_balance</code></a>
+          <a href="/docs/api/buy-credits/"><code>buy_credits</code></a>
+          <p class="label">Account</p>
+          <a href="/docs/credits/">Credits and billing</a>
+          <a href="/docs/errors/">Errors and limits</a>
+          <a href="/docs/data/">Data and coverage</a>
+        </nav>
+        <!-- @end docs-nav -->
+      </details>
+    </aside>
+
+    <main class="docs-main">
+      <article class="docs-article">
         <p class="crumbs"><a href="/">Home</a> / Docs</p>
-        <p class="label">Docs</p>
-        <h1>WhichSitesUse API and MCP docs</h1>
-        <p class="lede">How to create an account, connect the MCP server to your agent, and call each operation over MCP or REST. Everything on this page is checked against the code that serves the API.</p>
-      </div>
-    </section>
+        <h1>Quickstart</h1>
+        <p class="docs-lede">WhichSitesUse tells you which technologies a website uses and which websites use a technology. An AI agent can ask over MCP and your own code can ask over the REST API, and both get the same six operations with the same inputs, costs and responses.</p>
 
-    <section class="block" id="contents">
-      <div class="wrap">
-        <p class="rule-label">// 00 &nbsp;Contents</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>On this page</h2>
-            <p class="intro">The MCP server and the REST API expose the same six operations with the same inputs, costs and response envelope, so the operation sections cover both.</p>
-          </div>
-          <ol class="toc">
-            <li><a href="#api-key">01 Create an account and get an API key</a></li>
-            <li><a href="#connect">02 Connect an MCP client</a></li>
-            <li><a href="#responses">03 Requests and responses</a></li>
-            <li><a href="#find-technologies">04 find_technologies</a></li>
-            <li><a href="#filters">05 Site filters</a></li>
-            <li><a href="#count-sites">06 count_sites</a></li>
-            <li><a href="#search-sites">07 search_sites</a></li>
-            <li><a href="#lookup-domain">08 lookup_domain</a></li>
-            <li><a href="#get-balance">09 get_balance</a></li>
-            <li><a href="#buy-credits">10 buy_credits</a></li>
-            <li><a href="#credits">11 Credits and billing</a></li>
-            <li><a href="#errors">12 Errors</a></li>
-            <li><a href="#rate-limits">13 Rate limits and trial limits</a></li>
-            <li><a href="#data">14 Data freshness and coverage</a></li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="api-key">
-      <div class="wrap">
-        <p class="rule-label">// 01 &nbsp;Account and API key</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Create an account and get an API key</h2>
-            <p class="intro">Every MCP connection and every paid call belongs to an account. Clients that sign in with OAuth, like Claude's and ChatGPT's custom connectors, only need the account, while Claude Code, Cursor and the REST API use an API key.</p>
-          </div>
-          <div>
-            <ol class="steps">
-              <li><span>Go to <a href="https://api.whichsitesuse.com/signup">the sign-up page</a> and enter your email. Use your work email if you want the free credits.</span></li>
-              <li><span>Open the link we email you and press the button on the page it opens. The sign-up link works once and lasts 24 hours, and later sign-in links last 30 minutes. Sign-in is always by emailed link, so there's no password to set.</span></li>
-              <li><span>Once your email is verified, a work email gets 250 credits, once. Personal and free-mail addresses can still sign up and buy credits, they just don't get the free grant, and if you think that call was wrong you can <a href="https://api.whichsitesuse.com/request-credits">ask for the credits</a>, where a person reads every request. Disposable addresses can't sign up.</span></li>
-              <li><span>If you'll use an API key, create one on your <a href="https://api.whichsitesuse.com/account">account page</a>. Give it a name, and if you like a monthly credit cap, which stops that key (and any agent using it) from spending more than you set in a calendar month (UTC).</span></li>
-              <li><span>Copy the key straight away. It starts with <code>wsu_live_</code>, it's shown once, and we only keep a hash of it. You can revoke a key or change its cap from the account page at any time.</span></li>
-            </ol>
-            <div class="prose">
-              <p>The free grant is one per person. It's held back when the same inbox already had one on another account, and also when the same device or several accounts from one network got one in the past week. Those last two holds lift on your first purchase.</p>
-              <p>Send a key as <code>Authorization: Bearer YOUR_API_KEY</code>. The API also accepts the bare key in the <code>Authorization</code> header, or in an <code>x-api-key</code> header, if your client can only set one of those.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="connect">
-      <div class="wrap">
-        <p class="rule-label">// 02 &nbsp;Connect an MCP client</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Connect an MCP client</h2>
-            <p class="intro">The MCP server is at <code>https://api.whichsitesuse.com/mcp</code>. It uses the Streamable HTTP transport, is stateless and takes POST requests. Every MCP call needs you signed in, either through OAuth or with an API key; without one the server answers 401 and points the client at its OAuth metadata, which is how Claude and ChatGPT know to show you a sign-in.</p>
-          </div>
-          <div class="rows">
-            <div class="row" id="oauth">
-              <h3>How signing in works</h3>
-              <p>When a client connects, it registers itself with WhichSitesUse and opens our consent page in your browser. If you're not signed in yet, you sign in or sign up by emailed link first, and the link brings you back to the consent page. The consent page names the app, says it can search and spend credits from your balance but can't see your payment details or buy credits by itself, and lets you set a monthly credit cap for that app. Approve it and you're sent back to the app.</p>
-              <p>Each approved app shows up on your <a href="https://api.whichsitesuse.com/account">account page</a> as a connected app, with its usage and cap, and a disconnect button that cuts it off straight away. The app's access token lasts an hour and it renews itself with a refresh token for up to 90 days, so you won't be asked to sign in again unless you disconnect it or it goes 90 days without renewing.</p>
-            </div>
-            <div class="row" id="claude">
-              <h3>Claude (claude.ai and Claude Desktop)</h3>
-              <p>Go to Customize, then Connectors, choose Add and then Add custom connector. Name it WhichSitesUse, enter <code>https://api.whichsitesuse.com/mcp</code> as the server URL and click Continue. Keep the sign-in option Claude detects. If the dialog asks how Claude identifies itself under OAuth client, choose Register automatically, because WhichSitesUse supports dynamic client registration but not Claude's published identity. Click Add, then Connect, and approve the connection on our consent page. On a Free plan this uses your one custom connector.</p>
-              <p>On Team and Enterprise plans, an Owner adds the connector under Organization settings, then Connectors, and each member then connects it from Customize, then Connectors, signing in with their own WhichSitesUse account (<a href="https://claude.com/docs/connectors/custom/add-unlisted">Anthropic's custom connector docs</a>, checked November 2026). Claude Desktop uses the connectors on your claude.ai account, so there's nothing separate to set up there.</p>
-            </div>
-            <div class="row" id="chatgpt">
-              <h3>ChatGPT</h3>
-              <p>Custom MCP servers work on ChatGPT on the web, and which plans get them is up to OpenAI. As of November 2026, Business and Enterprise/Edu workspaces get full MCP support, Pro users can connect custom servers with read-only tools, and on Business only admins and owners can add one (<a href="https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt">OpenAI's help article</a>). Read-only access covers every tool except <code>buy_credits</code>, which ChatGPT treats as a write action because it creates a checkout link.</p>
-              <ol class="steps">
-                <li><span>Go to <a href="https://chatgpt.com/plugins">ChatGPT Plugins</a>, select the plus button, then Add custom MCP server.</span></li>
-                <li><span>Enter WhichSitesUse as the name and, under Connection, <code>https://api.whichsitesuse.com/mcp</code> as the server URL.</span></li>
-                <li><span>Choose OAuth for authentication and leave the client credentials empty, so ChatGPT registers itself.</span></li>
-                <li><span>Review the risk warning, tick I understand and want to continue, then select Create as a plugin and approve the connection on our consent page.</span></li>
-                <li><span>Install the plugin, start a new conversation, type @ and pick WhichSitesUse.</span></li>
-              </ol>
-              <p class="config-note">Steps from <a href="https://developers.openai.com/api/docs/guides/custom-mcp-server">OpenAI's custom MCP server guide</a>, checked November 2026. ChatGPT asks you to confirm write actions, so expect a prompt before <code>buy_credits</code> runs.</p>
-            </div>
-            <div class="row" id="claude-code">
-              <h3>Claude Code</h3>
-              <p>Add the server with an API key from your terminal. Leave out <code>--scope user</code> to add it to the current project only.</p>
-<pre class="config"><code>claude mcp add --transport http --scope user whichsitesuse \
-  https://api.whichsitesuse.com/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"</code></pre>
-            </div>
-            <div class="row" id="cursor">
-              <h3>Cursor</h3>
-              <p>Add the server to <code>~/.cursor/mcp.json</code> to use it in every project, or to <code>.cursor/mcp.json</code> in one project. Reading the key from an environment variable keeps it out of a file you might commit.</p>
-<pre class="config"><code>{
-  "mcpServers": {
-    "whichsitesuse": {
-      "url": "https://api.whichsitesuse.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${env:WSU_API_KEY}"
-      }
-    }
-  }
-}</code></pre>
-            </div>
-            <div class="row" id="other-clients">
-              <h3>Other clients and the REST API</h3>
-              <p>Any MCP client that supports remote Streamable HTTP servers can connect, either with OAuth (authorization code with PKCE, discovered from <code>/.well-known/oauth-protected-resource</code>) or with an API key in a request header. Anything that can make an HTTP request can use the REST API at <code>https://api.whichsitesuse.com/v1</code> with an API key; each operation below shows its REST method and path.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="responses">
-      <div class="wrap">
-        <p class="rule-label">// 03 &nbsp;Requests and responses</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Requests and responses</h2>
-            <p class="intro">MCP and REST share one definition of each operation, so the field names, limits and costs are the same on both.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Operations</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">MCP tool</th><th scope="col">REST</th><th scope="col">Cost</th><th scope="col">Sign-in needed</th></tr></thead>
-                  <tbody>
-                    <tr><td><a href="#find-technologies">find_technologies</a></td><td>GET /v1/technologies</td><td>Free</td><td>Not on REST</td></tr>
-                    <tr><td><a href="#count-sites">count_sites</a></td><td>GET /v1/counts</td><td>Free</td><td>Not on REST</td></tr>
-                    <tr><td><a href="#search-sites">search_sites</a></td><td>GET /v1/sites</td><td>1 credit per site returned</td><td>Yes</td></tr>
-                    <tr><td><a href="#lookup-domain">lookup_domain</a></td><td>GET /v1/domains/:domain</td><td>2 credits, free when not covered</td><td>Yes</td></tr>
-                    <tr><td><a href="#get-balance">get_balance</a></td><td>GET /v1/balance</td><td>Free</td><td>Yes</td></tr>
-                    <tr><td><a href="#buy-credits">buy_credits</a></td><td>POST /v1/checkout</td><td>Free to call</td><td>Yes</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="config-note">REST paths are relative to <code>https://api.whichsitesuse.com</code>. Over MCP every tool needs you signed in; over REST the two free search tools also answer without a key.</p>
-            </div>
-            <div class="row">
-              <h3>Inputs</h3>
-              <p>On REST, GET operations take their inputs as query parameters and <code>/v1/checkout</code> takes a JSON body. List inputs can be comma-separated (<code>technologies=shopify,klaviyo</code>) or repeated (<code>technologies=shopify&amp;technologies=klaviyo</code>). Over MCP, pass real arrays and objects.</p>
-            </div>
-            <div class="row">
-              <h3>The response envelope</h3>
-              <p>Every successful response, MCP or REST, wraps the result in the same envelope. Over MCP it comes back as the tool's structured content and as JSON text. Keep the attribution line when you publish results.</p>
-<pre class="config"><code>{
-  "data": { ... },
+        <h2 id="first-call">Make your first call</h2>
+        <p>Counting sites and looking up technologies are free, and on REST they work without a key, so you can try the API before you sign up. This call counts the sites in the top 100,000 that run Shopify and fail Largest Contentful Paint for real Chrome users on mobile:</p>
+<pre data-lang="bash"><code>curl "https://api.whichsitesuse.com/v1/counts?technologies=shopify&amp;max_rank=100000&amp;cwv=lcp:fail"</code></pre>
+        <p>The November 2026 crawl has 367 of them, most in the 50k to 100k popularity band:</p>
+<pre data-lang="json"><code>{
+  "data": {
+    "total": 367,
+    "by_rank_bucket": [
+      { "rank_bucket": 5000, "sites": 2 },
+      { "rank_bucket": 10000, "sites": 13 },
+      { "rank_bucket": 50000, "sites": 136 },
+      { "rank_bucket": 100000, "sites": 216 }
+    ],
+    "full_list_credits": 367
+  },
   "meta": {
-    "crawl_date": "YYYY-MM-DD",
+    "crawl_date": "2026-11-01",
     "credits_used": 0,
-    "credits_remaining": ...,
+    "credits_remaining": null,
     "attribution": "Technology data from HTTP Archive (httparchive.org), detected with its open-source Wappalyzer fork. Core Web Vitals from the Chrome UX Report."
   }
 }</code></pre>
-              <p class="config-note"><code>credits_remaining</code> is your balance after the call, or <code>null</code> for a REST call made without a key. <code>crawl_date</code> is the HTTP Archive crawl the answer came from.</p>
-            </div>
-          </div>
+        <p>Listing those sites costs a credit each, so the full list would be 367 credits, and like every paid call it needs an account. <a href="/docs/api/filters/">Site filters</a> covers every way to narrow a count, and <a href="/docs/api/">requests and responses</a> explains the envelope around it.</p>
+        <h2 id="api-key">Create an account and get an API key</h2>
+        <p>Every MCP connection and every paid call belongs to an account. Clients that sign in with OAuth, like Claude's and ChatGPT's custom connectors, only need the account, while Claude Code, Cursor and the REST API use an API key.</p>
+        <ol>
+        <li>Go to <a href="https://api.whichsitesuse.com/signup">the sign-up page</a> and enter your email. Use your work email if you want the free credits.</li>
+        <li>Open the link we email you and press the button on the page it opens. The sign-up link works once and lasts 24 hours, and later sign-in links last 30 minutes. Sign-in is always by emailed link, so there's no password to set.</li>
+        <li>Once your email is verified, a work email gets 250 credits, once. Personal and free-mail addresses can still sign up and buy credits, they just don't get the free grant, and if you think that call was wrong you can <a href="https://api.whichsitesuse.com/request-credits">ask for the credits</a>, where a person reads every request. Disposable addresses can't sign up.</li>
+        <li>If you'll use an API key, create one on your <a href="https://api.whichsitesuse.com/account">account page</a>. Give it a name, and if you like a monthly credit cap, which stops that key (and any agent using it) from spending more than you set in a calendar month (UTC).</li>
+        <li>Copy the key straight away. It starts with <code>wsu_live_</code>, it's shown once, and we only keep a hash of it. You can revoke a key or change its cap from the account page at any time.</li>
+        </ol>
+        <p>The free grant is one per person. It's held back when the same inbox already had one on another account, and also when the same device or several accounts from one network got one in the past week. Those last two holds lift on your first purchase.</p>
+        <p>Send a key as <code>Authorization: Bearer YOUR_API_KEY</code>. The API also accepts the bare key in the <code>Authorization</code> header, or in an <code>x-api-key</code> header, if your client can only set one of those.</p>
+        <h2 id="next-steps">Next steps</h2>
+        <ul>
+        <li><a href="/docs/connect/">Connect an MCP client</a> such as Claude, ChatGPT, Claude Code or Cursor.</li>
+        <li>Start with <a href="/docs/api/find-technologies/"><code>find_technologies</code></a> to get the slugs the other operations take.</li>
+        <li>See what each call costs and how plans work in <a href="/docs/credits/">credits and billing</a>.</li>
+        </ul>
+        <div class="free-grant">
+        <div>
+        <h3>Start with 250 free credits</h3>
+        <p>Sign up with your work email and pull a real list from your own market before you pay a cent.</p>
         </div>
-      </div>
-    </section>
+        <a class="btn btn-primary" href="https://api.whichsitesuse.com/signup">Get 250 free credits</a>
+        </div>
 
-    <section class="block" id="find-technologies">
-      <div class="wrap">
-        <p class="rule-label">// 04 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>find_technologies</code></h2>
-            <p class="intro">Matches a plain name like "hubspot" or a category like "email marketing" to the technologies in the dataset, with each one's slug, categories, a note where two products share a name, and how many sites use it. Call it first, then pass the slugs to the other tools. Free, and on REST it works without a key.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Inputs</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
-                  <tbody>
-                    <tr><td>q</td><td>string, 1 to 100 characters, required</td><td>A technology or category in plain words. Spaces and punctuation are ignored, so "Word Press" finds WordPress.</td></tr>
-                    <tr><td>limit</td><td>integer, 1 to 50, default 10</td><td>Most matches to return.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="config-note">Exact name or alias matches come first, then names that start with your words, then names that contain them, then category matches. Ties go to the technology on more sites.</p>
-            </div>
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>GET /v1/technologies</code></p>
-<pre class="config"><code>curl "https://api.whichsitesuse.com/v1/technologies?q=hubspot&amp;limit=5"</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "matches": [
-      {
-        "tech_id": ...,
-        "name": "...",
-        "slug": "...",
-        "categories": ["..."],
-        "vendor_domain": "example.com",
-        "note": "..." | null,
-        "site_count": ...
-      }
-    ]
-  },
-  "meta": { "crawl_date": "YYYY-MM-DD", "credits_used": 0, ... }
-}</code></pre>
-              <p class="config-note">Slugs are usually the name in lower case with hyphens, but take them from this tool rather than guessing.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="filters">
-      <div class="wrap">
-        <p class="rule-label">// 05 &nbsp;Site filters</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Site filters</h2>
-            <p class="intro"><code>count_sites</code> and <code>search_sites</code> share one filter definition, so a count always matches the list it prices. Pass <code>technologies</code>, <code>category</code> or both; the other fields narrow the result.</p>
-          </div>
-          <div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
-                <tbody>
-                  <tr><td>technologies</td><td>list of up to 20 slugs, each 1 to 100 characters</td><td>Slugs from find_technologies, such as ["shopify","klaviyo"].</td></tr>
-                  <tr><td>match</td><td>"all" or "any", default "all"</td><td>"all" needs every listed technology on the site, "any" needs at least one.</td></tr>
-                  <tr><td>exclude_technologies</td><td>list of up to 20 slugs</td><td>Drops sites that use any of these. A slug can't be both required and excluded.</td></tr>
-                  <tr><td>category</td><td>string, 1 to 100 characters</td><td>A technology category such as "Email marketing", case-insensitive. A site matches if it uses any technology in it.</td></tr>
-                  <tr><td>version</td><td>string, 1 to 50 characters</td><td>A version prefix for the matched technologies: "6.8" matches 6.8.1 but not 60.1.</td></tr>
-                  <tr><td>rank_buckets</td><td>list of up to 20 positive integers or "unknown"</td><td>Chrome UX Report popularity buckets as count_sites returns them: 1000 is the top 1k, 5000 is 1k to 5k, 500000 is 100k to 500k.</td></tr>
-                  <tr><td>max_rank</td><td>positive integer</td><td>Only sites in the top N, such as 100000 for the top 100k. Sites with an unknown rank are dropped.</td></tr>
-                  <tr><td>tld</td><td>list of up to 50, each 1 to 30 characters</td><td>Top-level domains such as ["com","co.uk"]. A leading dot is ignored.</td></tr>
-                  <tr><td>cwv</td><td>object with lcp, inp and cls, each "pass" or "fail"</td><td>Core Web Vitals at the 75th percentile. Pass means at or under Google's good threshold (LCP 2,500 ms, INP 200 ms, CLS 0.1). Sites without field data match neither. REST: <code>cwv=lcp:fail,inp:pass</code>.</td></tr>
-                  <tr><td>device</td><td>"mobile", "desktop" or "any", default "any"</td><td>With mobile or desktop, the technologies must be detected on that device and CWV uses that device's field data. With any, either device counts and CWV uses mobile.</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="config-note">An unknown slug or category is an <code>invalid_input</code> error that names it, and for slugs lists them in <code>unknown_technologies</code>, so an agent can look them up and retry.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="count-sites">
-      <div class="wrap">
-        <p class="rule-label">// 06 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>count_sites</code></h2>
-            <p class="intro">Counts the sites that match a filter, split by popularity bucket, and says what the full list would cost in <code>full_list_credits</code>. Free, and on REST it works without a key, so call it before <code>search_sites</code> to size and price a list.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Inputs</h3>
-              <p>The <a href="#filters">site filters</a>, nothing else.</p>
-            </div>
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>GET /v1/counts</code></p>
-<pre class="config"><code>curl "https://api.whichsitesuse.com/v1/counts?technologies=wordpress&amp;max_rank=1000000&amp;cwv=inp:fail"</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "total": ...,
-    "by_rank_bucket": [
-      { "rank_bucket": 1000, "sites": ... },
-      { "rank_bucket": 5000, "sites": ... },
-      { "rank_bucket": null, "sites": ... }
-    ],
-    "full_list_credits": ...
-  },
-  "meta": { "crawl_date": "YYYY-MM-DD", "credits_used": 0, ... }
-}</code></pre>
-              <p class="config-note">Buckets run from most popular to least, and <code>null</code> (unknown rank) comes last. <code>full_list_credits</code> equals <code>total</code>, because each site in a list costs one credit.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="search-sites">
-      <div class="wrap">
-        <p class="rule-label">// 07 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>search_sites</code></h2>
-            <p class="intro">Lists the sites that match a filter, best-ranked first, with the technologies that matched (versions and first and last seen dates) and a Core Web Vitals summary for each. Costs 1 credit per site returned.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Inputs</h3>
-              <p>The <a href="#filters">site filters</a>, plus:</p>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
-                  <tbody>
-                    <tr><td>limit</td><td>integer, 1 to 1000, default 100</td><td>Most sites to return in this call.</td></tr>
-                    <tr><td>max_credits</td><td>integer, 0 or more</td><td>Most credits this call may spend. The call returns fewer sites rather than spend more.</td></tr>
-                    <tr><td>cursor</td><td>string, 1 to 1000 characters</td><td>next_cursor from the previous page, unchanged.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="config-note">A page holds the smallest of <code>limit</code>, your balance, <code>max_credits</code>, what's left under the key's monthly cap, and 100 for accounts that haven't paid yet. If that comes to zero you get an <code>insufficient_credits</code> error with checkout links instead of an empty page, unless you passed <code>max_credits: 0</code>, which returns no sites, costs nothing and hands back the same cursor.</p>
-            </div>
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>GET /v1/sites</code></p>
-<pre class="config"><code>curl "https://api.whichsitesuse.com/v1/sites?technologies=shopify&amp;max_rank=100000&amp;tld=com&amp;limit=100&amp;max_credits=100" \
-  -H "Authorization: Bearer $WSU_API_KEY"</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "sites": [
-      {
-        "domain": "example.com",
-        "root_url": "https://example.com/",
-        "rank_bucket": ... | null,
-        "tld": "com",
-        "technologies": [
-          {
-            "name": "...",
-            "slug": "...",
-            "version": "..." | null,
-            "first_seen": "YYYY-MM-DD",
-            "last_seen": "YYYY-MM-DD",
-            "confidence": ...
-          }
-        ],
-        "cwv": {
-          "device": "mobile",
-          "lcp": { "p75": ... | null, "pass": true | false | null },
-          "inp": { "p75": ... | null, "pass": true | false | null },
-          "cls": { "p75": ... | null, "pass": true | false | null }
-        },
-        "source": "httparchive"
-      }
-    ],
-    "next_cursor": "..." | null
-  },
-  "meta": { "crawl_date": "YYYY-MM-DD", "credits_used": ..., "credits_remaining": ..., ... }
-}</code></pre>
-              <p class="config-note">Sites are ordered by popularity bucket, then by domain. <code>next_cursor</code> is <code>null</code> on the last page. LCP and INP are in milliseconds and CLS has no unit; <code>pass</code> is <code>null</code> when the site has no field data.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="lookup-domain">
-      <div class="wrap">
-        <p class="rule-label">// 08 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>lookup_domain</code></h2>
-            <p class="intro">Returns one domain's full stack, grouped by category, with versions and first and last seen dates, plus its popularity bucket and Core Web Vitals on mobile and desktop. Costs 2 credits. A domain that isn't in the crawl comes back as <code>covered: false</code> and costs nothing.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Inputs</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
-                  <tbody>
-                    <tr><td>domain</td><td>string, 1 to 2048 characters, required</td><td>A domain or URL. The scheme, path, port and a leading www. are ignored, so https://www.example.com/pricing looks up example.com.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>GET /v1/domains/:domain</code></p>
-<pre class="config"><code>curl "https://api.whichsitesuse.com/v1/domains/example.com" \
-  -H "Authorization: Bearer $WSU_API_KEY"</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "covered": true,
-    "domain": "example.com",
-    "root_url": "https://example.com/",
-    "rank_bucket": ... | null,
-    "tld": "com",
-    "stack": [
-      {
-        "category": "...",
-        "technologies": [
-          {
-            "name": "...",
-            "slug": "...",
-            "version": "..." | null,
-            "categories": ["..."],
-            "first_seen": "YYYY-MM-DD",
-            "last_seen": "YYYY-MM-DD",
-            "confidence": ...
-          }
-        ]
-      }
-    ],
-    "cwv": {
-      "mobile": { "device": "mobile", "lcp": { ... }, "inp": { ... }, "cls": { ... } },
-      "desktop": { "device": "desktop", "lcp": { ... }, "inp": { ... }, "cls": { ... } }
-    },
-    "last_crawl_date": "YYYY-MM-DD",
-    "source": "httparchive"
-  },
-  "meta": { "crawl_date": "YYYY-MM-DD", "credits_used": 2, ... }
-}</code></pre>
-              <p>When the domain isn't covered:</p>
-<pre class="config"><code>{
-  "data": {
-    "covered": false,
-    "domain": "example.com",
-    "message": "example.com isn't in this month's crawl. ... No credits were charged."
-  },
-  "meta": { "crawl_date": "YYYY-MM-DD", "credits_used": 0, ... }
-}</code></pre>
-              <p class="config-note">Each technology is grouped under its first category, and its <code>categories</code> field lists all of them. Something that isn't a domain, like a bare word, is an <code>invalid_input</code> error.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="get-balance">
-      <div class="wrap">
-        <p class="rule-label">// 09 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>get_balance</code></h2>
-            <p class="intro">Shows the credits you have left by bucket, your plan and its renewal date, this key's monthly cap and what it has used, and where to buy more. Free, and takes no inputs. Agents can call it before a large search, or after a checkout to see whether the credits have landed.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>GET /v1/balance</code></p>
-<pre class="config"><code>curl "https://api.whichsitesuse.com/v1/balance" \
-  -H "Authorization: Bearer $WSU_API_KEY"</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "credits": { "total": ..., "plan": ..., "topup": ..., "free": ... },
-    "plan": {
-      "id": "growth",
-      "name": "Growth",
-      "credits_per_month": 60000,
-      "renews_at": "YYYY-MM-DDTHH:MM:SSZ"
-    } | null,
-    "trial": {
-      "max_results_per_call": 100,
-      "calls_per_minute": 30,
-      "csv_export": false
-    } | null,
-    "key": { "name": "...", "monthly_credit_cap": ... | null, "credits_used_this_month": ... },
-    "buy_credits_url": "https://.../account",
-    "prices": "Credits: 1 per site in a list, 2 per domain lookup; ..."
-  },
-  "meta": { "credits_used": 0, ... }
-}</code></pre>
-              <p class="config-note"><code>plan</code> is <code>null</code> without a plan, and <code>trial</code> is <code>null</code> once the account has paid for anything.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="buy-credits">
-      <div class="wrap">
-        <p class="rule-label">// 10 &nbsp;Operation</p>
-        <div class="split">
-          <div class="section-head">
-            <h2><code>buy_credits</code></h2>
-            <p class="intro">Creates a checkout link for a top-up or a monthly plan. An agent can't pay, so it gives the link to the person it works for, who opens it and pays by card through Stripe. Free to call; nothing is charged until a person pays.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Inputs</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">Field</th><th scope="col">Type and limits</th><th scope="col">Notes</th></tr></thead>
-                  <tbody>
-                    <tr><td>item</td><td>"topup", "starter", "growth", "pro" or "scale", required</td><td>A top-up is $15 per 1,000 credits and lasts 12 months. The plans are listed under <a href="#credits">credits and billing</a>.</td></tr>
-                    <tr><td>units</td><td>integer, 1 to 100, default 1</td><td>Top-ups only: how many blocks of 1,000 credits.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="row">
-              <h3>Request</h3>
-              <p>REST: <code>POST /v1/checkout</code></p>
-<pre class="config"><code>curl -X POST "https://api.whichsitesuse.com/v1/checkout" \
-  -H "Authorization: Bearer $WSU_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"item": "topup", "units": 5}'</code></pre>
-            </div>
-            <div class="row">
-              <h3>Response</h3>
-<pre class="config"><code>{
-  "data": {
-    "checkout_url": "https://.../buy/...",
-    "item": "topup",
-    "label": "5,000 credits (top-up)",
-    "price": "$75",
-    "credits": 5000,
-    "next_step": "Give checkout_url to the person you're working for. It opens a secure Stripe checkout and stays valid for 7 days."
-  },
-  "meta": { "credits_used": 0, ... }
-}</code></pre>
-              <p class="config-note">A checkout link only pays into the account it was made for and grants nothing else, so it's safe to pass to whoever holds the card. If the account already has a plan, a plan link sends the owner to sign in and change it from billing instead, so nobody pays for two plans. Top-up links always work.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="credits">
-      <div class="wrap">
-        <p class="rule-label">// 11 &nbsp;Credits and billing</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Credits and billing</h2>
-            <p class="intro">A site in a list costs one credit and a domain lookup costs two. Counts, technology search, balance checks, checkout links and "not covered" lookups are free.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>Plans and top-ups</h3>
-              <div class="table-wrap">
-                <table class="plan-table">
-                  <thead>
-                    <tr><th scope="col"><span class="visually-hidden">Plan detail</span></th><th scope="col">Starter</th><th scope="col" class="is-rec">Growth <span class="rec-tag">Recommended</span></th><th scope="col">Pro</th><th scope="col">Scale</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr class="price-row"><th scope="row">Price</th><td><strong>$49</strong> /mo</td><td class="is-rec"><strong>$149</strong> /mo</td><td><strong>$399</strong> /mo</td><td><strong>$999</strong> /mo</td></tr>
-                    <tr><th scope="row">Credits each month</th><td>15,000</td><td class="is-rec">60,000</td><td>200,000</td><td>750,000</td></tr>
-                    <tr><th scope="row">item value</th><td>starter</td><td class="is-rec">growth</td><td>pro</td><td>scale</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="config-note">Top-ups are $15 per 1,000 credits, up to 100 blocks in one checkout, and last 12 months. You can buy them on any plan or with no plan at all.</p>
-            </div>
-            <div class="row">
-              <h3>Monthly reset and spend order</h3>
-              <p>Plan credits arrive when each monthly invoice is paid and don't roll over: whatever's left goes when the next month's credits land. Spending takes plan credits first, then top-up credits, then the free grant. If you cancel a plan, the credits you already have last until the end of that billing month.</p>
-              <p>Plans are changed or cancelled from the billing link on your account page, which opens Stripe's billing portal with your invoices and payment details.</p>
-            </div>
-            <div class="row">
-              <h3>When credits run out</h3>
-              <p>A call is charged after it runs, for what it actually returned, and <code>meta.credits_remaining</code> shows the balance afterwards. When a paid call can't be covered, it fails with HTTP 402 and the code <code>insufficient_credits</code>, and nothing is charged. The error says how many credits the call needed, how many were available, how many it was short, and why, in <code>reason</code>:</p>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th scope="col">reason</th><th scope="col">What it means</th><th scope="col">What to do</th></tr></thead>
-                  <tbody>
-                    <tr><td>balance</td><td>The account is out of credits.</td><td>Open one of the checkout links in <code>options</code>: a top-up that covers the shortfall, or the smallest plan that covers the call. Links last 7 days.</td></tr>
-                    <tr><td>max_credits</td><td>The call's max_credits is lower than its cost.</td><td>Raise max_credits or narrow the request.</td></tr>
-                    <tr><td>key_cap</td><td>This key or connected app has reached its monthly cap.</td><td>The account owner can raise the cap on the account page.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-<pre class="config"><code>{
-  "error": {
-    "code": "insufficient_credits",
-    "message": "This call costs ... credits and the balance is .... ...",
-    "credits_needed": ...,
-    "credits_available": ...,
-    "credits_short": ...,
-    "reason": "balance",
-    "options": [
-      { "item": "topup", "units": ..., "label": "...", "price": "...", "checkout_url": "https://.../buy/..." },
-      { "item": "...", "label": "...", "price": ".../month", "checkout_url": "https://.../buy/..." }
-    ],
-    "next_step": "A human opens a checkout_url and pays; the credits appear on the next get_balance."
-  }
-}</code></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="errors">
-      <div class="wrap">
-        <p class="rule-label">// 12 &nbsp;Errors</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Errors</h2>
-            <p class="intro">Errors have the same body on REST and MCP: <code>{"error": {"code", "message", ...details}}</code>. REST sets the HTTP status below; MCP returns the same JSON as a tool result marked as an error.</p>
-          </div>
-          <div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th scope="col">Code</th><th scope="col" class="num">HTTP</th><th scope="col">When</th></tr></thead>
-                <tbody>
-                  <tr><td>invalid_input</td><td class="num">400</td><td>A field is missing or invalid, or a slug, category, domain or cursor isn't recognised. <code>issues</code> lists each field and what's wrong with it.</td></tr>
-                  <tr><td>unauthorized</td><td class="num">401</td><td>A REST call to a paid or account operation had no key, or the key is invalid or revoked; a missing key also gets a <code>signup_url</code>. Over MCP, a request without a valid OAuth token or key gets HTTP 401 with a <code>WWW-Authenticate</code> header before any tool runs.</td></tr>
-                  <tr><td>insufficient_credits</td><td class="num">402</td><td>The call can't be covered by the balance, max_credits or the key's cap. See <a href="#credits">credits and billing</a>.</td></tr>
-                  <tr><td>account_suspended</td><td class="num">403</td><td>The account is suspended. Reply to any WhichSitesUse email to sort it out.</td></tr>
-                  <tr><td>not_found</td><td class="num">404</td><td>No such endpoint.</td></tr>
-                  <tr><td>rate_limited</td><td class="num">429</td><td>Too many calls this minute. Includes <code>retry_after_seconds</code> and <code>limit_per_minute</code>, and REST also sends a Retry-After header.</td></tr>
-                  <tr><td>internal</td><td class="num">500</td><td>Something went wrong on our side.</td></tr>
-                  <tr><td>billing_unavailable</td><td class="num">503</td><td>Accounts can't be checked on the server right now.</td></tr>
-                  <tr><td>snapshot_unavailable</td><td class="num">503</td><td>The monthly dataset is loading. Try again in a few minutes.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="rate-limits">
-      <div class="wrap">
-        <p class="rule-label">// 13 &nbsp;Rate limits</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Rate limits and trial limits</h2>
-            <p class="intro">Limits count calls in one-minute windows. Signed-in calls count against the account, so every key and connected app on it shares one limit.</p>
-          </div>
-          <div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th scope="col">Caller</th><th scope="col" class="num">Calls a minute</th><th scope="col">Counted per</th></tr></thead>
-                <tbody>
-                  <tr><td>No key (REST find_technologies and count_sites only)</td><td class="num">30</td><td>IP address</td></tr>
-                  <tr><td>Account that hasn't paid yet</td><td class="num">30</td><td>Account</td></tr>
-                  <tr><td>Account that has paid</td><td class="num">300</td><td>Account</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="config-note">Until an account's first purchase, a call also returns at most 100 results, whatever <code>limit</code> says. Both limits lift as soon as the account pays for a plan or a top-up. The sign-up and sign-in forms send at most 10 emails an hour from one IP address.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="data">
-      <div class="wrap">
-        <p class="rule-label">// 14 &nbsp;Data</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Data freshness and coverage</h2>
-          </div>
-          <div class="prose">
-            <p>Every answer comes from a monthly snapshot of <a href="https://httparchive.org">HTTP Archive</a>'s public crawl, which tests the homepage and one inner page of about 15 million sites that real Chrome users visit. Technologies are detected with <a href="https://github.com/HTTPArchive/wappalyzer">HTTP Archive's fork of the Wappalyzer rules</a>, and Core Web Vitals are <a href="https://developer.chrome.com/docs/crux">Chrome UX Report</a> field data from the newest month at or before the crawl.</p>
-            <p>We load each crawl once HTTP Archive has finished publishing it, so a result can be up to about six weeks old. <code>meta.crawl_date</code> tells you which crawl you're looking at, and <code>first_seen</code> and <code>last_seen</code> on each technology are the first and latest crawls in which we saw it on that site. Our history starts with our first snapshot, so <code>first_seen</code> can be later than the day a site really added something.</p>
-            <p>Sites with little Chrome traffic are often missing from the crawl, and a lookup on one says "not covered" and costs nothing. Detection only sees what loads on public pages, so tools that live behind a login, like a CRM's back office or payroll software, don't show up. A site that blocks the crawler or loads a tool only after some interaction may also look like it doesn't use it. The data has no company firmographics, contacts or emails.</p>
-            <p>For how teams put this data to work, read the <a href="/technographics/">technographics guide</a>, or see how WhichSitesUse compares with <a href="/builtwith-alternative/">BuiltWith</a> and <a href="/wappalyzer-alternative/">Wappalyzer</a>.</p>
-            <div class="free-grant">
-              <div>
-                <h3>Start with 250 free credits</h3>
-                <p>Sign up with your work email and pull a real list from your own market before you pay a cent.</p>
-              </div>
-              <a class="btn btn-primary" href="https://api.whichsitesuse.com/signup">Get 250 free credits</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+        <nav class="docs-pager" aria-label="Previous and next">
+          <a class="next" href="/docs/connect/"><span class="label">Next</span>Connect an MCP client</a>
+        </nav>
+      </article>
+      <aside class="docs-toc">
+        <p class="label">On this page</p>
+        <ol id="docs-toc"></ol>
+      </aside>
+    </main>
+  </div>
 
   <!-- @partial footer -->
   <footer class="site-footer">
@@ -748,6 +162,6 @@
   </footer>
   <!-- @end footer -->
 
-  <script>document.getElementById("year").textContent = String(new Date().getFullYear());</script>
+  <script src="/docs/docs.js" defer></script>
 </body>
 </html>

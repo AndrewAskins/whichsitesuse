@@ -105,6 +105,20 @@
   .docs-menu[open] > summary::after { content: "−"; }
   .docs-menu[open] .docs-nav { padding-bottom: var(--s4); }
   .docs-main { padding-top: var(--s5); }
-  .docs-pager { grid-template-columns: 1fr; }
+  .docs-pager { grid-template-columns: minmax(0, 1fr); }
   .docs-pager .next { grid-column: 1; }
+  .docs-nav a { padding: 10px; }
+  .docs-menu > summary { padding: 18px 0; }
+}
+@media (max-width: 640px) {
+  .docs-main { padding-bottom: var(--s7); }
+  .docs-lede { font-size: 17px; margin-bottom: var(--s5); }
+  .docs-article h2 { font-size: 23px; margin-top: var(--s5); }
+  /* Long inline code (URLs, header values) wraps instead of pushing the page sideways */
+  .docs-article :not(pre) > code { white-space: normal; overflow-wrap: anywhere; }
+  .code pre { padding: var(--s3); font-size: 12.5px; }
+  .code-copy { padding: 9px 12px; }
+  .endpoint { flex-wrap: wrap; row-gap: 6px; }
+  /* Field names may wrap so the description column keeps a readable width */
+  .docs-article td:first-child { white-space: normal; overflow-wrap: anywhere; width: 42%; font-size: 12.5px; }
 }

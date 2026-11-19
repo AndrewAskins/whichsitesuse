@@ -28,7 +28,7 @@
 .docs-lede { font-size: 18px; line-height: 1.6; color: var(--muted); margin-bottom: var(--s6); max-width: 64ch; }
 .docs-article h2 {
   font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 600; max-width: none;
-  margin: var(--s7) 0 var(--s3); padding-top: var(--s5); border-top: 1px solid var(--rule);
+  margin: var(--s6) 0 var(--s3); padding-top: var(--s4); border-top: 1px solid var(--rule);
   scroll-margin-top: var(--s4);
 }
 .docs-article h3 { font-size: 18px; line-height: 1.35; font-weight: 600; margin: var(--s5) 0 var(--s2); scroll-margin-top: var(--s4); }
@@ -46,8 +46,11 @@
 }
 .docs-article h1 code, .docs-article h2 code { border: 0; background: none; padding: 0; white-space: normal; }
 .docs-article .table-wrap { margin: var(--s3) 0 var(--s4); }
-.docs-article table { font-size: 14px; }
-.docs-article td:first-child code, .docs-article td:first-child { white-space: nowrap; }
+.docs-article table { font: 400 14px/1.55 var(--sans); margin-bottom: var(--s3); }
+.docs-article th { font-family: var(--mono); }
+.docs-article td { vertical-align: top; }
+.docs-article td:first-child { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+.docs-article .endpoint + h2, .docs-lede + h2 { margin-top: var(--s5); }
 .docs-article .note { font-size: 14px; line-height: 1.6; color: var(--muted); }
 .docs-callout { border: 1px solid var(--rule); box-shadow: inset 3px 0 0 var(--moon); background: var(--surface); padding: var(--s3) var(--s4); margin: var(--s4) 0; }
 .docs-callout p:last-child { margin: 0; }

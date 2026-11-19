@@ -1,7 +1,7 @@
 import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
 import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -221,6 +221,19 @@ describe("routes", () => {
       expect(t.sites_label).toMatch(/ sites$/);
     }
     expect(body.crawl_date).toBe(plan.data.crawl_date);
+    const icon = Object.fromEntries((body.technologies as unknown as { slug: string; icon: string | null }[]).map((t) => [t.slug, t.icon]));
+    expect(icon.klaviyo).toBe("https://whichsitesuse.com/logos/klaviyo.svg");
+    expect(icon.doppler ?? "").not.toContain("/logos/");
+  });
+
+  it("gives every homepage tile a vector logo in site/logos", () => {
+    const html = readFileSync(new URL("../site/index.html", import.meta.url), "utf8");
+    const slugs = [...html.matchAll(/data-slug="([a-z0-9-]+)"/g)].map((m) => m[1]);
+    expect(slugs.length).toBeGreaterThan(0);
+    for (const slug of slugs) {
+      expect(html).toContain(`<img src="/logos/${slug}.svg"`);
+      expect(existsSync(new URL(`../site/logos/${slug}.svg`, import.meta.url))).toBe(true);
+    }
   });
 
   it("404s an unknown technology", async () => {

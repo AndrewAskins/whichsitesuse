@@ -363,6 +363,8 @@ pre.config {
    The icon sits over a letter, so a missing icon still reads as a tile. */
 .ti { position: relative; display: inline-grid; place-items: center; flex: none; background: var(--surface); border: 1px solid var(--rule); font: 600 14px/1 var(--sans); color: var(--muted); overflow: hidden; }
 .ti img { position: absolute; inset: 15%; width: 70%; height: 70%; object-fit: contain; background: var(--surface); }
+/* Our own vector logos sit on a white chip in both themes, so dark marks stay visible in dark mode */
+.ti-logo, .ti-logo img { background: #fff; }
 .ti-s { width: 28px; height: 28px; font-size: 12px; }
 .ti-m { width: 40px; height: 40px; }
 .ti-l { width: 72px; height: 72px; font-size: 28px; }

@@ -51,8 +51,6 @@
           if (!t) return;
           var meta = a.querySelector(".seo-card-text span");
           if (meta) meta.textContent = t.sites_label + (t.category ? " · " + t.category : "");
-          var img = a.querySelector(".ti img");
-          if (img && t.icon && img.getAttribute("src") !== t.icon) img.setAttribute("src", t.icon);
         });
       })
       .catch(function () {});

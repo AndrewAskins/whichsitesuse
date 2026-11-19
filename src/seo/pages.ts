@@ -1,4 +1,5 @@
 import { TECH_ICON_BASE } from "./catalog.js";
+import { logoUrl } from "./logos.js";
 import { SEO_RULES, type SeoRules } from "./config.js";
 import type { RankRow, SeoCategory, SeoDataset, SeoTechnology } from "./dataset.js";
 import { absolute, esc, jsonLd, renderShell, type Crumb } from "./layout.js";
@@ -131,7 +132,7 @@ export function techTiles(plan: PagePlan, slugs: string[]): { crawl_date: string
         sites: t.sites,
         sites_label: `${compact(t.sites)} sites`,
         category: plan.categoriesFor(t)[0]?.name ?? null,
-        icon: t.icon ? TECH_ICON_BASE + encodeURIComponent(t.icon) : null,
+        icon: logoUrl(t.slug) ?? (t.icon ? TECH_ICON_BASE + encodeURIComponent(t.icon) : null),
         path: techPath(t.slug),
       }];
     });
@@ -140,11 +141,16 @@ export function techTiles(plan: PagePlan, slugs: string[]): { crawl_date: string
 
 // ---------- small pieces ----------
 
-/** A technology's logo from HTTP Archive's CDN over a letter tile, so a missing icon still looks deliberate. */
-export function techIcon(t: Pick<SeoTechnology, "name" | "icon">, size: "s" | "m" | "l" = "m"): string {
-  const file = t.icon ?? `${t.name}.png`;
+/**
+ * A technology's logo over a letter tile, so a missing icon still looks deliberate: our own vector
+ * logo where site/logos has one (on a light chip, so dark marks read in dark mode), otherwise
+ * HTTP Archive's CDN icon.
+ */
+export function techIcon(t: Pick<SeoTechnology, "slug" | "name" | "icon">, size: "s" | "m" | "l" = "m"): string {
+  const vector = logoUrl(t.slug);
+  const src = vector ?? TECH_ICON_BASE + encodeURIComponent(t.icon ?? `${t.name}.png`);
   const letter = esc((t.name.match(/[A-Za-z0-9]/)?.[0] ?? "?").toUpperCase());
-  return `<span class="ti ti-${size}" aria-hidden="true"><span>${letter}</span><img src="${esc(TECH_ICON_BASE + encodeURIComponent(file))}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>`;
+  return `<span class="ti ti-${size}${vector ? " ti-logo" : ""}" aria-hidden="true"><span>${letter}</span><img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>`;
 }
 
 /** A site's favicon over a letter tile. */

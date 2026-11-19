@@ -1,7 +1,7 @@
 import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
 import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -207,6 +207,33 @@ describe("routes", () => {
       expect(res.headers.get("content-type")).toBe("image/png");
     }
     expect((await fetch(`${base}/og/companies-using/nope.png`)).status).toBe(404);
+  });
+
+  it("serves homepage tiles with live counts, in the order asked", async () => {
+    const res = await fetch(`${base}/companies-using/technologies.json?slugs=klaviyo,nope,doppler,klaviyo`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=3600");
+    const body = (await res.json()) as { crawl_date: string; technologies: { slug: string; sites: number; path: string; sites_label: string }[] };
+    expect(body.technologies.map((t) => t.slug)).toEqual(["klaviyo", "doppler"]);
+    for (const t of body.technologies) {
+      expect(t.sites).toBe(plan.tech.get(t.slug)!.sites);
+      expect(t.path).toBe(`/companies-using/${t.slug}/`);
+      expect(t.sites_label).toMatch(/ sites$/);
+    }
+    expect(body.crawl_date).toBe(plan.data.crawl_date);
+    const icon = Object.fromEntries((body.technologies as unknown as { slug: string; icon: string | null }[]).map((t) => [t.slug, t.icon]));
+    expect(icon.klaviyo).toBe("https://whichsitesuse.com/logos/klaviyo.svg");
+    expect(icon.doppler ?? "").not.toContain("/logos/");
+  });
+
+  it("gives every homepage tile a vector logo in site/logos", () => {
+    const html = readFileSync(new URL("../site/index.html", import.meta.url), "utf8");
+    const slugs = [...html.matchAll(/data-slug="([a-z0-9-]+)"/g)].map((m) => m[1]);
+    expect(slugs.length).toBeGreaterThan(0);
+    for (const slug of slugs) {
+      expect(html).toContain(`<img src="/logos/${slug}.svg"`);
+      expect(existsSync(new URL(`../site/logos/${slug}.svg`, import.meta.url))).toBe(true);
+    }
   });
 
   it("404s an unknown technology", async () => {

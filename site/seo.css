@@ -16,13 +16,6 @@
 .seo-stats dd small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; }
 @media (max-width: 720px) { .seo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* Logo tiles: the icon sits over a letter, so a missing icon still reads as a tile */
-.ti { position: relative; display: inline-grid; place-items: center; flex: none; background: var(--surface); border: 1px solid var(--rule); font: 600 14px/1 var(--sans); color: var(--muted); overflow: hidden; }
-.ti img { position: absolute; inset: 15%; width: 70%; height: 70%; object-fit: contain; background: var(--surface); }
-.ti-s { width: 28px; height: 28px; font-size: 12px; }
-.ti-m { width: 40px; height: 40px; }
-.ti-l { width: 72px; height: 72px; font-size: 28px; }
-
 /* Blocks: a heading row with an optional action, then the content */
 .seo-block { padding: 0 0 var(--s7); }
 .seo-block-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--rule); }
@@ -30,16 +23,9 @@
 .seo-note { margin: var(--s3) 0 0; font: 400 12px/1.6 var(--mono); color: var(--muted); }
 .seo-lead { margin: 0 0 var(--s4); max-width: 62ch; }
 
-/* Card grids */
-.seo-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+/* Card grids (tiles and cards are shared with the homepage, in styles.css) */
 .seo-sites { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-.seo-chips { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .seo-cats { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-.seo-card { display: flex; align-items: center; gap: var(--s3); padding: var(--s3); background: var(--surface); border: 1px solid var(--rule); color: var(--ink); text-decoration: none; min-width: 0; height: 100%; }
-a.seo-card:hover { border-color: var(--ink); }
-.seo-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.seo-card-text strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.seo-card-text span { font: 400 12px/1.4 var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seo-cat { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s4); background: var(--surface); border: 1px solid var(--rule); color: var(--ink); text-decoration: none; height: 100%; }
 .seo-cat:hover { border-color: var(--ink); }
 .seo-cat-icons { display: flex; gap: 6px; margin-bottom: var(--s1); }

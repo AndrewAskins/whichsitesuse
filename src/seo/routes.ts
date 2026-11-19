@@ -1,6 +1,6 @@
 import { Router, type Response } from "express";
 import type { PagePlan, RenderedPage } from "./pages.js";
-import { renderCategoryIndex, renderCategoryPage, renderHub, renderSitemap, renderTechPage } from "./pages.js";
+import { renderCategoryIndex, renderCategoryPage, renderHub, renderSitemap, renderTechPage, techTiles } from "./pages.js";
 
 /**
  * The programmatic pages. whichsitesuse.com serves them through Render rewrites
@@ -28,6 +28,14 @@ export function seoRouter(getPlan: () => PagePlan | null): Router {
   router.get("/companies-using/", (_req, res) => {
     const plan = getPlan();
     send(res, plan ? renderHub(plan) : null);
+  });
+  // Tiles for the homepage: name, icon and live site count per technology (?slugs=shopify,hubspot).
+  // Registered before /:slug so the .json name isn't read as a technology.
+  router.get("/companies-using/technologies.json", (req, res) => {
+    const plan = getPlan();
+    if (!plan) return res.status(503).json({ error: { code: "snapshot_unavailable", message: "The monthly dataset is loading. Try again in a few minutes." } });
+    const slugs = typeof req.query.slugs === "string" ? req.query.slugs.split(",") : [];
+    res.set("Cache-Control", "public, max-age=3600").json(techTiles(plan, slugs));
   });
   router.get("/companies-using/:slug", (req, res) => slash(req.path, res));
   router.get("/companies-using/:slug/", (req, res) => {

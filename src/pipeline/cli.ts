@@ -1,3 +1,4 @@
+import { BigQuery, type Query } from "@google-cloud/bigquery";
 import { loadConfig } from "../config.js";
 import { log } from "../log.js";
 import {
@@ -12,7 +13,7 @@ import {
   run,
 } from "./bigquery.js";
 import { runMonthly } from "./monthly.js";
-import { EXTRACT_SQL, MEASURE_SQL } from "./sql.js";
+import { EXTRACT_SQL, MEASURE_SQL, SAMPLE_COUNTS_SQL, SAMPLE_CWV_SQL, SAMPLE_STACK_SQL } from "./sql.js";
 
 const GIB = 1024 ** 3;
 const round = (n: number, digits = 2) => Math.round(n * 10 ** digits) / 10 ** digits;
@@ -21,6 +22,7 @@ const round = (n: number, digits = 2) => Math.round(n * 10 ** digits) / 10 ** di
  * The pipeline cron job. PIPELINE_MODE (or the first argument) picks what it does:
  *   dry-run  report the bytes the extract would scan, for free
  *   measure  run an aggregate-only version of the extract: rows, sites, detections per site, size
+ *   sample   one real domain's stack and CWV plus a few technology counts (each dry-run first)
  *   monthly  export to GCS, build the Parquet snapshot, publish it to R2
  */
 async function main() {
@@ -83,6 +85,28 @@ async function main() {
       },
       "PIPELINE MEASURE",
     );
+    return;
+  }
+
+  if (mode === "sample") {
+    const origin = config.SAMPLE_ORIGIN.replace(/\/+$/, "");
+    const queries: Record<string, Query> = {
+      stack: { query: SAMPLE_STACK_SQL, params: { crawl_date: BigQuery.date(crawlDate), root_page: `${origin}/` } },
+      cwv: { query: SAMPLE_CWV_SQL, params: { crux_date: cruxDate ? BigQuery.date(cruxDate) : null, origin }, types: cruxDate ? undefined : { crux_date: "DATE" } },
+      counts: {
+        query: SAMPLE_COUNTS_SQL,
+        params: { crawl_date: BigQuery.date(crawlDate), technologies: config.SAMPLE_TECHNOLOGIES.split(",").map((t) => t.trim()) },
+      },
+    };
+    for (const [name, query] of Object.entries(queries)) {
+      const { bytes } = await dryRun(bq, query);
+      if (bytes > config.SAMPLE_MAX_GIB * GIB) {
+        log.warn({ name, gib: round(bytes / GIB) }, "PIPELINE SAMPLE skipped: dry run over SAMPLE_MAX_GIB");
+        continue;
+      }
+      const { rows, bytesBilled } = await run<Record<string, unknown>>(bq, query, cap);
+      log.info({ sample: name, crawl_date: crawlDate, crux_date: cruxDate, origin, bytes_billed_gib: round(bytesBilled / GIB), rows }, "PIPELINE SAMPLE");
+    }
     return;
   }
 

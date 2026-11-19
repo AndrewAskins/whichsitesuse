@@ -166,6 +166,9 @@ GET ${API}/v1/sites?${esc(filter)}&amp;max_rank=100000</code></pre>
           <div class="seo-cta-actions"><a class="btn btn-primary" href="${API}/signup">Get 250 free credits</a><a class="btn btn-secondary" href="/docs/">Read the docs</a></div>
         </div>`;
 
+/** A category name inside a sentence: "Ecommerce" becomes "ecommerce", while "CMS", "PaaS" and "A/B" keep their capitals. */
+export const lowerName = (name: string) => name.replace(/[A-Za-z][\w/-]*/g, (w) => (/^[A-Z0-9/-]{2,}$/.test(w) || /[A-Z].*[A-Z]/.test(w) ? w : w.toLowerCase()));
+
 // ---------- technology page ----------
 
 /** The H1 of a technology page: the researched keyword where there is one, else "Which sites use X?". */
@@ -266,7 +269,7 @@ ${rankRows
     if (peers.length > 0) {
       sections += block(
         "alternatives",
-        `Other ${esc(main.name.toLowerCase())}`,
+        `Other ${esc(lowerName(main.name))}`,
         `        <ul class="seo-grid seo-chips">
 ${peers.map((s) => `          <li>${techCard(plan, plan.tech.get(s)!, `${compact(plan.tech.get(s)!.sites)} sites`)}</li>`).join("\n")}
         </ul>`,
@@ -346,7 +349,7 @@ ${peers.map((s) => `          <li>${techCard(plan, plan.tech.get(s)!, `${compact
     html: renderShell({
       path,
       title: `${titleStart}: ${n(t.sites)} websites (${month}) | WhichSitesUse`,
-      description: `${n(t.sites)} websites ran ${t.name} in HTTP Archive's ${month} crawl. See the top sites using it, what they run alongside it, and pull the full list.`,
+      description: `${n(t.sites)} websites ran ${t.name} in HTTP Archive's ${month} crawl. See the top sites using it${co.length >= 3 ? ", what they run alongside it" : ""} and pull the full list.`,
       indexable,
       crumbs,
       ogImage: ogImage(path),
@@ -356,7 +359,7 @@ ${peers.map((s) => `          <li>${techCard(plan, plan.tech.get(s)!, `${compact
         dataset({
           path,
           name: `Websites using ${t.name}, ${month}`,
-          description: `Number of websites running ${t.name} in HTTP Archive's ${month} crawl of ${n(total)} sites, split by Chrome UX Report popularity bucket, with the highest-ranked sites, technologies used alongside it and top-level domains.`,
+          description: `Number of websites running ${t.name} in HTTP Archive's ${month} crawl of ${n(total)} sites, split by Chrome UX Report popularity bucket, with the highest-ranked sites${co.length >= 3 ? ", technologies used alongside it" : ""} and top-level domains.`,
           month: data.crawl_date.slice(0, 7),
           dateModified: data.built_at.slice(0, 10),
           measured: ["Websites", "Share of crawled websites", "Websites by popularity bucket"],
@@ -382,7 +385,7 @@ export function renderCategoryPage(plan: PagePlan, slug: string): RenderedPage |
   const leader = techs[0]!;
   const path = categoryPath(slug);
   const indexable = plan.indexedCategory.has(slug);
-  const lower = esc(c.name.toLowerCase());
+  const lower = esc(lowerName(c.name));
   const base = c.sites_estimate > 0 ? c.sites_estimate : leader.sites;
 
   const rows = techs
@@ -404,7 +407,7 @@ ${rows}
     ) +
     `
     <section class="seo-block" id="list">
-      <div class="wrap">${listCta(c.sites_estimate, `category=${encodeURIComponent(c.name)}`, `${c.name.toLowerCase()} sites`)}
+      <div class="wrap">${listCta(c.sites_estimate, `category=${encodeURIComponent(c.name)}`, `${lowerName(c.name)} sites`)}
       </div>
     </section>`;
 
@@ -422,18 +425,18 @@ ${rows}
     html: renderShell({
       path,
       title: `${c.name} market share, ${month}: ${techs.length} technologies ranked | WhichSitesUse`,
-      description: `The most popular ${c.name.toLowerCase()} technologies by number of websites in HTTP Archive's ${month} crawl. ${leader.name} leads with ${n(leader.sites)} sites.`,
+      description: `The most popular ${lowerName(c.name)} technologies by number of websites in HTTP Archive's ${month} crawl. ${leader.name} leads with ${n(leader.sites)} sites.`,
       indexable,
       crumbs: [{ name: "Home", path: "/" }, { name: "Companies using", path: HUB_PATH }, { name: "Categories", path: "/categories/" }, { name: c.name }],
       ogImage: ogImage(path),
       dateModified: data.built_at.slice(0, 10),
       pageType: "CollectionPage",
       structuredData: [
-        itemList(`Most popular ${c.name.toLowerCase()} technologies`, techs.map((t) => ({ name: t.name, path: techPath(t.slug) }))),
+        itemList(`Most popular ${lowerName(c.name)} technologies`, techs.map((t) => ({ name: t.name, path: techPath(t.slug) }))),
         dataset({
           path,
           name: `${c.name} market share, ${month}`,
-          description: `Number of websites running each ${c.name.toLowerCase()} technology in HTTP Archive's ${month} crawl of ${n(total)} sites, with each one's share of the category and of the top 10k sites.`,
+          description: `Number of websites running each ${lowerName(c.name)} technology in HTTP Archive's ${month} crawl of ${n(total)} sites, with each one's share of the category and of the top 10k sites.`,
           month: data.crawl_date.slice(0, 7),
           dateModified: data.built_at.slice(0, 10),
           measured: ["Websites", "Share of category", "Share of top 10k sites"],
@@ -554,7 +557,7 @@ ${cats.map((c) => `          <li>${categoryCard(plan, c)}</li>`).join("\n")}
       "how",
       "From a technology to a list of companies",
       `        <ol class="seo-steps">
-          <li><strong>Pick a technology</strong><span>Each page shows how many sites run it, the top ones, and what they run alongside it.</span></li>
+          <li><strong>Pick a technology</strong><span>Each page shows how many sites run it and the biggest ones, with the full list a click away.</span></li>
           <li><strong>Count for free</strong><span><code>count_sites</code> sizes any filter, by popularity, TLD, other technologies or Core Web Vitals, and tells you what the list would cost.</span></li>
           <li><strong>Pull the domains</strong><span><code>search_sites</code> returns the sites at 1 credit each, from Claude, ChatGPT or the REST API. Take them to your enrichment tool for contacts.</span></li>
         </ol>`,

@@ -111,18 +111,25 @@ other than `GCP_PROJECT_ID`.
 
 ## Programmatic pages
 
-`/companies-using/<slug>/` for every technology with at least 100 sites, plus `/categories/` and
-`/categories/<slug>/`. The plan (templates, quality bar, rollout) is the Notion page "WhichSitesUse
+`/companies-using/` (a searchable hub), `/companies-using/<slug>/` for every technology with at least
+100 sites, plus `/categories/` and `/categories/<slug>/`. Each page leads with its list (top sites, or
+technologies ranked) and keeps the explanation and FAQ below it. The plan (templates, quality bar, rollout) is the Notion page "WhichSitesUse
 programmatic SEO plan"; the thresholds live only in `src/seo/config.ts`.
 
 - `src/seo/dataset.ts` turns a snapshot into one JSON file per month: counts by popularity bucket, the
-  best-ranked sites, co-usage from a hash sample, CWV pass rates, versions, TLDs and categories.
+  best-ranked sites, co-usage from a hash sample, CWV pass rates, versions, TLDs and categories, plus each
+  technology's logo and description from HTTP Archive's Tech Report catalog (`src/seo/catalog.ts`).
   The pipeline writes it to R2 as `seo/<month>/dataset.json` with its own pointer, `seo/current.json`.
 - `src/seo/pages.ts` renders the pages from that file with the site's shared partials
   (`scripts/site-partials`) and `site/seo.css`. A section only shows when its data clears the bar in `SEO_RULES`.
+  Keyword headings and detection notes for a few technologies (Shopify, HubSpot, Salesforce, Stripe) live in
+  `src/seo/overrides.ts`; numbers never go there.
+- Every page has its own title, description, canonical, Open Graph and Twitter tags, and one JSON-LD graph built
+  with `src/seo/schema.ts`. Its OG image is drawn on request at `https://api.whichsitesuse.com/og/<path>.png`
+  (`src/og/routes.ts`, using the shared card in `src/og/card.ts`).
 - The API serves them (`src/seo/routes.ts`) and whichsitesuse.com reaches them through Render rewrites on the
   static site: `/companies-using/*`, `/categories/*` and `/sitemaps/*` to the same path on `https://api.whichsitesuse.com`.
-  Render serves a real file before a rewrite, so the hand-written pages in `site/companies-using/` win.
+  Render serves a real file before a rewrite, so keep `site/companies-using/` and `site/categories/` empty.
   The API host's own robots.txt disallows these paths, so only the whichsitesuse.com copies get indexed.
 - `npm run seo:export -- <dataset.json> <outDir>` writes the site plus every page as static files, for previews.
 

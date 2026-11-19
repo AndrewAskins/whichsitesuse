@@ -11,6 +11,7 @@ import { SEO_RULES, type SeoRules } from "../src/seo/config.js";
 import { buildSeoDataset, type SeoDataset } from "../src/seo/dataset.js";
 import { exportSite } from "../src/seo/export.js";
 import {
+  lowerName,
   PagePlan,
   rankLabels,
   renderCategoryIndex,
@@ -238,5 +239,17 @@ describe("static export", () => {
     expect(await readFile(join(out, "companies-using", "shopify", "index.html"), "utf8")).toBe("hand-written");
     expect(existsSync(join(out, "companies-using", "klaviyo", "index.html"))).toBe(true);
     expect(existsSync(join(out, "sitemaps", "technologies.xml"))).toBe(true);
+  });
+});
+
+describe("lowerName", () => {
+  it("lowercases category names but keeps acronyms", () => {
+    expect(["Ecommerce", "CMS", "A/B Testing", "PaaS", "JavaScript frameworks"].map(lowerName)).toEqual([
+      "ecommerce",
+      "CMS",
+      "A/B testing",
+      "PaaS",
+      "JavaScript frameworks",
+    ]);
   });
 });

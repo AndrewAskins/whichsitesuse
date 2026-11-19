@@ -315,3 +315,45 @@ pre.config {
 .free-grant p { max-width: 52ch; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .free-grant { background: color-mix(in srgb, var(--moon) 7%, var(--surface)); } }
 :root[data-theme="dark"] .free-grant { background: color-mix(in srgb, var(--moon) 7%, var(--surface)); }
+
+/* Footer links (shared footer partial) */
+.footer-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s4); flex-basis: 100%; margin-bottom: var(--s4); }
+.footer-nav div { display: flex; flex-direction: column; gap: 6px; }
+.footer-nav .label { margin: 0 0 4px; }
+.footer-nav a { color: var(--ink); text-decoration: none; }
+.footer-nav a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .footer-nav { grid-template-columns: 1fr 1fr; } }
+
+/* Inner pages: page hero, breadcrumbs, a draft notice and a contents list */
+.page-hero { padding: var(--s7) 0 var(--s5); }
+.page-hero h1 { max-width: 20ch; }
+.page-hero .lede { max-width: 62ch; }
+.crumbs { font: 500 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s4); }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--ink); text-decoration: underline; }
+.draft-banner { border: 1px solid var(--rule); box-shadow: inset 4px 0 0 var(--moon); background: color-mix(in srgb, var(--moon) 12%, var(--surface)); padding: var(--s3) var(--s4); font: 500 13px/1.6 var(--mono); margin-bottom: var(--s5); }
+.toc { list-style: none; padding: 0; margin: 0; font: 400 13px/1.9 var(--mono); }
+.toc a { color: var(--muted); text-decoration: none; }
+.toc a:hover { color: var(--ink); text-decoration: underline; }
+.callout { border: 1px solid var(--rule); padding: var(--s4); background: var(--surface); }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.card-grid > a, .card-grid > div { display: block; padding: var(--s4); border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); }
+.card-grid > a:hover { background: var(--surface); }
+.card-grid h3 { margin: 0 0 var(--s2); }
+.card-grid p { color: var(--muted); margin: 0; }
+
+/* Homepage lookup: "data loading" line shown until the API has a snapshot */
+.lookup-status { margin-top: var(--s2); }
+.lookup-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; background: var(--moon); vertical-align: 1px; animation: blink 1.2s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) { .lookup-status::before { animation: none; } }
+.turnstile-box:not(:empty) { margin-top: var(--s3); }
+
+/* Inner page prose: lists, spacing after tables and code */
+.prose ul, .prose ol { padding-left: 1.2em; margin: 0 0 var(--s4); }
+.prose li { margin-bottom: var(--s2); }
+.prose li::marker { color: var(--muted); }
+.table-wrap + p, .table-wrap + .table-wrap, pre.config + p { margin-top: var(--s4); }
+.prose pre.config, .row pre.config { margin-top: var(--s3); }
+.prose h2 { margin-top: var(--s6); }
+.prose h3 { margin-top: var(--s5); }
+.prose h2:first-child, .prose h3:first-child { margin-top: 0; }

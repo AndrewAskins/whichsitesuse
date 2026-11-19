@@ -1,5 +1,6 @@
 import type { Snapshot } from "../data/snapshot.js";
 import { CWV_GOOD } from "../data/schema.js";
+import { adultSitesSql } from "./adult.js";
 import { SEO_RULES, type SeoRules } from "./config.js";
 
 /**
@@ -107,10 +108,12 @@ export async function buildSeoDataset(
     FROM site_tech st JOIN seo_tech t USING (tech_id) JOIN sites s USING (site_id)
     GROUP BY st.tech_id, s.rank_bucket`);
 
+  // Named sites leave out adult sites (src/seo/adult.ts); the counts above still include them.
+  await q(adultSitesSql());
   const topSites = await q<{ tech_id: number; domain: string; rank_bucket: number }>(`
     SELECT st.tech_id, s.domain, s.rank_bucket
     FROM site_tech st JOIN seo_tech t USING (tech_id) JOIN sites s USING (site_id)
-    WHERE s.rank_bucket <= ${R.topSitesMaxRank}
+    WHERE s.rank_bucket <= ${R.topSitesMaxRank} AND st.site_id NOT IN (SELECT site_id FROM adult_sites)
     QUALIFY row_number() OVER (PARTITION BY st.tech_id ORDER BY s.rank_bucket, hash(s.domain), s.domain) <= ${R.topSites}`);
 
   const tlds = await q<{ tech_id: number; tld: string; sites: number }>(`

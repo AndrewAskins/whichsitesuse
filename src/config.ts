@@ -25,7 +25,9 @@ const schema = z.object({
   BIGQUERY_MAX_BYTES_BILLED: z.coerce.number().int().positive().default(200 * 1024 ** 3),
 
   // Pipeline cron job mode.
-  PIPELINE_MODE: z.enum(["dry-run", "measure", "sample", "monthly"]).default("dry-run"),
+  PIPELINE_MODE: z.enum(["dry-run", "measure", "sample", "monthly", "report"]).default("dry-run"),
+  // report mode: technologies (slugs or names) to profile from the published snapshot, for site copy.
+  REPORT_TECHNOLOGIES: z.string().default("hubspot,salesforce,shopify,stripe"),
   // sample mode: one real domain and a few technology counts, for site copy.
   SAMPLE_ORIGIN: z.string().url().default("https://www.allbirds.com"),
   SAMPLE_TECHNOLOGIES: z.string().default("Shopify,React,HubSpot,Stripe,WordPress,Next.js"),

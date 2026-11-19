@@ -13,6 +13,7 @@ import {
   run,
 } from "./bigquery.js";
 import { runMonthly } from "./monthly.js";
+import { runReport } from "./report.js";
 import { EXTRACT_SQL, MEASURE_SQL, SAMPLE_COUNTS_SQL, SAMPLE_CWV_SQL, SAMPLE_STACK_SQL } from "./sql.js";
 
 const GIB = 1024 ** 3;
@@ -24,10 +25,15 @@ const round = (n: number, digits = 2) => Math.round(n * 10 ** digits) / 10 ** di
  *   measure  run an aggregate-only version of the extract: rows, sites, detections per site, size
  *   sample   one real domain's stack and CWV plus a few technology counts (each dry-run first)
  *   monthly  export to GCS, build the Parquet snapshot, publish it to R2
+ *   report   profile REPORT_TECHNOLOGIES from the published snapshot (no BigQuery)
  */
 async function main() {
   const config = loadConfig();
   const mode = (process.argv[2] as typeof config.PIPELINE_MODE | undefined) ?? config.PIPELINE_MODE;
+  if (mode === "report") {
+    await runReport(config);
+    return;
+  }
   const bq = bigqueryClient(config);
   const cap = config.BIGQUERY_MAX_BYTES_BILLED;
 

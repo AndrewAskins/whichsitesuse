@@ -79,7 +79,7 @@ describe.skipIf(!TEST_DATABASE_URL)("billing gate", () => {
     const body: any = await res.json();
     expect(body.error).toMatchObject({ code: "insufficient_credits", credits_needed: 1500, credits_available: 2, reason: "balance" });
     const [topup, plan] = body.error.options;
-    expect(topup).toMatchObject({ item: "topup", units: 2, price: "$20" });
+    expect(topup).toMatchObject({ item: "topup", units: 2, price: "$30" });
     expect(plan.item).toBe("starter");
     const token = new URL(topup.checkout_url).pathname.split("/").pop()!;
     expect(readCheckoutLink(t.config, token)).toMatchObject({ a: account.id, i: "topup", u: 2 });
@@ -131,7 +131,7 @@ describe.skipIf(!TEST_DATABASE_URL)("billing gate", () => {
       body: JSON.stringify({ item: "topup", units: 3 }),
     });
     const buy: any = await res.json();
-    expect(buy.data).toMatchObject({ item: "topup", credits: 3000, price: "$30" });
+    expect(buy.data).toMatchObject({ item: "topup", credits: 3000, price: "$45" });
     const token = new URL(buy.data.checkout_url).pathname.split("/").pop()!;
     expect(readCheckoutLink(t.config, token)).toMatchObject({ a: account.id, i: "topup", u: 3 });
   });

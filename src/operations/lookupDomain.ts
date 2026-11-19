@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CREDIT_COSTS } from "./billing.js";
 import { cwvSummary, type CwvSummary } from "./siteFilters.js";
 import { requireSnapshot } from "./snapshotGuard.js";
 import { OperationError, type Operation } from "./types.js";
@@ -13,7 +14,6 @@ const input = z.object({
 });
 
 /** Price of a covered lookup; a domain the snapshot doesn't cover is free. */
-export const LOOKUP_DOMAIN_CREDITS = 2;
 
 export interface StackTechnology {
   name: string;
@@ -80,6 +80,7 @@ export const lookupDomain: Operation<typeof input.shape, CoveredDomain | Uncover
     "dates, plus its popularity rank bucket and Core Web Vitals on mobile and desktop. Costs 2 credits. " +
     "If the domain isn't in the dataset the answer says covered: false and costs nothing.",
   rest: { method: "get", path: "/domains/:domain" },
+  pricing: "paid",
   input,
   async run({ domain: raw }, ctx) {
     const snapshot = requireSnapshot(ctx);
@@ -106,6 +107,8 @@ export const lookupDomain: Operation<typeof input.shape, CoveredDomain | Uncover
       };
     }
 
+    // Covered: check the budget before doing the work (402 with checkout links if short).
+    ctx.billing.require(CREDIT_COSTS.domainLookup);
     const techs = await snapshot.query<StackTechnology>(
       `
       SELECT t.name, t.slug, st.version, t.categories,
@@ -137,7 +140,7 @@ export const lookupDomain: Operation<typeof input.shape, CoveredDomain | Uncover
         last_crawl_date: site.last_crawl_date,
         source: site.source,
       },
-      credits_used: LOOKUP_DOMAIN_CREDITS,
+      credits_used: CREDIT_COSTS.domainLookup,
     };
   },
 };

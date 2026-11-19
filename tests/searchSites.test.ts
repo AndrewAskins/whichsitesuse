@@ -4,14 +4,15 @@ import { countSites } from "../src/operations/countSites.js";
 import { decodeCursor, encodeCursor, searchSites } from "../src/operations/searchSites.js";
 import { OperationError, type OperationContext } from "../src/operations/types.js";
 import { testConfig } from "./helpers/config.js";
+import { anonymousContext, fixedBilling } from "./helpers/context.js";
 import { buildFixtureSnapshot, QUERY_FIXTURE_ROWS } from "./helpers/fixtureSnapshot.js";
 
 let ctx: OperationContext;
 let killed: OperationContext;
 beforeAll(async () => {
   const dir = await buildFixtureSnapshot(QUERY_FIXTURE_ROWS);
-  ctx = { config: testConfig(), snapshot: await Snapshot.open(dir, { serveHttpArchive: true }) };
-  killed = { config: testConfig(), snapshot: await Snapshot.open(dir, { serveHttpArchive: false }) };
+  ctx = { ...anonymousContext(testConfig(), await Snapshot.open(dir, { serveHttpArchive: true })), billing: fixedBilling(1_000_000) };
+  killed = { ...anonymousContext(testConfig(), await Snapshot.open(dir, { serveHttpArchive: false })), billing: fixedBilling(1_000_000) };
 });
 afterAll(() => {
   ctx.snapshot?.close();

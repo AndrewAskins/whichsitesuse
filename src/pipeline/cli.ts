@@ -11,6 +11,7 @@ import {
   newestPartitions,
   run,
 } from "./bigquery.js";
+import { runMonthly } from "./monthly.js";
 import { EXTRACT_SQL, MEASURE_SQL } from "./sql.js";
 
 const GIB = 1024 ** 3;
@@ -20,7 +21,7 @@ const round = (n: number, digits = 2) => Math.round(n * 10 ** digits) / 10 ** di
  * The pipeline cron job. PIPELINE_MODE (or the first argument) picks what it does:
  *   dry-run  report the bytes the extract would scan, for free
  *   measure  run an aggregate-only version of the extract: rows, sites, detections per site, size
- *   monthly  the full extract to Parquet and R2 (next build step)
+ *   monthly  export to GCS, build the Parquet snapshot, publish it to R2
  */
 async function main() {
   const config = loadConfig();
@@ -85,7 +86,8 @@ async function main() {
     return;
   }
 
-  throw new Error("The monthly extract to Parquet and R2 ships in the next build step.");
+  if (extract.bytes > cap) throw new Error(`Extract would scan ${report.extract_gib} GiB, over the cap.`);
+  await runMonthly(config, bq, { crawlDate, cruxDate, params });
 }
 
 main().catch((err) => {

@@ -13,18 +13,14 @@ import {
   type CwvSummary,
   type ResolvedFilters,
 } from "./siteFilters.js";
+import { CREDIT_COSTS, maxCreditsInput } from "./billing.js";
 import { requireSnapshot } from "./snapshotGuard.js";
 import { OperationError, type Operation } from "./types.js";
 
 const input = z.object({
   ...siteFilterShape,
   limit: z.coerce.number().int().min(1).max(1000).default(100).describe("Most sites to return (1 to 1000)."),
-  max_credits: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe("Spend cap: the call never returns more sites than this (1 credit each). 0 returns nothing."),
+  ...maxCreditsInput,
   cursor: z
     .string()
     .trim()
@@ -105,12 +101,19 @@ export const searchSites: Operation<typeof input.shape, SiteSearch> = {
     "returned: call count_sites first (free) to see the total, and pass max_credits to cap spend. " +
     "Page with next_cursor.",
   rest: { method: "get", path: "/sites" },
+  pricing: "paid",
   input,
   async run(args, ctx) {
     const snapshot = requireSnapshot(ctx);
     const filters = await resolveSiteFilters(snapshot, args);
     const after = args.cursor ? decodeCursor(args.cursor) : null;
-    const pageSize = Math.min(args.limit, args.max_credits ?? args.limit);
+    // One credit per site: never return more than the call may spend, or than trial accounts may see at once.
+    const budget = Math.floor(Math.min(ctx.billing.available, args.max_credits ?? Infinity) / CREDIT_COSTS.site);
+    const pageSize = Math.min(args.limit, budget, ctx.billing.maxResults ?? args.limit);
+    if (pageSize === 0 && args.max_credits !== 0) {
+      // Out of credits (or a key cap): a 402 with checkout links, not a silent empty page.
+      ctx.billing.require(CREDIT_COSTS.site);
+    }
     if (pageSize === 0) {
       // Nothing spent; the same cursor still points at the next site.
       return { data: { sites: [], next_cursor: args.cursor ?? null }, credits_used: 0 };
@@ -149,7 +152,7 @@ export const searchSites: Operation<typeof input.shape, SiteSearch> = {
       cwv: cwvSummary(s, device),
       source: s.source,
     }));
-    return { data: { sites, next_cursor }, credits_used: sites.length };
+    return { data: { sites, next_cursor }, credits_used: sites.length * CREDIT_COSTS.site };
   },
 };
 

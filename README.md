@@ -62,6 +62,13 @@ REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV a
 - **Stripe** (`src/billing/stripe.ts`, `webhooks.ts`, `src/web/buy.ts`): Checkout for plans and top-ups,
   webhooks at `POST /stripe/webhook` into the ledger. Prices are found or created by lookup key, so there
   is no price id to configure. `buy_credits` returns a signed `/buy/<token>` link a human opens; it lasts 7 days.
+  The webhook endpoint in Stripe needs these events: `checkout.session.completed`,
+  `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.updated`,
+  `customer.subscription.deleted`, `charge.refunded` and `charge.dispute.created`. A refund takes back the same
+  share of the credits it bought, from what's left (the admin gets an alert when some were already spent); a
+  dispute takes back all of them and suspends the account. A late invoice for an earlier period never resets
+  this month's credits, a mid-month upgrade adds only the extra credits for the days left, and a second
+  subscription on one account adds nothing and alerts the admin. Pages can't be framed.
 - **OAuth for MCP clients** (`src/auth/oauth.ts`, `src/web/oauth.ts`): what Claude, ChatGPT and other
   directories expect. Protected-resource and authorization-server metadata under `/.well-known/`, dynamic
   client registration (`/oauth/register`), authorization code with PKCE S256 (`/oauth/authorize`, a consent
@@ -72,16 +79,8 @@ REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV a
 - **Pages**: `/signup`, `/login`, `/account` (balance, API keys and caps, buy), `/request-credits`, `/admin`
   (abuse dashboard, request review, revoke and suspend). Accounts in `ADMIN_EMAILS` become admins when they verify.
 - **Email** (`src/mail/mailer.ts`): Loops transactional emails. Without `LOOPS_API_KEY` (or a template's id)
-  the email is written to the log instead. Create these transactional emails in Loops, then put each one's
-  id in the matching env var:
-
-  | Env var | Sent when | Data variables |
-  | --- | --- | --- |
-  | `LOOPS_TEMPLATE_VERIFY` | someone signs up (confirm email, 24-hour link) | `link` |
-  | `LOOPS_TEMPLATE_LOGIN` | a verified account asks to sign in (30-minute link) | `link` |
-  | `LOOPS_TEMPLATE_CREDITS_APPROVED` | an admin approves a free-credit request | `credits`, `accountUrl` |
-  | `LOOPS_TEMPLATE_CREDITS_DENIED` | an admin denies one | `accountUrl` |
-  | `LOOPS_TEMPLATE_ADMIN_ALERT` | an abuse alert fires (to `ADMIN_ALERT_EMAIL`) | `subject`, `text` |
+  the email is written to the log instead. The five templates, their env vars, data variables and copy are in
+  [docs/emails.md](docs/emails.md).
 - Background jobs run in the web service (`src/jobs.ts`): hourly credit expiry, weekly email-list refresh.
 
 ## Running locally

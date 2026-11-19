@@ -176,6 +176,22 @@ async function charge(
 ): Promise<number> {
   try {
     return await withTransaction(services.db, async (c) => {
+      // The cap was checked before the call ran; parallel calls on one key could all pass that
+      // check, so it is checked again here with the key locked, before anything is spent.
+      const key = await c.query<{ cap: number | null }>(
+        `SELECT monthly_credit_cap AS cap FROM api_keys WHERE id = $1 FOR UPDATE`,
+        [caller.key.id],
+      );
+      const cap = key.rows[0]?.cap ?? null;
+      if (cap !== null) {
+        const used = await c.query<{ used: string | null }>(
+          `SELECT sum(credits)::text AS used FROM usage_events
+            WHERE api_key_id = $1 AND created_at >= date_trunc('month', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'`,
+          [caller.key.id],
+        );
+        const left = Math.max(0, cap - Number(used.rows[0]?.used ?? 0));
+        if (credits > left) throw insufficientCredits(config, caller.account.id, credits, left, "key_cap");
+      }
       const { rows } = await c.query<{ id: string }>(
         `INSERT INTO usage_events (account_id, api_key_id, operation, channel, credits, status, params)
          VALUES ($1, $2, $3, $4, $5, 'ok', $6) RETURNING id`,

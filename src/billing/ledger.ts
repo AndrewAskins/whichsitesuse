@@ -148,6 +148,33 @@ export class Ledger {
     return client ? run(client) : withTransaction(this.db, run);
   }
 
+  /**
+   * Takes up to `credits` from one lot (what's left of it, never below zero) and
+   * writes the ledger row. Returns what was actually taken.
+   */
+  async debitLot(
+    lotId: string,
+    credits: number,
+    entry: { kind: "refund" | "revoke"; ref: string; note?: string; createdBy?: string },
+    client: pg.PoolClient,
+  ): Promise<number> {
+    if (credits <= 0) return 0;
+    const { rows } = await client.query<{ account_id: string; taken: number }>(
+      `UPDATE credit_lots l SET remaining = l.remaining - least(l.remaining, $2)
+         FROM (SELECT id, remaining FROM credit_lots WHERE id = $1 FOR UPDATE) old
+        WHERE l.id = old.id
+      RETURNING l.account_id, least(old.remaining, $2) AS taken`,
+      [lotId, credits],
+    );
+    const row = rows[0];
+    if (!row || row.taken === 0) return 0;
+    await client.query(
+      `INSERT INTO credit_ledger (account_id, lot_id, kind, amount, ref, note, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [row.account_id, lotId, entry.kind, -row.taken, entry.ref, entry.note ?? null, entry.createdBy ?? "system"],
+    );
+    return row.taken;
+  }
+
   /** Writes "expire" rows for lots past their expiry. Run hourly. */
   async sweepExpired(): Promise<number> {
     return withTransaction(this.db, async (c) => {

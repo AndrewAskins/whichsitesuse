@@ -1,9 +1,9 @@
 import type { Server } from "node:http";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
-import { grantFreeCredits, releaseWithheldGrant } from "../src/auth/freeGrant.js";
+import { decideFreeGrant, grantFreeCredits, releaseWithheldGrant } from "../src/auth/freeGrant.js";
 import { Browser, listen } from "./helpers/browser.js";
-import { createTestDb, TEST_DATABASE_URL, type TestDb } from "./helpers/db.js";
+import { createTestDb, makeAccount, TEST_DATABASE_URL, type TestDb } from "./helpers/db.js";
 
 describe.skipIf(!TEST_DATABASE_URL)("sign-up and the free grant", () => {
   let t: TestDb;
@@ -103,6 +103,18 @@ describe.skipIf(!TEST_DATABASE_URL)("sign-up and the free grant", () => {
     expect(signals.rowCount).toBe(1);
   });
 
+  it("holds one network to two grants when verifications race", async () => {
+    const accounts = await Promise.all(
+      ["r1@race1.com", "r2@race2.com", "r3@race3.com", "r4@race4.com"].map(async (email, i) => {
+        const { account } = await makeAccount(t.services, email);
+        await t.db.query("UPDATE accounts SET signup_ip = $2 WHERE id = $1", [account.id, `203.0.113.${i + 1}`]);
+        return account;
+      }),
+    );
+    const decisions = await Promise.all(accounts.map((a) => decideFreeGrant(t.services, a)));
+    expect(decisions.filter((d) => d.status === "granted")).toHaveLength(2);
+  });
+
   it("grants by hand once, keeping why it was first withheld", async () => {
     await signUp("hand@hotmail.com");
     const account = (await accountFor("hand@hotmail.com"))!;
@@ -146,8 +158,12 @@ describe.skipIf(!TEST_DATABASE_URL)("sign-up and the free grant", () => {
 
     const account = (await accountFor("keys@acme-agency.com"))!;
     const [key] = await t.services.accounts.listKeys(account.id);
-    await b.post(`/account/keys/${key!.id}/revoke`, {}, "/account");
+    const revoked = await b.post(`/account/keys/${key!.id}/revoke`, {}, "/account");
+    expect(revoked.headers.get("location")).toBe("/account?msg=key_revoked");
     expect((await fetch(`${base}/v1/balance`, { headers: { authorization: `Bearer ${secret}` } })).status).toBe(401);
+    expect(await (await b.get("/account?msg=key_revoked")).text()).toContain("Key revoked.");
+    // A link can't put its own words on the page.
+    expect(await (await b.get("/account?msg=Your%20account%20is%20locked")).text()).not.toContain("Your account is locked");
   });
 
   it("sends signed-out visitors from /account to sign in", async () => {

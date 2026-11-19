@@ -10,6 +10,12 @@ import { signupRoutes } from "./signup.js";
 /** The account, checkout and admin pages. The marketing site lives elsewhere (site/). */
 export function webRouter(services: Services): Router {
   const router = Router();
+  // No page of ours may be framed: the consent and buy pages must not be clickjacked.
+  router.use((_req, res, next) => {
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'none'");
+    res.setHeader("X-Frame-Options", "DENY");
+    next();
+  });
   router.use(express.urlencoded({ extended: false, limit: "32kb" }));
   router.use(sessionMiddleware(services));
   router.use(signupRoutes(services));

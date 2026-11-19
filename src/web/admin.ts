@@ -44,7 +44,8 @@ function redirectWith(res: Response, path: string, msg: keyof typeof MESSAGES, n
 }
 
 function flash(req: Request): Html {
-  const make = typeof req.query.msg === "string" ? MESSAGES[req.query.msg] : undefined;
+  const code = req.query.msg;
+  const make = typeof code === "string" && Object.hasOwn(MESSAGES, code) ? MESSAGES[code as keyof typeof MESSAGES] : undefined;
   if (!make) return html``;
   const n = typeof req.query.n === "string" && /^\d{1,9}$/.test(req.query.n) ? Number(req.query.n) : null;
   return notice(make(n), "ok");

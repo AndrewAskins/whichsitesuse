@@ -9,3 +9,4 @@ export const EXTRACT_SQL = read("extract.sql");
 export const MEASURE_SQL = read("measure.sql").replace("{{EXTRACT}}", EXTRACT_SQL);
 export const LATEST_CRAWL_SQL = read("latest-crawl.sql");
 export const LATEST_CRUX_SQL = read("latest-crux.sql");
+export const PARTITIONS_SQL = (dataset: string) => read("partitions.sql").replace("{{DATASET}}", dataset);

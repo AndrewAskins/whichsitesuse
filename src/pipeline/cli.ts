@@ -8,6 +8,7 @@ import {
   extractParams,
   latestCrawlDate,
   latestCruxDate,
+  newestPartitions,
   run,
 } from "./bigquery.js";
 import { EXTRACT_SQL, MEASURE_SQL } from "./sql.js";
@@ -27,6 +28,18 @@ async function main() {
   const bq = bigqueryClient(config);
   const cap = config.BIGQUERY_MAX_BYTES_BILLED;
 
+  // What the source tables hold right now, so a wrong month or a stale table shows in the log.
+  const partitions: Record<string, unknown> = {};
+  for (const [dataset, table] of [
+    ["httparchive.crawl", "pages"],
+    ["chrome-ux-report.materialized", "device_summary"],
+  ] as const) {
+    partitions[`${dataset}.${table}`] = await newestPartitions(bq, dataset, table, cap).catch(
+      (err: Error) => `unavailable: ${err.message}`,
+    );
+  }
+  log.info({ partitions }, "PIPELINE SOURCE PARTITIONS");
+
   const crawlDate = config.CRAWL_DATE ?? (await latestCrawlDate(bq, cap));
   const cruxDate = await latestCruxDate(bq, crawlDate, cap);
   const params = extractParams(crawlDate, cruxDate);
@@ -38,6 +51,8 @@ async function main() {
     crawl_date: crawlDate,
     crux_date: cruxDate,
     extract_bytes: extract.bytes,
+    estimate_accuracy: extract.accuracy,
+    tables_read: extract.tables,
     extract_gib: round(extract.bytes / GIB),
     extract_cost_usd_without_free_tier: round(costUsd(extract.bytes), 3),
     share_of_monthly_free_tier: round(extract.bytes / FREE_TIER_BYTES, 3),
@@ -45,6 +60,7 @@ async function main() {
     max_bytes_billed_cap_gib: round(cap / GIB),
   };
   log.info({ report }, "PIPELINE DRY RUN");
+  if (!cruxDate) log.warn({ crawlDate }, "no CrUX month found within four months of the crawl; CWV would be empty");
 
   if (mode === "dry-run") return;
 

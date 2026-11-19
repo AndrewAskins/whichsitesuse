@@ -1,6 +1,6 @@
 import { BigQuery, type Query } from "@google-cloud/bigquery";
 import type { Config } from "../config.js";
-import { LATEST_CRAWL_SQL, LATEST_CRUX_SQL } from "./sql.js";
+import { LATEST_CRAWL_SQL, LATEST_CRUX_SQL, PARTITIONS_SQL } from "./sql.js";
 
 /** BigQuery's on-demand free tier: the first 1 TiB scanned each month. */
 export const FREE_TIER_BYTES = 1024 ** 4;
@@ -35,11 +35,52 @@ export function bigqueryClient(config: Config): BigQuery {
 
 export interface DryRunResult {
   bytes: number;
+  accuracy: string | null;
+  /** Tables BigQuery says the query reads, as project.dataset.table. */
+  tables: string[];
 }
 
 export async function dryRun(bq: BigQuery, query: Query): Promise<DryRunResult> {
   const [job] = await bq.createQueryJob({ ...query, dryRun: true, location: "US", useQueryCache: false });
-  return { bytes: Number(job.metadata.statistics?.totalBytesProcessed ?? 0) };
+  const stats = job.metadata.statistics ?? {};
+  const bytes = stats.query?.totalBytesProcessed ?? stats.totalBytesProcessed;
+  if (bytes === undefined) {
+    throw new Error(`Dry run returned no byte estimate: ${JSON.stringify(stats)}`);
+  }
+  return {
+    bytes: Number(bytes),
+    accuracy: stats.query?.totalBytesProcessedAccuracy ?? null,
+    tables: (stats.query?.referencedTables ?? []).map(
+      (t: { projectId?: string; datasetId?: string; tableId?: string }) => `${t.projectId}.${t.datasetId}.${t.tableId}`,
+    ),
+  };
+}
+
+export interface PartitionInfo {
+  partition_id: string;
+  total_rows: number;
+  total_logical_bytes: number;
+  last_modified_time: string | null;
+}
+
+/** Newest partitions of a public table, read from metadata (cheap). */
+export async function newestPartitions(
+  bq: BigQuery,
+  dataset: string,
+  table: string,
+  maxBytesBilled: number,
+): Promise<PartitionInfo[]> {
+  const { rows } = await run<Record<string, unknown>>(
+    bq,
+    { query: PARTITIONS_SQL(dataset), params: { table_name: table } },
+    maxBytesBilled,
+  );
+  return rows.map((r) => ({
+    partition_id: String(r.partition_id),
+    total_rows: Number(r.total_rows),
+    total_logical_bytes: Number(r.total_logical_bytes),
+    last_modified_time: dateString(r.last_modified_time),
+  }));
 }
 
 export async function run<T>(bq: BigQuery, query: Query, maxBytesBilled: number): Promise<{ rows: T[]; bytesBilled: number }> {

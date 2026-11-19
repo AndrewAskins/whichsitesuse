@@ -54,6 +54,25 @@ describe.skipIf(!TEST_DATABASE_URL)("data tools and credits", () => {
     expect(body.meta).toMatchObject({ credits_used: body.data.sites.length, credits_remaining: 10 - body.data.sites.length });
   });
 
+  it("exports a CSV page for paid accounts at the same price, and refuses it on the free grant", async () => {
+    const { secret } = await makeAccount(t.services, "csv@acme.com", { credits: 10, paid: true });
+    const res = await fetch(`${base}/v1/sites?technologies=shopify&format=csv&limit=2`, { headers: { authorization: `Bearer ${secret}` } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toMatch(/text\/csv/);
+    expect(res.headers.get("x-credits-used")).toBe("2");
+    expect(res.headers.get("x-credits-remaining")).toBe("8");
+    expect(res.headers.get("x-attribution")).toMatch(/HTTP Archive/);
+    expect(res.headers.get("x-next-cursor")).toBeTruthy();
+    const lines = (await res.text()).trim().split("\r\n");
+    expect(lines[0]).toMatch(/^domain,root_url,rank_bucket/);
+    expect(lines).toHaveLength(3);
+
+    const trial = await makeAccount(t.services, "trial-csv@acme.com", { credits: 10 });
+    const refused = await get("/v1/sites?technologies=shopify&format=csv", trial.secret);
+    expect(refused.status).toBe(403);
+    expect(refused.body.error.code).toBe("export_not_allowed");
+  });
+
   it("returns no more sites than the balance covers", async () => {
     const { secret } = await makeAccount(t.services, "small@acme.com", { credits: 1, paid: true });
     const { body } = await get("/v1/sites?technologies=shopify", secret);

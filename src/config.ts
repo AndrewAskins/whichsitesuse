@@ -61,9 +61,14 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
-  // Transactional email (magic links, alerts). Without a key, links are logged instead of sent.
-  RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default("WhichSitesUse <hello@whichsitesuse.com>"),
+  // Transactional email through Loops (magic links, alerts). Without the key, emails are logged instead
+  // of sent. Each email is a Loops transactional template; the ids aren't secret (see src/mail/mailer.ts).
+  LOOPS_API_KEY: z.string().optional(),
+  LOOPS_TEMPLATE_VERIFY: z.string().optional(),
+  LOOPS_TEMPLATE_LOGIN: z.string().optional(),
+  LOOPS_TEMPLATE_CREDITS_APPROVED: z.string().optional(),
+  LOOPS_TEMPLATE_CREDITS_DENIED: z.string().optional(),
+  LOOPS_TEMPLATE_ADMIN_ALERT: z.string().optional(),
 
   // Cloudflare Turnstile on sign-up. Without both keys the check is skipped (local work only).
   TURNSTILE_SITE_KEY: z.string().optional(),

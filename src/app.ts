@@ -11,6 +11,7 @@ import type { Operation } from "./operations/types.js";
 import { seoRouter } from "./seo/routes.js";
 import type { PagePlan } from "./seo/pages.js";
 import type { Services } from "./services.js";
+import { cors, oauthApiRoutes } from "./web/oauth.js";
 import { webRouter } from "./web/router.js";
 
 export const VERSION = "0.1.0";
@@ -62,7 +63,10 @@ export function createApp({
 
   app.use("/v1", restRouter(operations, deps));
 
+  if (services) app.use(oauthApiRoutes(services));
+
   const mcp = mcpHandler(operations, deps, VERSION);
+  app.use("/mcp", cors);
   app.post("/mcp", mcp);
   // Stateless server: no SSE stream to resume and no session to delete.
   app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").end());

@@ -40,13 +40,13 @@ export const FIXTURE_ROWS: Rows = {
   ],
 };
 
-const site = (row: Record<string, unknown>) => ({
+export const site = (row: Record<string, unknown>) => ({
   on_mobile: true, on_desktop: true,
   lcp_p75_mobile: null, inp_p75_mobile: null, cls_p75_mobile: null,
   lcp_p75_desktop: null, inp_p75_desktop: null, cls_p75_desktop: null,
   last_crawl_date: "2026-10-01", source: "httparchive", ...row,
 });
-const detection = (site_id: number, tech_id: number, row: Record<string, unknown> = {}) => ({
+export const detection = (site_id: number, tech_id: number, row: Record<string, unknown> = {}) => ({
   site_id, tech_id, version: null, confidence: 1, on_mobile: true, on_desktop: true,
   first_seen: "2026-10-01", last_seen: "2026-10-01", source: "httparchive", ...row,
 });

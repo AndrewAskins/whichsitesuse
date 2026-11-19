@@ -39,6 +39,8 @@ code, pre { font-family: var(--mono); font-size: 0.9em; }
 
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 .narrow { max-width: 720px; }
+.wrap.narrow { max-width: 1080px; }
+.wrap.narrow > * { max-width: 720px; }
 
 /* Header */
 .site-header { border-bottom: 1px solid var(--line); }

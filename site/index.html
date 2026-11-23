@@ -107,24 +107,25 @@
           <div class="setup-panel" role="tabpanel" id="setup-claude" aria-labelledby="tab-claude">
             <h2 class="setup-title">Claude</h2>
             <ol class="setup-steps">
-              <li>Open <b>Customize</b>, then <b>Connectors</b>, and choose <b>Add custom connector</b>.</li>
-              <li>Name it WhichSitesUse, paste the URL and click <b>Add</b>.</li>
-              <li>Click <b>Connect</b>, sign in with your email and approve the connection.</li>
+              <li><span>Open <b>Customize</b>, then <b>Connectors</b>, and choose <b>Add custom connector</b>.</span></li>
+              <li><span>Name it WhichSitesUse, paste the URL and click <b>Add</b>.</span></li>
+              <li><span>Click <b>Connect</b>, sign in with your email and approve the connection.</span></li>
             </ol>
             <p class="setup-note">This works on claude.ai and in Claude Desktop, and a Free plan gets one custom connector.</p>
           </div>
           <div class="setup-panel" role="tabpanel" id="setup-chatgpt" aria-labelledby="tab-chatgpt">
             <h2 class="setup-title">ChatGPT</h2>
             <ol class="setup-steps">
-              <li>Open <b>Plugins</b>, select <b>+</b> and then <b>Add custom MCP server</b>.</li>
-              <li>Paste the URL under Connection and choose <b>OAuth</b>, leaving the client fields empty.</li>
-              <li>Create it as a plugin, then sign in and approve the connection.</li>
+              <li><span>Open <b>Plugins</b>, select <b>+</b> and then <b>Add custom MCP server</b>.</span></li>
+              <li><span>Paste the URL under Connection and choose <b>OAuth</b>, leaving the client fields empty.</span></li>
+              <li><span>Create it as a plugin, then sign in and approve the connection.</span></li>
             </ol>
             <p class="setup-note">OpenAI offers custom MCP servers on Business, Enterprise and Pro plans, and Pro gets read-only tools.</p>
           </div>
           <div class="setup-panel" role="tabpanel" id="setup-claude-code" aria-labelledby="tab-claude-code">
             <h2 class="setup-title">Claude Code</h2>
-<pre class="config"><code>claude mcp add --transport http whichsitesuse https://api.whichsitesuse.com/mcp
+<pre class="config"><code>claude mcp add --transport http whichsitesuse \
+  https://api.whichsitesuse.com/mcp
 claude mcp login whichsitesuse</code></pre>
             <p class="setup-note">The second command opens the sign-in page in your browser. You can also run <code>/mcp</code> inside Claude Code and choose the server there.</p>
           </div>

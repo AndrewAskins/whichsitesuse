@@ -3,13 +3,14 @@ import type pg from "pg";
 import { withTransaction } from "../db/pool.js";
 import type { Services } from "../services.js";
 import { OAUTH_ACCESS_PREFIX } from "./accounts.js";
+import { isMetadataClientId, resolveMetadataClient } from "./cimd.js";
 import { randomToken, safeEqual, sha256 } from "./tokens.js";
 
 /**
  * OAuth 2.1 for MCP clients, as the MCP authorization spec describes it:
  * protected-resource and authorization-server metadata, dynamic client
- * registration, authorization code with PKCE (S256 only), rotating refresh
- * tokens. An approved connection is stored as an api_keys row, so caps, usage,
+ * registration, client ID metadata documents (cimd.ts), authorization code
+ * with PKCE (S256 only), rotating refresh tokens. An approved connection is stored as an api_keys row, so caps, usage,
  * revocation and the account page treat it like any other key.
  */
 
@@ -27,6 +28,8 @@ export interface OAuthClient {
   client_name: string;
   redirect_uris: string[];
   token_endpoint_auth_method: AuthMethod;
+  /** True when client_id is a metadata document URL: the name and redirects come from that domain. */
+  metadata_document: boolean;
 }
 
 /** A standard OAuth error, rendered as { error, error_description }. */
@@ -71,6 +74,9 @@ export function authorizationServerMetadata(services: Services) {
     response_types_supported: ["code"],
     grant_types_supported: ["authorization_code", "refresh_token"],
     code_challenge_methods_supported: ["S256"],
+    client_id_metadata_document_supported: true,
+    // The redirect back carries iss (RFC 9207), so clients like ChatGPT can use one stable client identity.
+    authorization_response_iss_parameter_supported: true,
     token_endpoint_auth_methods_supported: ["none", "client_secret_post", "client_secret_basic"],
     revocation_endpoint_auth_methods_supported: ["none", "client_secret_post", "client_secret_basic"],
   };
@@ -134,12 +140,45 @@ export async function registerClient(
   };
 }
 
+/**
+ * A registered client, or the client a metadata document URL describes (fetched and cached).
+ * Throws OAuthError when a metadata document can't be fetched or isn't valid.
+ */
 export async function getClient(services: Services, clientId: string): Promise<OAuthClient | null> {
+  if (isMetadataClientId(clientId)) return resolveMetadataClient(services, clientId);
   const { rows } = await services.db.query<OAuthClient>(
-    `SELECT client_id, client_secret_hash, client_name, redirect_uris, token_endpoint_auth_method FROM oauth_clients WHERE client_id = $1`,
+    `SELECT client_id, client_secret_hash, client_name, redirect_uris, token_endpoint_auth_method, metadata_document
+       FROM oauth_clients WHERE client_id = $1 AND NOT metadata_document`,
     [clientId],
   );
   return rows[0] ?? null;
+}
+
+const LOOPBACK = ["localhost", "127.0.0.1", "[::1]"];
+
+/**
+ * Whether a requested redirect_uri is one the client registered. Exact match, except that
+ * loopback http redirects may use any port (RFC 8252 §7.3, OAuth 2.1): native apps like
+ * Claude Code pick a free port each time and register "http://localhost/callback".
+ */
+export function redirectAllowed(registered: string[], requested: string): boolean {
+  if (registered.includes(requested)) return true;
+  let req: URL;
+  try {
+    req = new URL(requested);
+  } catch {
+    return false;
+  }
+  if (req.protocol !== "http:" || !LOOPBACK.includes(req.hostname) || req.hash) return false;
+  const withoutPort = (u: URL) => `${u.protocol}//${u.hostname}${u.pathname}${u.search}`;
+  return registered.some((r) => {
+    try {
+      const reg = new URL(r);
+      return reg.protocol === "http:" && reg.hostname === req.hostname && withoutPort(reg) === withoutPort(req);
+    } catch {
+      return false;
+    }
+  });
 }
 
 /** Confidential clients must send their secret; public ones must not pretend to. */

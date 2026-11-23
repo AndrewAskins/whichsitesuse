@@ -11,6 +11,58 @@
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 
+  // Hero: copy the MCP server URL. Falls back to selecting the text where the clipboard API is missing.
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (button) {
+    var source = document.getElementById(button.getAttribute("data-copy"));
+    if (!source) return;
+    var label = button.textContent;
+    button.addEventListener("click", function () {
+      var text = source.textContent.trim();
+      function done() {
+        button.textContent = button.getAttribute("data-copied") || "copied";
+        button.classList.add("is-copied");
+        setTimeout(function () { button.textContent = label; button.classList.remove("is-copied"); }, 1800);
+      }
+      function select() {
+        var range = document.createRange();
+        range.selectNodeContents(source);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, select);
+      else select();
+    });
+  });
+
+  // Hero: one setup tab per MCP client (WAI-ARIA tabs). Without JS the panels all show.
+  var setup = document.querySelector(".setup");
+  var tablist = setup && setup.querySelector('[role="tablist"]');
+  if (tablist) {
+    var tabs = Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]'));
+    var show = function (tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      });
+      if (focus) tab.focus();
+    };
+    tablist.hidden = false;
+    setup.classList.add("has-tabs");
+    show(tabs[0], false);
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () { show(tab, false); });
+      tab.addEventListener("keydown", function (e) {
+        var next = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : null;
+        if (next === null) return;
+        e.preventDefault();
+        show(tabs[(next + tabs.length) % tabs.length], true);
+      });
+    });
+  }
+
   // H1 "Which sites use [technology]?": cycles through the rows of the adoption table (real HTTP Archive counts).
   // The static Shopify text is what crawlers, no-JS readers and reduced-motion readers see.
   var word = document.getElementById("tech-word");

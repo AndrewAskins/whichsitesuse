@@ -10,6 +10,7 @@ import {
   exchangeCode,
   getClient,
   protectedResourceMetadata,
+  redirectAllowed,
   refreshTokens,
   registerClient,
   revokeToken,
@@ -39,7 +40,7 @@ export function cors(req: Request, res: Response, next: NextFunction) {
 /** Where a 401 points MCP clients to start OAuth (RFC 9728). */
 export function wwwAuthenticate(services: Services, error?: "invalid_token"): string {
   const meta = `${services.config.PUBLIC_BASE_URL}/.well-known/oauth-protected-resource`;
-  return `Bearer resource_metadata="${meta}"${error ? `, error="${error}"` : ""}`;
+  return `Bearer resource_metadata="${meta}", scope="${OAUTH_SCOPE}"${error ? `, error="${error}"` : ""}`;
 }
 
 /** Metadata, registration, token and revocation endpoints: JSON in and out, no session. */
@@ -110,6 +111,9 @@ async function authenticateClient(services: Services, req: Request, body: Record
   }
   const client = id ? await getClient(services, id) : null;
   if (!client) throw new OAuthError("invalid_client", "Unknown client_id.", 401);
+  if (client.metadata_document && (secret || basic)) {
+    throw new OAuthError("invalid_client", "A client identified by a metadata document is a public client and sends no secret.", 401);
+  }
   checkClientSecret(client, secret);
   return client;
 }
@@ -152,7 +156,14 @@ export function oauthConsentRoutes(services: Services): Router {
   /** Validates an authorize request. Returns null after sending a response itself. */
   const parse = async (q: Record<string, unknown>, res: Response): Promise<AuthorizeRequest | null> => {
     const str = (k: string) => (typeof q[k] === "string" ? (q[k] as string) : undefined);
-    const client = str("client_id") ? await getClient(services, str("client_id")!) : null;
+    let client: OAuthClient | null = null;
+    try {
+      client = str("client_id") ? await getClient(services, str("client_id")!) : null;
+    } catch (err) {
+      if (!(err instanceof OAuthError)) throw err;
+      errorPage(res, `We couldn't check this app's identity at ${new URL(str("client_id")!).hostname}: ${err.description} Try connecting again from the app.`);
+      return null;
+    }
     if (!client) {
       errorPage(res, "This app isn't registered with WhichSitesUse. Try connecting again from the app.");
       return null;
@@ -160,7 +171,7 @@ export function oauthConsentRoutes(services: Services): Router {
     const requested = str("redirect_uri");
     const redirectUri = requested ?? (client.redirect_uris.length === 1 ? client.redirect_uris[0] : undefined);
     // Never redirect to an address the client didn't register: show the error here instead.
-    if (!redirectUri || !client.redirect_uris.includes(redirectUri)) {
+    if (!redirectUri || !redirectAllowed(client.redirect_uris, redirectUri)) {
       errorPage(res, "The app sent a return address it didn't register, so we stopped here.");
       return null;
     }
@@ -190,15 +201,23 @@ export function oauthConsentRoutes(services: Services): Router {
     if (account.status === "suspended") return errorPage(res, "This account is suspended, so it can't connect apps.");
     const q = req.query as Record<string, string>;
     const keep = ["client_id", "redirect_uri", "state", "code_challenge", "code_challenge_method", "scope", "resource", "response_type"];
-    const returnHost = new URL(parsed.redirectUri).host || parsed.redirectUri.split(":")[0];
+    const returnUrl = new URL(parsed.redirectUri);
+    const returnHost = returnUrl.host || parsed.redirectUri.split(":")[0];
+    const loopback = returnUrl.protocol === "http:";
+    // A metadata-document client's name is published on its own domain, so say whose domain;
+    // a dynamically registered client's name is whatever it typed.
+    const who = parsed.client.metadata_document
+      ? html`<b>${parsed.client.client_name}</b>, an app whose details are published at <b><code>${new URL(parsed.client.client_id).hostname}</code></b>,`
+      : html`An app that calls itself <b>${parsed.client.client_name}</b> (a name it chose; WhichSitesUse hasn't verified it)`;
+    const where = loopback ? html`a program running on this computer (<b><code>${returnHost}</code></b>)` : html`<b><code>${returnHost}</code></b>`;
     res.send(
       page({
         title: "Connect an app",
         signedIn: true,
         isAdmin: account.is_admin,
         body: html`<h1>Connect an <span class="mark">app</span>?</h1>
-<p>An app that calls itself <b>${parsed.client.client_name}</b> (a name it chose; WhichSitesUse hasn't verified it) wants to search WhichSitesUse and spend credits from <b>${account.email}</b>'s balance. It can't see your payment details or buy credits by itself.</p>
-<p>After you approve, you go back to <b><code>${returnHost}</code></b>. Only approve if you just started connecting an app there. You can disconnect it any time on your account page.</p>
+<p>${who} wants to search WhichSitesUse and spend credits from <b>${account.email}</b>'s balance. It can't see your payment details or buy credits by itself.</p>
+<p>After you approve, you go back to ${where}. Only approve if you just started connecting an app there. You can disconnect it any time on your account page.</p>
 <form method="post" action="/oauth/authorize">${csrfField(locals(res).csrf)}
 ${keep.filter((k) => typeof q[k] === "string").map((k) => html`<input type="hidden" name="${k}" value="${q[k]}">`)}
 <label for="cap" class="label">Monthly credit cap for this app (optional)</label>

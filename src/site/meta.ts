@@ -33,7 +33,7 @@ export interface PageMeta {
   about?: string[];
 }
 
-export const DATE_MODIFIED = "2026-11-19";
+export const DATE_MODIFIED = "2026-11-23";
 const OG_DIR = "og";
 const HOME: Crumb = { name: "Home", path: "/" };
 const DOCS: Crumb = { name: "Docs", path: "/docs/" };

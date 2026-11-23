@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import { Accounts } from "./auth/accounts.js";
+import type { MetadataFetcher } from "./auth/cimd.js";
 import { Ledger } from "./billing/ledger.js";
 import type { Config } from "./config.js";
 import type { Db } from "./db/pool.js";
@@ -17,6 +18,8 @@ export interface Services {
   mailer: Mailer;
   /** Null until STRIPE_SECRET_KEY is set; checkout then answers billing_unavailable. */
   stripe: Stripe | null;
+  /** How OAuth client metadata documents are fetched. Defaults to cimd.ts's safeFetch; tests swap it. */
+  fetchClientMetadata?: MetadataFetcher;
 }
 
 export function createServices(config: Config, db: Db, mailer: Mailer, stripe: Stripe | null): Services {

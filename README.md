@@ -70,8 +70,10 @@ REST takes lists as `technologies=shopify,klaviyo` or repeated params, and CWV a
   this month's credits, a mid-month upgrade adds only the extra credits for the days left, and a second
   subscription on one account adds nothing and alerts the admin. Pages can't be framed.
 - **OAuth for MCP clients** (`src/auth/oauth.ts`, `src/web/oauth.ts`): what Claude, ChatGPT and other
-  directories expect. Protected-resource and authorization-server metadata under `/.well-known/`, dynamic
-  client registration (`/oauth/register`), authorization code with PKCE S256 (`/oauth/authorize`, a consent
+  directories expect. Protected-resource and authorization-server metadata under `/.well-known/`, client ID
+  metadata documents (`src/auth/cimd.ts`: a client_id that is an https URL is fetched, checked and cached, as
+  Claude, Claude Code and ChatGPT send by default), dynamic client registration (`/oauth/register`), loopback
+  redirects on any port, authorization code with PKCE S256 (`/oauth/authorize`, a consent
   page with an optional monthly credit cap), `/oauth/token` with rotating refresh tokens, and `/oauth/revoke`.
   An approved app is stored as an `api_keys` row, so caps, usage and revocation work as for keys. With
   accounts on, `/mcp` answers 401 with `WWW-Authenticate` until it gets an OAuth token or API key; REST free

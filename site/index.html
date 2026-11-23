@@ -81,6 +81,15 @@
         <div class="hero-copy">
           <p class="label">Website technology data for AI agents</p>
           <h1>Which sites use <span class="mark" id="tech-word">Shopify</span>?</h1>
+          <!-- The H1 cycles through these (sites per technology, HTTP Archive's November 2026 crawl) -->
+          <ul id="tech-cycle" hidden>
+            <li data-tech="Shopify" data-count="756,868"></li>
+            <li data-tech="React" data-count="2,236,705"></li>
+            <li data-tech="HubSpot" data-count="334,592"></li>
+            <li data-tech="Stripe" data-count="208,351"></li>
+            <li data-tech="WordPress" data-count="4,622,807"></li>
+            <li data-tech="Next.js" data-count="736,627"></li>
+          </ul>
           <p class="answer" id="tech-answer"><strong id="tech-count">756,868</strong> sites in HTTP Archive's November 2026 crawl, and your AI agent can pull the whole list.</p>
           <p class="lede">Add the WhichSitesUse MCP server to Claude, ChatGPT or Cursor, and your agent can list every site running a technology or tell you what any domain is built with.</p>
 
@@ -149,11 +158,11 @@ claude mcp login whichsitesuse</code></pre>
 
     <section class="block" id="lookup-section">
       <div class="wrap">
-        <p class="rule-label">// 01 &nbsp;Free lookup</p>
+        <p class="rule-label">// 01 &nbsp;One site's stack</p>
         <div class="split">
           <div class="section-head">
             <h2 id="lookup-heading">What is this website built with?</h2>
-            <p class="intro">Type any domain to see its CMS or ecommerce platform, frameworks, analytics, CDN and Core Web Vitals. It's free on this page and you don't need an account.</p>
+            <p class="intro">Put in a domain to see what it runs on: the CMS or ecommerce platform, JavaScript frameworks, analytics and tag managers, CDN and fonts, along with its popularity bucket and Core Web Vitals. It's free on this page without an account, and your agent can run the same lookup over MCP or the API for 2 credits, or nothing when the domain isn't covered.</p>
           </div>
           <div>
             <div class="lookup-block">
@@ -162,77 +171,57 @@ claude mcp login whichsitesuse</code></pre>
                 <input id="domain" name="domain" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="allbirds.com" required>
                 <button class="btn btn-primary" type="submit">look up</button>
               </form>
-              <p class="hero-alt">If you want a list of sites instead, <a href="#ask">search by technology</a> over MCP or the API.</p>
               <p class="hero-alt lookup-status" id="lookup-status" role="status" hidden></p>
             </div>
 
-            <div class="result" id="result" aria-live="polite" hidden></div>
-
-            <figure class="adoption">
-              <p class="fig-label"><span class="fig-tag">Fig. 2</span> Sites per technology, November 2026</p>
+            <!-- The example result. A lookup replaces everything inside #result with that domain's stack. -->
+            <div class="result" id="result" aria-live="polite">
+              <p class="fig-label"><span class="fig-tag">Fig. 2</span> Example: allbirds.com, November 2026 crawl</p>
               <div class="table-wrap">
-                <table id="adoption">
-                  <thead><tr><th scope="col">Technology</th><th scope="col" class="num">Sites</th><th scope="col" class="num">Share of crawl</th></tr></thead>
+                <table>
+                  <thead><tr><th scope="col">Category</th><th scope="col">Detected</th></tr></thead>
                   <tbody>
-                    <tr data-tech="Shopify" class="is-current"><td>Shopify</td><td class="num">756,868</td><td class="num">5.0%</td></tr>
-                    <tr data-tech="React"><td>React</td><td class="num">2,236,705</td><td class="num">14.6%</td></tr>
-                    <tr data-tech="HubSpot"><td>HubSpot</td><td class="num">334,592</td><td class="num">2.2%</td></tr>
-                    <tr data-tech="Stripe"><td>Stripe</td><td class="num">208,351</td><td class="num">1.4%</td></tr>
-                    <tr data-tech="WordPress"><td>WordPress</td><td class="num">4,622,807</td><td class="num">30.3%</td></tr>
-                    <tr data-tech="Next.js"><td>Next.js</td><td class="num">736,627</td><td class="num">4.8%</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <figcaption>Mobile homepages in <a href="https://httparchive.org">HTTP Archive</a>'s November 2026 crawl, which covers 15,269,451 sites. Counted by WhichSitesUse from HTTP Archive's public data.</figcaption>
-            </figure>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="ask">
-      <div class="wrap">
-        <p class="rule-label">// 02 &nbsp;What you can ask</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Look up one site, or pull a list of thousands</h2>
-            <p class="intro">Both questions run against the same monthly snapshot, so a lookup and a list always agree with each other.</p>
-          </div>
-          <div class="rows">
-            <div class="row">
-              <h3>One domain's stack</h3>
-              <p>A lookup returns the platform or CMS, JavaScript frameworks, analytics and tag managers, CDN, fonts and anything else the detection rules found, along with the site's popularity bucket and its LCP, INP and CLS results. Over the API it costs 2 credits, and nothing when the domain isn't covered.</p>
-              <figure class="sample">
-                <p class="fig-label"><span class="fig-tag">Fig. 3</span> allbirds.com, November 2026 crawl</p>
-                <div class="table-wrap">
-                  <table>
-                    <thead><tr><th scope="col">Group</th><th scope="col">Detected</th></tr></thead>
-                    <tbody>
                       <tr><td>Ecommerce</td><td>Shopify</td></tr>
                       <tr><td>Payments</td><td>Shop Pay, PayPal, Apple Pay</td></tr>
                       <tr><td>Front end</td><td>Vue.js, Tailwind CSS, GSAP, Swiper</td></tr>
                       <tr><td>Analytics</td><td>Google Analytics, Microsoft Clarity, Datadog, Facebook Pixel 2.9.439</td></tr>
                       <tr><td>Marketing</td><td>Attentive, Google Ads, Impact</td></tr>
                       <tr><td>Tag manager, CDN</td><td>Google Tag Manager, Cloudflare</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="pills"><span class="pill">top 500k</span><span class="pill pill-pass">LCP 1.9 s</span><span class="pill pill-pass">INP 175 ms</span><span class="pill pill-pass">CLS 0</span></div>
-                <figcaption>17 of the 32 technologies detected on its homepage. Core Web Vitals are Chrome UX Report field data for October 2026, and all three pass.</figcaption>
-              </figure>
-            </div>
-            <div class="row">
-              <h3>Every site using a technology</h3>
-              <p>A reverse search returns sites at one credit each, and you can narrow it by:</p>
-              <ul class="filters">
-                <li>technologies a site must use (all or any of them) and ones it must not</li>
-                <li>category and version, such as WordPress 6.x</li>
-                <li>popularity bucket, from the top 1k to the top 10M</li>
-                <li>TLD, and mobile or desktop</li>
-                <li>passing or failing LCP, INP or CLS</li>
-              </ul>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pills"><span class="pill">top 500k</span><span class="pill pill-pass">LCP 1.9 s</span><span class="pill pill-pass">INP 175 ms</span><span class="pill pill-pass">CLS 0</span></div>
+              <p class="result-note">17 of the 32 technologies detected on its homepage. Core Web Vitals are Chrome UX Report field data for October 2026, and all three pass.</p>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="browse">
+      <div class="wrap">
+        <p class="rule-label">// 02 &nbsp;Every site using a technology</p>
+        <div class="split">
+          <div class="section-head">
+            <h2>Find the sites behind any technology</h2>
+            <p class="intro">Thousands of technologies have a page in the directory, with the number of sites that run each one and the biggest names among them. Start with one of these, or search the whole list.</p>
+            <p class="intro">For the full list, a reverse search over MCP or the API returns every matching site at one credit each. You can filter it by the technologies a site must or mustn't use, version, popularity from the top 1k to the top 10M, TLD, and passing or failing Core Web Vitals.</p>
+            <p class="browse-all"><a class="btn btn-secondary" href="/companies-using/">Browse all technologies</a></p>
+          </div>
+          <ul class="seo-grid seo-chips" id="tech-tiles">
+            <li><a class="seo-card" href="/companies-using/shopify/" data-slug="shopify"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/shopify.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Shopify</strong><span>Ecommerce</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/hubspot/" data-slug="hubspot"><span class="ti ti-m ti-logo" aria-hidden="true"><span>H</span><img src="/logos/hubspot.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>HubSpot</strong><span>Marketing automation</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/stripe/" data-slug="stripe"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/stripe.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Stripe</strong><span>Payment processors</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/wordpress/" data-slug="wordpress"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/wordpress.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>WordPress</strong><span>CMS</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/klaviyo/" data-slug="klaviyo"><span class="ti ti-m ti-logo" aria-hidden="true"><span>K</span><img src="/logos/klaviyo.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Klaviyo</strong><span>Marketing automation</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/salesforce/" data-slug="salesforce"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/salesforce.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Salesforce</strong><span>CRM</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/webflow/" data-slug="webflow"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/webflow.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Webflow</strong><span>CMS</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/intercom/" data-slug="intercom"><span class="ti ti-m ti-logo" aria-hidden="true"><span>I</span><img src="/logos/intercom.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Intercom</strong><span>Live chat</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/zendesk/" data-slug="zendesk"><span class="ti ti-m ti-logo" aria-hidden="true"><span>Z</span><img src="/logos/zendesk.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Zendesk</strong><span>Live chat</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/wix/" data-slug="wix"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/wix.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Wix</strong><span>CMS</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/segment/" data-slug="segment"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/segment.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Segment</strong><span>Customer data platform</span></span></a></li>
+            <li><a class="seo-card" href="/companies-using/squarespace/" data-slug="squarespace"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/squarespace.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Squarespace</strong><span>CMS</span></span></a></li>
+          </ul>
         </div>
       </div>
     </section>
@@ -255,36 +244,9 @@ claude mcp login whichsitesuse</code></pre>
       </div>
     </section>
 
-    <section class="block" id="browse">
-      <div class="wrap">
-        <p class="rule-label">// 04 &nbsp;Browse</p>
-        <div class="split">
-          <div class="section-head">
-            <h2>Find the sites behind any technology</h2>
-            <p class="intro">Thousands of technologies have a page in the directory, with the number of sites that run each one and the biggest names among them. Start with one of these, or search the whole list.</p>
-            <p class="browse-all"><a class="btn btn-secondary" href="/companies-using/">Browse all technologies</a></p>
-          </div>
-          <ul class="seo-grid seo-chips" id="tech-tiles">
-            <li><a class="seo-card" href="/companies-using/shopify/" data-slug="shopify"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/shopify.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Shopify</strong><span>Ecommerce</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/hubspot/" data-slug="hubspot"><span class="ti ti-m ti-logo" aria-hidden="true"><span>H</span><img src="/logos/hubspot.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>HubSpot</strong><span>Marketing automation</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/stripe/" data-slug="stripe"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/stripe.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Stripe</strong><span>Payment processors</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/wordpress/" data-slug="wordpress"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/wordpress.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>WordPress</strong><span>CMS</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/klaviyo/" data-slug="klaviyo"><span class="ti ti-m ti-logo" aria-hidden="true"><span>K</span><img src="/logos/klaviyo.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Klaviyo</strong><span>Marketing automation</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/salesforce/" data-slug="salesforce"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/salesforce.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Salesforce</strong><span>CRM</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/webflow/" data-slug="webflow"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/webflow.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Webflow</strong><span>CMS</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/intercom/" data-slug="intercom"><span class="ti ti-m ti-logo" aria-hidden="true"><span>I</span><img src="/logos/intercom.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Intercom</strong><span>Live chat</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/zendesk/" data-slug="zendesk"><span class="ti ti-m ti-logo" aria-hidden="true"><span>Z</span><img src="/logos/zendesk.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Zendesk</strong><span>Live chat</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/wix/" data-slug="wix"><span class="ti ti-m ti-logo" aria-hidden="true"><span>W</span><img src="/logos/wix.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Wix</strong><span>CMS</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/segment/" data-slug="segment"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/segment.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Segment</strong><span>Customer data platform</span></span></a></li>
-            <li><a class="seo-card" href="/companies-using/squarespace/" data-slug="squarespace"><span class="ti ti-m ti-logo" aria-hidden="true"><span>S</span><img src="/logos/squarespace.svg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><span class="seo-card-text"><strong>Squarespace</strong><span>CMS</span></span></a></li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
     <section class="block" id="agents">
       <div class="wrap">
-        <p class="rule-label">// 05 &nbsp;For agents</p>
+        <p class="rule-label">// 04 &nbsp;For agents</p>
         <div class="split">
           <div class="section-head">
             <h2>An MCP server and a REST API</h2>
@@ -313,7 +275,7 @@ claude mcp login whichsitesuse</code></pre>
 
     <section class="block" id="data">
       <div class="wrap">
-        <p class="rule-label">// 06 &nbsp;Data</p>
+        <p class="rule-label">// 05 &nbsp;Data</p>
         <div class="split">
           <div class="section-head">
             <h2>Where the data comes from</h2>
@@ -328,7 +290,7 @@ claude mcp login whichsitesuse</code></pre>
 
     <section class="block" id="pricing">
       <div class="wrap">
-        <p class="rule-label">// 07 &nbsp;Pricing</p>
+        <p class="rule-label">// 06 &nbsp;Pricing</p>
         <div class="split">
           <div class="section-head">
             <h2>Priced per site in the list</h2>
@@ -367,7 +329,7 @@ claude mcp login whichsitesuse</code></pre>
 
     <section class="block" id="faq">
       <div class="wrap">
-        <p class="rule-label">// 08 &nbsp;Questions</p>
+        <p class="rule-label">// 07 &nbsp;Questions</p>
         <div class="split">
           <div class="section-head">
             <h2>Common questions</h2>

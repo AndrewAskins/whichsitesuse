@@ -63,23 +63,21 @@
     });
   }
 
-  // H1 "Which sites use [technology]?": cycles through the rows of the adoption table (real HTTP Archive counts).
+  // H1 "Which sites use [technology]?": cycles through the hidden #tech-cycle list (real HTTP Archive counts).
   // The static Shopify text is what crawlers, no-JS readers and reduced-motion readers see.
   var word = document.getElementById("tech-word");
   var count = document.getElementById("tech-count");
-  var rows = Array.prototype.slice.call(document.querySelectorAll("#adoption tbody tr[data-tech]"));
+  var techs = Array.prototype.slice.call(document.querySelectorAll("#tech-cycle li[data-tech]"));
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (word && count && rows.length > 1 && !reduce) {
+  if (word && count && techs.length > 1 && !reduce) {
     var i = 0;
     setInterval(function () {
       word.classList.add("is-swapping");
       count.classList.add("is-swapping");
       setTimeout(function () {
-        rows[i].classList.remove("is-current");
-        i = (i + 1) % rows.length;
-        rows[i].classList.add("is-current");
-        word.textContent = rows[i].getAttribute("data-tech");
-        count.textContent = rows[i].children[1].textContent;
+        i = (i + 1) % techs.length;
+        word.textContent = techs[i].getAttribute("data-tech");
+        count.textContent = techs[i].getAttribute("data-count");
         word.classList.remove("is-swapping");
         count.classList.remove("is-swapping");
       }, 180);
@@ -126,7 +124,7 @@
   }
 
   var base = api.replace(/\/$/, "");
-  var LOADING = "We're loading this month's HTTP Archive crawl into the lookup. It opens as soon as the first snapshot is published, so check back shortly. The table on this page already shows real counts from the November 2026 crawl.";
+  var LOADING = "We're loading this month's HTTP Archive crawl into the lookup. It opens as soon as the first snapshot is published, so check back shortly. The allbirds.com example on this page is a real result from the November 2026 crawl.";
   var UNREACHABLE = "The lookup service isn't answering right now. Try again in a minute.";
 
   // Ask the API once whether a snapshot is live. null = unknown (network/CORS), true/false = known.

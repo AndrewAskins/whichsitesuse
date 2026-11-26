@@ -148,7 +148,9 @@ export async function checkoutUrl(services: Services, account: Account, item: Ch
     line_items: [{ price: prices.byItem[item], quantity }],
     metadata,
     ...(item === "topup" ? { payment_intent_data: { metadata } } : { subscription_data: { metadata } }),
-    allow_promotion_codes: false,
+    // Promotion codes made in the Stripe dashboard. A 100%-off top-up adds no credits (the webhook
+    // credits top-ups only once paid); a 100%-off plan invoice still adds the plan's credits.
+    allow_promotion_codes: true,
     success_url: `${base}/account?paid=1`,
     cancel_url: `${base}/account`,
   });

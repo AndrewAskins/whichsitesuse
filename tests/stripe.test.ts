@@ -74,7 +74,7 @@ describe.skipIf(!TEST_DATABASE_URL)("checkout and customers", () => {
       line_items: [{ price: prices.byItem.topup, quantity: TOPUP.maxUnits }],
       metadata,
       payment_intent_data: { metadata },
-      allow_promotion_codes: false,
+      allow_promotion_codes: true,
       success_url: "https://wsu.test/account?paid=1",
       cancel_url: "https://wsu.test/account",
     });
@@ -91,6 +91,7 @@ describe.skipIf(!TEST_DATABASE_URL)("checkout and customers", () => {
       line_items: [{ price: (await ensurePrices(fake.stripe)).byItem.growth, quantity: 1 }],
       metadata,
       subscription_data: { metadata },
+      allow_promotion_codes: true,
     });
     expect(params).not.toHaveProperty("payment_intent_data");
   });
